@@ -1,0 +1,125 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<AccountItem>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 115px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    });
+</script>
+<script type="text/javascript">
+    function goSearch() {
+        let pm_account_id = '@ViewData["pm_id"]';
+        //alert(pm_id);
+
+        if (pm_id != '') {
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);
+
+            $("#thePartial").load('@Url.Action("ShowAccountDetails", "Admin")?pm_id=' + pm_id);
+        }
+    }
+    
+    window.addEventListener("load", goSearch);
+</script>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+<div>
+    <div id="theSheet" style="width: 23%;" class="tableScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 40px; max-width: 40px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="width: 140px; max-width: 140px;">
+                        @Html.DisplayNameFor(model => model.id)
+                        &nbsp;
+                        @Ajax.ActionLink("Create", "ShowAccountDetails", "Admin", new { pm_id = "", pm_isNew = true }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace })
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ 
+                    string RowColor = "";
+                    foreach (var item in Model)
+                    {
+                        switch (item.z_status)
+                        {
+                            case "A":
+                                RowColor = "color: red;";
+                                break;
+                            case "D":
+                                RowColor = "color: gray;";
+                                break;
+                            default:
+                                RowColor = "color: black;";
+                                break;
+                        }
+
+                        <tr>
+                            <td align="right" style="padding-right: 5px;">
+                                @Html.DisplayFor(modelItem => item.no)
+                            </td>
+                            <td style="font-size: medium;">
+                                @Ajax.ActionLink(@item.id, "ShowAccountDetails", "Admin", new { pm_id = @item.id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace } )
+                            </td>
+                            <td style="font-size: medium; @RowColor">
+                                @Html.DisplayFor(modelItem => item.full_name)
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="margin: 0 0 0 20px; vertical-align: top; width: 75%; display: inline-block;">
+        <div id="thePartial"></div>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

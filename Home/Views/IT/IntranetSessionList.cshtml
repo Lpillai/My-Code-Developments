@@ -1,0 +1,141 @@
+﻿@using RuntimeVariables;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 100%;
+        padding: 0 10px;
+        margin-top: 20px;
+    }
+
+    /* Style the counter cards */
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 2px 16px 16px 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+        width: 100%;
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+<div class="form-horizontal">
+    <div class="column">
+        <div class="card">
+            <h3 style="text-align: center; margin-bottom: 10px;">Current Session</h3>
+
+            <div class="row" style="padding: 5px 20px 5px 20px;">
+                @Html.Raw(ViewData["CurrentSession"].ToString())
+                @*@foreach (var itemSession in (List<string>)ViewData["CurrentSession"])
+                {
+                    <span>@Html.Raw(itemSession.ToString())</span>
+                    <br />
+                }*@
+            </div>
+        </div>
+    </div>
+
+
+    <div class="column">
+        <div class="card">
+            <h3 style="text-align: center; margin-bottom: 10px;">MySession</h3>
+
+            <div class="row">
+                @foreach (var property in ViewData.ModelMetadata.Properties)
+                {
+                    <div class="form-group">
+                        <label for="@property.PropertyName" class="control-label col-md-2" style="margin-top: -7px;">@(property.GetDisplayName())</label>
+                        <div class="col-md-10" style="white-space: nowrap;">
+                            @Html.Raw(@property.Model)
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <div class="column">
+        <div class="card">
+            <h3 style="text-align: center; margin-bottom: 10px;">Current Cache</h3>
+
+            <div class="row" style="padding: 5px 20px 5px 20px;">
+                @foreach (var itemCache in (List<string>)ViewData["CurrentCache"])
+                {
+                    <span>@Html.Raw(itemCache.ToString())</span>
+                    <br />
+                }
+            </div>
+        </div>
+    </div>
+</div>

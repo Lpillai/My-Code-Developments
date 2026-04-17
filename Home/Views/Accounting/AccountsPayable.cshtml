@@ -1,0 +1,283 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<AP_Item>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 155px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="filtersModal" tabindex="-1" role="dialog" aria-labelledby="filtersModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myFilters">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+@using (Html.BeginForm("GoUpdateAP", "Accounting", FormMethod.Post, new { id = "APForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pm_location_id" value="@ViewData["pm_location_id"]">
+    
+    <div class="row" style="padding: 0;">
+        <div class="col-md-4" style="text-align:left;">
+            @Ajax.ActionLink("Filters", "FilterAP", "Accounting", new { pm_location_id = @ViewData["pm_location_id"] }, new AjaxOptions { UpdateTargetId = "myFilters", InsertionMode = InsertionMode.Replace }, new { id = "btnFilters", data_toggle = "modal", data_target = "#filtersModal", @class = "btn btn-default action_btn" })
+        </div>
+        <div class="col-md-8">
+            <input type="submit" value="Update" class="btn btn-primary" @attr_html onclick="return confirm('Update the A/P list?');" />
+        </div>
+    </div>
+
+    
+    <div id="theSheet" class="tableScrollY" style="margin: 5px 0 0 0;">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.year_period)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.receipt_number)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.po_number)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.lines)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.currency_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.value_display)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.terms_desc)
+                    </th>
+                    <th style="width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.supplier_name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.default_paid_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.gui)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.z_memo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.z_status)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    { 
+                        <tr>
+                            <td colspan="15" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                    <input type="hidden" name="pmAR[@(i-1)].location_id" value="@item.location_id">
+                                    <input type="hidden" name="pmAR[@(i-1)].receipt_number" value="@item.receipt_number">
+                                    @*<input type="hidden" name="pmAR[@(i-1)].invoice_date" value="@item.invoice_date">
+                                    <input type="hidden" name="pmAR[@(i-1)].invoice_no" value="@item.invoice_no">*@
+                                    <input type="hidden" name="pmAR[@(i-1)].default_paid_date" value="@item.default_paid_date">
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.year_period)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.receipt_stamp)">
+                                    @*@Html.DisplayFor(modelItem => item.receipt_number)*@
+                                    @Ajax.ActionLink(item.receipt_number.ToString(), "showAP_Details", "Accounting", new { pm_receipt_number = item.receipt_number }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.po_number)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.lines)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.exchange_rate)">
+                                    @Html.DisplayFor(modelItem => item.currency_id)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.value_display)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.terms_desc)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.supplier_name)
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].override_paid_date", item.override_paid_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].invoice_no", item.gui, new { @type = "text", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].invoice_date", item.gui, new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].gui", item.gui, new { @type = "text", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].z_memo", item.z_memo, new { @type = "text", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.CheckBox($"pmAR[{i-1}].chk_archive", item.chk_archive, new { style="height: 20px;" })
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

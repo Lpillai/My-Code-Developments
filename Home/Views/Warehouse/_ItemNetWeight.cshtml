@@ -1,0 +1,82 @@
+﻿@model RuntimeVariables.item_net_weight
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        document.getElementById('btn_search').removeAttribute("disabled");
+        //document.getElementById('btn_search').value = "Search";
+        $("#loading").fadeOut();
+    })
+</script>
+<script type="text/javascript">
+    function toKG() {
+        var lb = document.getElementById("weight");
+        var kg = document.getElementById("kilograms");
+        kg.value = lb.value * 0.453592;
+    }
+    function toLB() {
+        var lb = document.getElementById("weight");
+        var kg = document.getElementById("kilograms");
+        lb.value = kg.value * 2.20462;
+    }
+</script>
+
+
+
+
+<style>
+</style>
+
+
+
+<div>
+    @using (Html.BeginForm("GoSaveItemNetWeightAsync", "Warehouse", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("item_id", Model.item_id)
+
+        <div class="form-group" style="text-align: left; padding-left: 500px;">
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+        <div class="form-horizontal" style="font-size: large;">
+            <div class="form-group">
+                @Html.LabelFor(model => model.weight, htmlAttributes: new { @class = "col-md-2", @style = "text-align: right;" })
+                @Html.DisplayFor(model => model.weight)
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.toKG, htmlAttributes: new { @class = "col-md-2", @style = "text-align: right;" })
+                @Html.DisplayFor(model => model.toKG)
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.kilograms, htmlAttributes: new { @class = "col-md-2", @style = "text-align: right;" })
+                @Html.DisplayFor(model => model.kilograms)
+            </div>
+            <div class="form-group">
+                @Html.Label("Correct Pound", htmlAttributes: new { @class = "col-md-2", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <input type="number" id="weight" name="weight" value="" autocomplete="off" step="any" onfocusout="toKG()" class="form-control col-md-4" style="text-align: right; font-size: large;" />
+            </div>
+            <div class="form-group">
+                @Html.Label("Correct Kilogram", htmlAttributes: new { @class = "col-md-2", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <input type="number" id="kilograms" name="kilograms" value="" autocomplete="off" step="any" onfocusout="toLB()" class="form-control col-md-4" style="text-align: right; font-size: large;" />
+            </div>
+        </div>
+        <div style="font-size: larger; color: darkorange; padding-left: 50px;">
+            @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+        </div>
+    }
+</div>
+

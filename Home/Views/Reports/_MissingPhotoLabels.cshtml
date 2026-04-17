@@ -1,0 +1,40 @@
+﻿<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Open_MissingPhotoLabels", "Reports", null, FormMethod.Post, new { target = "_blank" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_label", ViewData["label"].ToString())
+
+    <div class="form-horizontal" style="width: 500px; margin-left: 15px;">
+
+        <div class="form-group">
+            @Html.Label("Lot", new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" name="pm_lot_cd" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Loc ID", new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" name="pm_location_id" value="@ViewData["loc"]" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Qty", new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" name="pm_qty" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group" style="text-align:right;">
+            <input type="submit" value="Print" class="btn btn-primary" />
+        </div>
+    </div>
+}

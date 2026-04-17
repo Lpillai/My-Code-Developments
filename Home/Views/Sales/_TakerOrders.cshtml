@@ -1,0 +1,209 @@
+﻿@model IEnumerable<RuntimeVariables.SO_open_order>
+
+@*@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}*@
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 160px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="InquiryModal" tabindex="-1" role="dialog" aria-labelledby="InquiryModalLabel">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content" id="myInquiry">
+        </div>
+    </div>
+</div>
+
+
+
+    
+<div style="width: 98%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Model.Count().ToString()
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.order_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.taker)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.location_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ship2_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.requested_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.item_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.approved)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.expedite_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.qty_available)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.release_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.qty_release)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.qty_allocated)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.qty_picked)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.disposition)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.open_qty)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.line_feed)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.line_station)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    {
+                        <tr>
+                            <td colspan="17" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.po_no)">
+                                    @Html.DisplayFor(modelItem => item.order_no)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.taker)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.location_id)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.ship2_name)">
+                                    @Html.DisplayFor(modelItem => item.ship2_id)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.requested_date)
+                                </td>
+                                <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.customer_part_number)">
+                                    @Ajax.ActionLink(item.item_id, "GetItemInquiry", "Sales", new { pmP21URL = @ViewData["pmP21URL"], pm_item_id = @item.item_id, pm_loc_id = @item.location_id }, new AjaxOptions { UpdateTargetId = "myInquiry", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#InquiryModal" })
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.approved)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.expedite_date)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.qty_available)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.release_date)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.qty_release)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.qty_allocated)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.qty_picked)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.disposition)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.open_qty)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.line_feed)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.line_station)
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

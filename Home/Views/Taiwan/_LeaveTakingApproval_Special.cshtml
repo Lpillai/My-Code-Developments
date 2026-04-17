@@ -1,0 +1,99 @@
+﻿@model RuntimeVariables.tw_day_available
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+    input[type=checkbox] {
+        background-color: white;
+        border-radius: 2px;
+        outline: 1px solid skyblue;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        position: relative;
+    }
+
+        input[type=checkbox]:focus {
+            outline: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        input[type=checkbox]:checked {
+            background-color: #409fd6;
+            background: #409fd6 url("data:image/gif;base64,R0lGODlhCwAKAIABAP////3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat;
+        }
+</style>
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+
+@using (Html.BeginForm("Go_ApproveApplySpecial", "Taiwan", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("apply_uid", ViewData["apply_uid"])
+    @*@Html.HiddenFor(model => model.day_id)*@
+    @Html.Hidden("pm_available.day_id", Model.day_id)
+    @Html.Hidden("pm_available.account_id", ViewData["account_id"])
+    @Html.Hidden("pm_available.day_year", Model.day_year)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="specialModalLabel">
+            <span>特殊假別給假</span>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal" style="font-size: medium;">
+            <div class="form-group">
+                @Html.Label("姓名", htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <span class="col-md-8" style="margin: 5px 0 0 0; font-size: large;">@ViewData["emp_name"]</span>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.day_year, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <span class="col-md-8" style="margin: 5px 0 0 0; font-size: large;">@Html.ValueFor(model => model.day_year)</span>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.day_name, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <span class="col-md-8" style="margin: 5px 0 0 0; font-size: large;">@Html.ValueFor(model => model.day_name)</span>
+            </div>
+            <div class="form-group">
+                @*@Html.LabelFor(model => model.available_hours, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })*@
+                @Html.Label("可用天數", htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <input type="number" name="pm_available.available_hours" value="@Model.available_hours" autocomplete="off" step="1" class="form-control col-md-8" style="padding-right: 5px; text-align: right; font-size: large;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.available_start, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <input type="date" name="pm_available.available_start" value="@Model.available_start.ToString("yyyy-MM-dd")" class="form-control col-md-8"  style="font-size: large;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.available_end, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 7px 0 0 0;" })
+                <input type="date" name="pm_available.available_end" value="@Model.available_end.ToString("yyyy-MM-dd")" class="form-control col-md-8" style="font-size: large;" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="核可" @attr_html class="btn btn-primary" onclick="return confirm('確認核可給假？');" />
+    </div>
+}
+

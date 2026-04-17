@@ -1,0 +1,1709 @@
+﻿@using RuntimeVariables;
+@model Buy
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "["+ViewBag.cluster+"] " + ((ViewBagPageInfo)ViewBag.PageInfo).Title + " " + Model.viewID.ToString();
+    ViewBag.PageName = "["+ViewBag.cluster+"]" + ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    /* Style the counter cards */
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 2px 16px 16px 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+    div.perline {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    div.chk {
+        margin-top: -20px;
+    }
+
+    div.show {
+        padding-top: 7px;
+    }
+
+    div.display {
+        font-size: medium;
+        padding-top: 6px;
+    }
+
+    div.quotesHeader {
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .hideBorder {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        padding-top: 7px;
+        /*width: 60px;*/
+    }
+
+    textarea {
+        padding: 10px;
+        max-width: 100%;
+        line-height: 1.5;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 1px 1px 1px #999;
+    }
+
+
+    a[disabled] {
+        pointer-events: none;
+        cursor: default;
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<form action="" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        
+        <!-- #region Buttons -->
+        <div class="row" style="margin-bottom: 0px;">
+            @Html.HiddenFor(model => model.viewID)
+            @Html.HiddenFor(model => model.entryID)
+            @Html.Hidden("isRollBackSourcing", "0")
+
+            <div class="col-md-1">
+                @Html.ActionLink("Back to List", "BuySheet", "Procurement", new { cluster = ViewBag.cluster }, new { @class = "btn" })
+            </div>
+            <div class="col-md-1">
+                @Html.LabelFor(model => model.viewID, htmlAttributes: new { @class = "control-label" })
+                &nbsp;
+                <span style="font-size: large;">@Html.ValueFor(model => model.viewID)</span>
+            </div>
+            <div class="form-group col-md-3" style="padding-top: 5px;">
+                <span style="font-size: large;">@Html.ValueFor(model => model.ItemID)</span>
+            </div>
+            <div class="form-group col-md-1" style="color: @(Model.urgent == true ? "Red" : "Black") ">
+                <div class="col-md-1" style="padding: 3px 0 0 0;">
+                    @*<input type="checkbox" id="urgent" value="" disabled @(Model.urgent ? "checked" : "") style="height: 20px;" />*@
+                    <input type="checkbox" id="urgent" name="urgent" value="true" @(Model.urgent ? "checked" : "") style="height: 20px;" />
+                </div>
+                @Html.LabelFor(model => model.urgent, htmlAttributes: new { @class = "control-label col-md-1" })
+            </div>
+            @if (ViewBag.cluster != "FTB")
+            {
+                <div class="form-group col-md-1">
+                    <div class="col-md-1" style="padding: 3px 0 0 0;">
+                        <input type="checkbox" id="sourcing" value="" disabled @(Model.sourcing == "Y" ? "checked" : "") style="height: 20px;" />
+                    </div>
+                    @Html.LabelFor(model => model.sourcing, htmlAttributes: new { @class = "control-label col-md-1" })
+                </div>
+            }
+            @if (ViewBag.cluster == "OS")
+            {
+                <div class="form-group col-md-1" style="text-align: left;">
+                    <div class="col-md-1" style="padding: 3px 0 0 0;">
+                        <input type="checkbox" id="sourcing_in" value="" disabled @(Model.sourcing_in == "Y" ? "checked" : "") style="height: 20px;" />
+                    </div>
+                    @Html.LabelFor(model => model.sourcing_in, htmlAttributes: new { @class = "control-label col-md-11", @style = "padding-left: 0; margin-left: 0;" })
+                </div>
+                <div class="form-group col-md-1" style="text-align: left;">
+                    <div class="col-md-1" style="padding: 3px 0 0 0;">
+                        <input type="checkbox" id="sourcing_vn" value="" disabled @(Model.sourcing_vn == "Y" ? "checked" : "") style="height: 20px;" />
+                    </div>
+                    @Html.LabelFor(model => model.sourcing_vn, htmlAttributes: new { @class = "control-label col-md-11", @style = "padding-left: 0; margin-left: 0;" })
+                </div>
+            }
+            <div class="col-md-1" style="text-align: right;">
+                <input type="submit" name="EditBuyAction:Update" value="Save" class="btn btn-primary" onclick="onFormSubmit();" @attr_html />
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0px;">
+            @Html.LabelFor(model => model.item_desc, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-11 show">
+                @Html.ValueFor(model => model.item_desc)
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0px;">
+            @Html.LabelFor(model => model.extended_desc, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-11 show">
+                @Html.ValueFor(model => model.extended_desc)
+            </div>
+        </div>
+        <!-- #endregion -->
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row">
+
+            <div class="column form-horizontal" style="width: 28%;">
+                @* Part Info ========================================================================================================================*@
+                <div class="card">
+                    <h3 style="text-align: center; margin-bottom: 10px;">Part Info</h3>
+
+                    <input type="hidden" id="ItemID" name="ItemID" value="@Model.ItemID">
+                    <input type="hidden" name="item_desc" value="@Model.item_desc">
+                    <input type="hidden" name="extended_desc" value="@Model.extended_desc">
+                    <input type="hidden" name="part_assignment" value="@Model.part_assignment">
+                    <input type="hidden" name="purchase_class" value="@Model.purchase_class">
+                    <input type="hidden" name="PPAP" value="@Model.PPAP">
+                    <input type="hidden" name="standard_cost_current" value="@Model.standard_cost_current">
+                    <input type="hidden" name="program" value="@Model.program">
+                    <input type="hidden" name="standard_cost" value="@Model.standard_cost">
+                    <input type="hidden" id="unit_weight" name="unit_weight" value="@Model.unit_weight">
+                    <input type="hidden" name="primary_supplier_id" value="@Model.primary_supplier_id">
+                    <input type="hidden" id="primary_supplier_currency" name="primary_supplier_currency" value="@Model.primary_supplier_currency">
+                    <input type="hidden" name="TruePrimarySupplier" value="@Model.TruePrimarySupplier">
+                    <input type="hidden" name="loc_primary_supplier_name" value="@Model.loc_primary_supplier_name">
+                    <input type="hidden" id="supplier_standard_cost" name="supplier_standard_cost" value="@Model.supplier_standard_cost">
+                    <input type="hidden" name="loc_supplier_standard_cost" value="@Model.loc_supplier_standard_cost">
+                    <input type="hidden" name="MOQSupplierLoc1" value="@Model.MOQSupplierLoc1">
+                    <input type="hidden" name="LeadTime" value="@Model.LeadTime">
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.part_assignment, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.part_assignment)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.purchase_class, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.purchase_class)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.PPAP, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.PPAP)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.standard_cost_current, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.standard_cost_current)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.program, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.program)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.standard_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.standard_cost)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.unit_weight, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.unit_weight)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.TruePrimarySupplier, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(model => model.TruePrimarySupplier)">
+                            @Html.ValueFor(model => model.TruePrimarySupplier)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.loc_primary_supplier_name, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(model => model.loc_primary_supplier_name)">
+                            @Html.ValueFor(model => model.loc_primary_supplier_name)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.supplier_standard_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.supplier_standard_cost)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.loc_supplier_standard_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.loc_supplier_standard_cost)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.MOQSupplierLoc1, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.MOQSupplierLoc1)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.LeadTime, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.LeadTime)
+                        </div>
+                    </div>
+                </div>
+            
+                @* Documents ========================================================================================================================*@
+                @if (ViewBag.cluster == "FTB")
+                {
+                    <br>
+
+                    <div class="card">
+                        <h3 style="text-align: center;">Documents</h3>
+
+                        @{ 
+                            int i = 0;
+                            if (Model.theFTB.theDocuments != null && Model.theFTB.theDocuments.Count() > 0)
+                            {
+                                foreach (var doc in Model.theFTB.theDocuments)
+                                {
+                                    <div class="form-group perline">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].link_name" value="@doc.link_name">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].link_path" value="@doc.link_path">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].folder_path" value="@doc.folder_path">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].file_name" value="@doc.file_name">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].date_last_modified" value="@doc.date_last_modified">
+                                        <input type="hidden" name="theFTB.theDocuments[@i].last_maintained_by" value="@doc.last_maintained_by">
+
+                                        <label class="control-label col-md-5">@doc.link_name</label>
+                                        <div class="col-md-7 display word-wrap">
+                                            @Html.ActionLink(doc.file_name, "DownloadDocument", "Procurement", new { pm_folder = HttpUtility.UrlEncode(doc.folder_path), pm_file_name = HttpUtility.UrlEncode(doc.file_name) }, new { target = "_blank", title = "Last modified on " + doc.date_last_modified.ToString("yyyy/MM/dd HH:mm") + " by " + doc.last_maintained_by })
+                                        </div>
+                                    </div>
+                                    i++;
+                                }
+                            }
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="column" style="width: 22%;">
+                @* Planning ========================================================================================================================*@
+                <div class="card">
+                    <h3 style="text-align: center; margin-bottom: 10px;">Planning</h3>
+
+                    <input type="hidden" name="planner" value="@Model.planner">
+                    <input type="hidden" name="buy_to_loc" value="@Model.buy_to_loc">
+
+                    @if (ViewBag.cluster == "FTB")
+                    {
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.creator, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display">
+                                @Html.ValueFor(model => model.creator)
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.planner, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.planner)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.buy_to_loc, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 display">
+                            @Html.ValueFor(model => model.buy_to_loc)
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.new_quantity, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 fill">
+                            <input type="number" id="new_quantity" name="new_quantity" value="@Model.new_quantity" autocomplete="off" onclick="$(this).select();" onfocusout="total();" class="form-control input-sm" style="font-size: medium;" />
+                            @Html.ValidationMessageFor(model => model.new_quantity, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @if (ViewBag.cluster == "Domestic")
+                        {
+                            @Html.LabelFor(model => model.required_date, htmlAttributes: new { @class = "control-label col-md-5" })
+                        }
+                        else
+                        {
+                            <label class="control-label col-md-5">Supplier Ship Date (Required Date)</label>
+                        }
+                        <div class="col-md-7 fill" style="padding-top: @(ViewBag.cluster == "Domestic" ? "0" : "13px");">
+                            @Html.TextBox("required_date", Model.required_date.ToString("yyyy-MM-dd"), new { @type = "date", onchange = "onRequiredDateChange();", @class = "form-control input-sm", style="font-size: medium;" })
+                            @Html.ValidationMessageFor(model => model.required_date, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    @if (ViewBag.cluster == "Domestic")
+                    {
+                        @*<input type="hidden" id="ship_out_date" name="ship_out_date" value="@Model.ship_out_date" />*@
+                        <input type="hidden" id="preload_quantity" name="preload_quantity" value="@Model.preload_quantity" />
+                        <input type="hidden" id="preload_loc" name="preload_loc" value="@Model.preload_loc" />
+                        <input type="hidden" id="package" name="package" value="@Model.package" />
+                    }
+                    else
+                    {
+                        @*<div class="form-group perline">
+                            @Html.LabelFor(model => model.ship_out_date, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 fill">
+                                @Html.TextBox("ship_out_date", Model.ship_out_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                            </div>
+                        </div>*@
+
+                        if (ViewBag.cluster == "FTB")
+                        {
+                            <input type="hidden" name="theFTB.ship_method" value="@Model.theFTB.ship_method">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.ship_method, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.ship_method)
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.preload_quantity, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 fill">
+                                <input type="number" name="preload_quantity" value="@Model.preload_quantity" autocomplete="off" onclick="$(this).select();" class="form-control input-sm" style="font-size: medium;" />
+                            </div>
+                        </div>
+
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.preload_loc, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 fill">
+                                @if (ViewData["List_preload_loc"] == null)
+                                {
+                                    <input type="text" name="preload_loc" value="@Model.preload_loc" autocomplete="off" class="form-control col-md-2 input-sm" style="font-size: medium;" />
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("preload_loc", (SelectList)ViewData["List_preload_loc"], new { id = "preload_loc", @class = "form-control col-md-2 input-sm", style = "font-size: medium;" })
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.package, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 fill">
+                                <input type="text" name="package" value="@Model.package" autocomplete="off" class="form-control input-sm" style="font-size: medium;" />
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.total_value, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7">
+                            @Html.TextBox("total_value", Model.total_value, new { @readonly = "readonly", @class = "hideBorder", style = "min-width: 120px; max-width: 120px; font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.total_weight, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7">
+                            @Html.TextBox("total_weight", Model.total_weight, new { @readonly = "readonly", @class = "hideBorder", style = "min-width: 120px; max-width: 120px; font-size: medium;" })
+                        </div>
+                    </div>
+                </div>
+                
+                @* Other Charges ========================================================================================================================*@
+                @if (ViewBag.cluster == "FTB")
+                {
+                    <br>
+                    <div class="card">
+                        <h3 style="text-align: center; margin-bottom: 10px;">Other Charges</h3>
+                        
+                        @if ((Model.creator == ViewBag.Account) && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.ppap_level, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    @Html.DropDownListFor(m => m.theFTB.ppap_level, new SelectList((IEnumerable<SelectListItem>)ViewData["List_PPAP"], "Value", "Text", Model.theFTB.ppap_level), new { onchange = "onChangePPAP();", @class = "form-control col-md-2 input-sm", style = "font-size: medium;" })
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.ppap_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="number" id="theFTB_ppap_cost" name="theFTB.ppap_cost" value="@Model.theFTB.ppap_cost" autocomplete="off" @(string.IsNullOrWhiteSpace(Model.theFTB.ppap_level) ? "disabled" : "") @(string.IsNullOrWhiteSpace(Model.theFTB.ppap_level) ? "" : "required") onclick="$(this).select();" onchange="onFTBchanged();" onfocusout="grand_total();" class="form-control input-sm" style="font-size: medium;" />
+                                    @Html.ValidationMessageFor(model => model.theFTB.ppap_cost, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.ppap_note, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="text" id="theFTB_ppap_note" name="theFTB.ppap_note" value="@Model.theFTB.ppap_note" autocomplete="off" @(string.IsNullOrWhiteSpace(Model.theFTB.ppap_level) ? "disabled" : "") onclick="$(this).select();" class="form-control input-sm" style="font-size: medium;" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.ppap_level" value="@Model.theFTB.ppap_level">
+                            <input type="hidden" id="theFTB_ppap_cost" name="theFTB.ppap_cost" value="@Model.theFTB.ppap_cost">
+                            <input type="hidden" id="theFTB_ppap_note" name="theFTB.ppap_note" value="@Model.theFTB.ppap_note">
+
+                            if (string.IsNullOrWhiteSpace(Model.theFTB.ppap_level))
+                            { 
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.ppap_level, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.Raw("False")
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.ppap_level, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.ppap_level)
+                                    </div>
+                                </div>
+                            
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.ppap_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.ppap_cost)
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.ppap_note, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.ppap_note)
+                                    </div>
+                                </div>
+                            }
+                        }
+                        
+                        @if ((Model.creator == ViewBag.Account) && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.tc, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" id="theFTB_tc" name="theFTB.tc" value="true" @(Model.theFTB.tc ? "checked" : "") onclick="onCheckTC()" onchange="onFTBchanged();" />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.tc_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="number" id="theFTB_tc_cost" name="theFTB.tc_cost" value="@Model.theFTB.tc_cost" autocomplete="off" @(!Model.theFTB.tc ? "disabled" : "") @(Model.theFTB.tc ? "required" : "") onclick="$(this).select();" onchange="onFTBchanged();" onfocusout="grand_total();" class="form-control input-sm" style="font-size: medium;" />
+                                    @Html.ValidationMessageFor(model => model.theFTB.tc_cost, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.tc_note, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="text" id="theFTB_tc_note" name="theFTB.tc_note" value="@Model.theFTB.tc_note" autocomplete="off" @(!Model.theFTB.tc ? "disabled" : "") onclick="$(this).select();" class="form-control input-sm" style="font-size: medium;" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.tc" value="@Model.theFTB.tc.ToString()">
+                            <input type="hidden" id="theFTB_tc_cost" name="theFTB.tc_cost" value="@Model.theFTB.tc_cost">
+                            <input type="hidden" id="theFTB_tc_note" name="theFTB.tc_note" value="@Model.theFTB.tc_note">
+                        
+                            if (!Model.theFTB.tc)
+                            { 
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.tc, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.tc)
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.tc_cost, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.tc_cost)
+                                    </div>
+                                </div>
+
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.tc_note, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.tc_note)
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+            
+            <div class="column form-horizontal" style="width: 24%;">
+                @* Sourcing ========================================================================================================================*@
+                @if (ViewBag.cluster == "FTB")
+                {
+                    <div class="card">
+                        <h3 style="text-align: center; margin-bottom: 10px;">Sourcing Info</h3>
+                        
+                        <input type="hidden" name="theFTB.viewID" value="@Model.theFTB.viewID">
+                        <input type="hidden" name="theFTB.pod_no" value="@Model.theFTB.pod_no">
+                        <input type="hidden" name="theFTB.step" value="@Model.theFTB.step">
+                        <input type="hidden" name="theFTB.deviation_comfirm" value="@Model.theFTB.deviation_comfirm.ToString()">
+                    
+                        @if (Model.creator == ViewBag.Account && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sourced_by, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    @Html.DropDownList("theFTB.sourced_by", new SelectList((IEnumerable<SelectListItem>)ViewData["SoucingList"], "Value", "Text"), new { onchange = "onFTBchanged();", @class = "form-control input-sm", style = "font-size: medium; display: initial;" })
+                                    @Html.ValidationMessageFor(model => model.theFTB.sourced_by, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.sourced_by" value="@Model.theFTB.sourced_by">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sourced_by, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.sourced_by)
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.theFTB.pod_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display">
+                                @Html.ValueFor(model => model.theFTB.pod_no)
+                            </div>
+                        </div>
+                        
+                        @if (Model.creator == ViewBag.Account && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.buyer, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    @Html.DropDownList("theFTB.buyer", new SelectList((IEnumerable<SelectListItem>)ViewData["BuyerList"], "Value", "Text"), new { onchange = "onFTBchanged();", @class = "form-control input-sm", style = "font-size: medium; display: initial;" })
+                                    @Html.ValidationMessageFor(model => model.theFTB.buyer, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.buyer" value="@Model.theFTB.buyer">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.buyer, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.buyer)
+                                </div>
+                            </div>
+                        }
+                        
+                        @if ((Model.creator == ViewBag.Account || (bool)ViewData["isSourcing"]) && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.drawing, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" id="theFTB_drawing" name="theFTB.drawing" value="true" @(Model.theFTB.drawing ? "checked" : "") onclick="onCheckDrawing()" onchange="onFTBchanged()" />
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.print_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="text" id="theFTB_print_no" name="theFTB.print_no" value="@Model.theFTB.print_no" autocomplete="off" @(!Model.theFTB.drawing ? "disabled" : "") @(Model.theFTB.drawing ? "required" : "") onchange="onFTBchanged()" class="form-control input-sm" style="font-size: medium;" />
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.rev_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="text" id="theFTB_rev_no" name="theFTB.rev_no" value="@Model.theFTB.rev_no" autocomplete="off" @(!Model.theFTB.drawing ? "disabled" : "") @(Model.theFTB.drawing ? "required" : "") onchange="onFTBchanged()" class="form-control input-sm" style="font-size: medium;" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.drawing" value="@Model.theFTB.drawing.ToString()">
+                            <input type="hidden" name="theFTB.print_no" value="@Model.theFTB.print_no">
+                            <input type="hidden" name="theFTB.rev_no" value="@Model.theFTB.rev_no">
+
+                            if (!Model.theFTB.drawing)
+                            { 
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.drawing, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.drawing)
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.print_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.print_no)
+                                    </div>
+                                </div>
+
+                                <div class="form-group perline">
+                                    @Html.LabelFor(model => model.theFTB.rev_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                                    <div class="col-md-7 display">
+                                        @Html.ValueFor(model => model.theFTB.rev_no)
+                                    </div>
+                                </div>
+                            }
+                        }
+                        
+                        @if (Model.creator == ViewBag.Account && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_required, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" id="theFTB_cpal_required" name="theFTB.cpal_required" value="true" @(Model.theFTB.cpal_required ? "checked" : "") onclick="onCheckCPAL()" onchange="onFTBchanged()" />
+                                </div>
+                            </div>
+                        }
+                        else 
+                        { 
+                            <input type="hidden" name="theFTB.cpal_required" value="@Model.theFTB.cpal_required.ToString()">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_required, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.cpal_required)
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (Model.theFTB.cpal_required && (bool)ViewData["isSourcing"] && !string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_ship_approval, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" id="theFTB_cpal_ship_approval" name="theFTB.cpal_ship_approval" value="true" @(Model.theFTB.cpal_ship_approval ? "checked" : "") />
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_complete, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" id="theFTB_cpal_complete" name="theFTB.cpal_complete" value="true" @(Model.theFTB.cpal_complete ? "checked" : "") />
+                                </div>
+                            </div>
+                        }
+                        else 
+                        { 
+                            <input type="hidden" name="theFTB.cpal_ship_approval" value="@Model.theFTB.cpal_ship_approval.ToString()">
+                            <input type="hidden" name="theFTB.cpal_complete" value="@Model.theFTB.cpal_complete.ToString()">
+                            
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_ship_approval, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.cpal_ship_approval)
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.cpal_complete, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.cpal_complete)
+                                </div>
+                            </div>
+                        }
+                            
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.theFTB.deviation_comfirm, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display">
+                                @Html.ValueFor(model => model.theFTB.deviation_comfirm)
+                            </div>
+                        </div>
+                        
+                        @if (Model.creator == ViewBag.Account && string.IsNullOrWhiteSpace(Model.PO_no))
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.customer_provide_sample, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    @*<input type="checkbox" id="theFTB_customer_provide_sample" name="theFTB.customer_provide_sample" value="true" @((bool)Model.theFTB.customer_provide_sample ? "checked" : "") onclick="onClickSample(this)" onchange="onFTBchanged();" />*@
+                                    @Html.DropDownListFor(m => m.theFTB.customer_provide_sample, new SelectList((IEnumerable<SelectListItem>)ViewData["List_Sample"], "Value", "Text", Model.theFTB.customer_provide_sample), new { onclick = "onClickSample(this);", onchange = "onFTBchanged();", @class = "form-control col-md-2 input-sm", style = "font-size: medium;" })
+                                </div>
+                            </div>
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sample_tracking_number, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7">
+                                    <input type="text" id="theFTB_sample_tracking_number" name="theFTB.sample_tracking_number" value="@Model.theFTB.sample_tracking_number" autocomplete="off" @(!(Model.theFTB.customer_provide_sample ?? false) ? "disabled" : "") onclick="$(this).select();" class="form-control input-sm" style="font-size: medium;" />
+                                    @Html.ValidationMessageFor(model => model.theFTB.sample_tracking_number, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        else 
+                        { 
+                            <input type="hidden" name="theFTB.customer_provide_sample" value="@Model.theFTB.customer_provide_sample.ToString()">
+                            <input type="hidden" name="theFTB.sample_tracking_number" value="@Model.theFTB.sample_tracking_number">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.customer_provide_sample, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.customer_provide_sample)
+                                </div>
+                            </div>
+                            
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sample_tracking_number, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.sample_tracking_number)
+                                </div>
+                            </div>
+                        }
+
+                        @if ((bool)ViewData["isSourcing"] && string.IsNullOrWhiteSpace(Model.theFTB.sourcing_review) && Model.theFTB.step > 0)
+                        {
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sourcing_review, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 chk">
+                                    <input type="checkbox" name="isSourcingReview" value="true" @(!string.IsNullOrWhiteSpace(Model.theFTB.sourcing_review) ? "checked" : "") />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" name="theFTB.sourcing_review" value="@Model.theFTB.sourcing_review.ToString()">
+
+                            <div class="form-group perline">
+                                @Html.LabelFor(model => model.theFTB.sourcing_review, htmlAttributes: new { @class = "control-label col-md-5" })
+                                <div class="col-md-7 display">
+                                    @Html.ValueFor(model => model.theFTB.sourcing_review)
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <br>
+                }
+                
+                @* Buying ========================================================================================================================*@
+                <div class="card">
+                    <h3 style="text-align: center; margin-bottom: 10px;">Buying</h3>
+
+                    <input type="hidden" name="last_vendor" value="@Model.last_vendor">
+                    <input type="hidden" name="last_PO_date" value="@Model.last_PO_date">
+                    <input type="hidden" id="last_price" name="last_price" value="@Model.last_price">
+                    <input type="hidden" name="previous_quantity" value="@Model.previous_quantity">
+                    <input type="hidden" id="vendor_id" name="vendor_id" value="@Model.vendor_id" />
+                    <input type="hidden" id="vendor_approve" name="vendor_approve" value="@Model.vendor_approve" />
+                    <input type="hidden" id="company_id" name="company_id" value="@Model.company_id" />
+                    
+                    @if (ViewBag.cluster != "FTB")
+                    {
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.last_vendor, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(model => model.last_vendor)">
+                                @Html.ValueFor(model => model.last_vendor)
+                            </div>
+                        </div>
+
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.last_PO_date, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display">
+                                @*@Html.ValueFor(model => model.last_PO_date, "{0:MM/dd/yyyy}")*@
+                                @Html.DisplayFor(model => model.last_PO_date)
+                            </div>
+                        </div>
+
+                        <div class="form-group perline">
+                            @if (ViewBag.cluster == "Domestic")
+                            {
+                                <label class="control-label col-md-5">Last Price/EA</label>
+                            }
+                            else
+                            {
+                                @Html.LabelFor(model => model.last_price, htmlAttributes: new { @class = "control-label col-md-5" })
+                            }
+                            <div class="col-md-7 display">
+                                @Html.ValueFor(model => model.last_price)
+                            </div>
+                        </div>
+
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.previous_quantity, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 display">
+                                @Html.ValueFor(model => model.previous_quantity)
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.PO_no, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 fill">
+                            <input name="PO_no" class="form-control input-sm" autocomplete="off" value="@Model.PO_no" type="text" style="font-size: medium;" />
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.po_to_loc, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div style="text-align: right;" class="col-md-7 fill">
+                            @if (ViewData["List_po_to_loc"] == null)
+                            {
+                                <input name="po_to_loc" class="form-control col-md-2 input-sm" autocomplete="off" value="@Model.po_to_loc" type="text" style="font-size: medium;" />
+                            }
+                            else
+                            {
+                                @Html.DropDownList("po_to_loc", (SelectList)ViewData["List_po_to_loc"], new { id = "po_to_loc", @class = "form-control col-md-2 input-sm", style = "font-size: medium;" })
+                            }
+                            &nbsp;
+                            <input type="submit" name="EditBuyAction:locChg_Edit" value="Change" @(string.IsNullOrEmpty(Model.PO_no) ? "" : "disabled") class="btn btn-default input-sm" style="text-decoration: none; font-size: small;" onclick="return confirm('This action will erase all of Quotation data, would you like to do that?');" />
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.PO_order_quantity_1, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 fill">
+                            <input type="number" id="PO_order_quantity_1" name="PO_order_quantity_1" value="@Model.PO_order_quantity_1" autocomplete="off" onclick="$(this).select();" onfocusout="grand_total();" class="form-control input-sm" style="font-size: medium;" />
+                        </div>
+                    </div>
+
+                    <div class="form-group perline">
+                        @Html.LabelFor(model => model.expected_date, htmlAttributes: new { @class = "control-label col-md-5" })
+                        <div class="col-md-7 fill">
+                            @Html.TextBox("expected_date", Model.expected_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                        </div>
+                    </div>
+                    
+                    @if (ViewBag.cluster == "FTB")
+                    {
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.theFTB.follow_up_date, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7">
+                                @Html.TextBox("theFTB.follow_up_date", Model.theFTB.follow_up_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.cluster == "Domestic")
+                    {
+                        <input type="hidden" id="preload_PO_SO" name="preload_PO_SO" value="@Model.preload_PO_SO" />
+                    }
+                    else
+                    {
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.preload_PO_SO, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7 fill">
+                                @if (ViewData["PreloadList_SO"] == null)
+                                { 
+                                    <input name = "preload_PO_SO", type="text" value="@Model.preload_PO_SO" autocomplete="off" disabled class="form-control input-sm" style="font-size: medium;" />
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("preload_so", (SelectList)ViewData["PreloadList_SO"], new { @class = "form-control input-sm", style = "font-size: medium; display: initial;" });
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    @if (ViewBag.cluster == "FTB")
+                    {
+                        <div class="form-group perline">
+                            @Html.LabelFor(model => model.grand_total_value, htmlAttributes: new { @class = "control-label col-md-5" })
+                            <div class="col-md-7">
+                                @*@Html.TextBox("grand_total_value", Model.grand_total_value.ToString("N"), new { @type = "number", @readonly = "readonly", @class = "hideBorder", style = "min-width: 120px; max-width: 120px; font-size: medium;" })*@
+                                @Html.TextBox("grand_total_value", Model.grand_total_value, new { @readonly = "readonly", @class = "hideBorder", style = "min-width: 120px; max-width: 120px; font-size: medium;" })USD
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Note ========================================================================================================================*@
+            <div class="column form-horizontal" style="width: 24%;">
+                @* Rollback Note ========================================================================================================================*@
+                @if (
+                        ViewBag.cluster == "FTB" && 
+                        string.IsNullOrWhiteSpace(Model.PO_no) && 
+                        ((bool)ViewData["isSourcing"] && Model.theFTB.step == 1 || (bool)ViewData["isBuyer"] && Model.theFTB.step == 3) 
+                    )
+                {
+                    <div class="card">
+                        <h3 style="text-align: center;">Roll Back Reason</h3>
+
+                        <div class="form-group" style="padding: 0 16px 0 16px;">
+                            <textarea name="rollback_note" placeholder="Roll back reason here" rows="5" class="form-control" style="font-size: 14px;"></textarea>
+                        </div>
+                    </div>
+                    <br>
+                }
+                
+                @* Step Logs ========================================================================================================================*@
+                @if (ViewBag.cluster == "FTB")
+                {
+                    <div class="card">
+                        <h3 style="text-align: center;">Logs</h3>
+                        
+                        @if (Model.theFTB.theStepLogs != null)
+                        { 
+                            int i = 0;
+                            foreach (var log in Model.theFTB.theStepLogs)
+                            {
+                                <input type="hidden" name="theFTB.theStepLogs[@i].log_id" value="@log.log_id">
+                                <input type="hidden" name="theFTB.theStepLogs[@i].stamp" value="@log.stamp">
+                                <input type="hidden" name="theFTB.theStepLogs[@i].desc" value="@log.desc">
+                                
+                                <div class="form-group perline">
+                                    <div class="col-md-12 display">
+                                        @Html.DisplayFor(modelItem => log.stamp)
+                                        &nbsp;
+                                        @Html.DisplayFor(modelItem => log.desc)
+                                    </div>
+                                </div>
+                                i++;
+                            }
+                        }
+                    </div>
+                    <br>
+                }
+
+                <div class="card">
+                    <h3 style="text-align: center;">Note</h3>
+                    <div id="toUpdate"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            @* Quotations ========================================================================================================================*@
+            <div id="Quotations" style="float: left; width: 98%; padding: 20px 10px 3px 10px;">
+                <div class="card">
+                    <h3 style="text-align: center;">Quotations</h3>
+
+                    <p style="color: brown; font-size: medium; margin: 5px 0 4px 10px;">
+                        @Html.Raw("※ Once a supplier/vendor got approved, \"Expected Date\" will be calculated again automatically base on the supplier's country and \"PO to Loc\".")
+                    </p>
+                    
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; padding: 0; margin: 0;">
+                                    @Html.Hidden("QuoteCount", Model.theQuotes.Count().ToString(), null)
+                                    @if (ViewBag.cluster != "FTB")
+                                    {
+                                        <a class="btn" style="font-size: 18px; padding: 0; margin: 0;" onclick="AppendFunc()">&#10010;</a>
+                                    }
+                                </th>
+                                <th style="text-align: center;">
+                                    @((Model.theQuotes.Count()-1).ToString())
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().supplier_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().vendor_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().unit_price) @(ViewBag.cluster == "Domestic" ? "(EA)" : "(C)") 
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().currency_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().price_diff)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().tariff)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().price_all_in)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().moq)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().lead)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.theQuotes.First().supplier_info)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                foreach (var item in Model.theQuotes)
+                                {
+                                    <tr id="Quote_@item.quote_seq" class="quotes" style="display: @(item.quote_seq == 0 ? "none" : "table-row");">
+                                        <td align="center">
+                                            <input type="hidden" id="theQuotes_@(item.quote_seq)__viewID" name="theQuotes[@item.quote_seq].viewID" value="@item.viewID">
+                                            @if (ViewBag.cluster != "FTB")
+                                            {
+                                                <a id="herf_@item.quote_seq" class="btn" @((item.quote_seq < Model.theQuotes.Count() - 1) ? "disabled" : "") style="font-size: 18px; padding: 0; margin: 5px 0 0 0;" onclick="RemoveFunc(@item.quote_seq)">@("\u2718")</a>
+                                            }
+                                        </td>
+                                        <td align="center">
+                                            <input type="number" id="theQuotes_@(item.quote_seq)__quote_seq" name="theQuotes[@item.quote_seq].quote_seq" value="@item.quote_seq" readonly class="hideBorder" style="display: inline; text-align: right; font-size: medium; min-width: 25px; max-width: 25px;" />
+                                            &nbsp;&nbsp;
+                                            @Html.DropDownList($"theQuotes[{item.quote_seq}].z_status", (IEnumerable<SelectListItem>)ViewData["StatusList"], new { onchange = $"CheckApprove({item.quote_seq});", @class = "form-control detailSelect", style="display: inline; font-size: medium; min-width: 120px; max-width: 120px;" })
+                                        </td>
+                                        <td align="center">
+                                            @if (ViewData["SupplierList"] != null)
+                                            {
+                                                if (item.z_status == "T")
+                                                {
+                                                    @Html.DropDownListFor(m => m.theQuotes[item.quote_seq].supplier_id, new SelectList((IEnumerable<SelectListItem>)ViewData["SupplierList"], "Value", "Text", item.supplier_id), new { onchange = $"OnSupplierChanged({item.quote_seq});", @class = "form-control", style = "display: none; font-size: 14px; min-width: 200px; max-width: 200px;" });
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => m.theQuotes[item.quote_seq].supplier_id, new SelectList((IEnumerable<SelectListItem>)ViewData["SupplierList"], "Value", "Text", item.supplier_id), new { onchange = $"OnSupplierChanged({item.quote_seq});", @class = "form-control", style = "display: initial; font-size: 14px; min-width: 200px; max-width: 200px;" });
+                                                }
+                                            }
+                                            @if (item.z_status == "T")
+                                            {
+                                                @Html.TextBox($"theQuotes[{item.quote_seq}].supplier_name", item.supplier_name, new { @type = "text", @class = "form-control", style="font-size: 14px; min-width: 220px; max-width: 220px; display: initial;" })
+                                            }
+                                            else
+                                            {
+                                                @Html.TextBox($"theQuotes[{item.quote_seq}].supplier_name", item.supplier_name, new { @type = "text", @class = "form-control", style="font-size: 14px; min-width: 220px; max-width: 220px; display: none;" })
+                                            }
+                                            <input type="hidden" id="theQuotes_@(item.quote_seq)__supplier_country" name="theQuotes[@item.quote_seq].supplier_country" value="@item.supplier_country">
+                                            <input type="text" id="theQuotes_@(item.quote_seq)__show_country" value="@item.supplier_country" readonly class="hideBorder" style="text-align: center; font-size: medium; min-width: 35px; max-width: 35px; display: @(item.z_status == "T" ? "none" : "initial");" />
+                                        </td>
+                                        <td align="center">
+                                            <select id="theQuotes_@(item.quote_seq)__vendor_id" name="theQuotes[@item.quote_seq].vendor_id" @(item.z_status == "T" ? "disabled" : "") onchange="changeVendor(@item.quote_seq);" class="form-control" style="display: inline; min-width: 240px; max-width: 240px; font-size: 14px;"></select>
+                                            <input type="hidden" id="theQuotes_@(item.quote_seq)__vendor_name" name="theQuotes[@item.quote_seq].vendor_name" value="@item.vendor_name">
+                                        </td>
+                                        <td align="center">
+                                            <input type="hidden" id="theQuotes_@(item.quote_seq)__price_usd" name="theQuotes[@item.quote_seq].price_usd" value="@item.price_usd">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].unit_price", item.unit_price.ToString(), new { @type = "number", @step = ".0001", @autocomplete = "off", @onfocusout = $"priceDiff({item.quote_seq});", @class = "form-control", style="text-align: right; font-size: medium; min-width: 100px; max-width: 100px;" })
+                                        </td>
+                                        <td align="center">
+                                            <input type="hidden" id="theQuotes_@(item.quote_seq)__currency_rate" name="theQuotes[@item.quote_seq].currency_rate" value="@item.currency_rate">
+                                            @Html.DropDownListFor(m => m.theQuotes[item.quote_seq].currency_id, new SelectList((IEnumerable<SelectListItem>)ViewData["CurrencyList"], "Value", "Text", (item.currency_id > 0 ? item.currency_id : (Model.po_to_loc == 13 && item.supplier_country == "TW" ? 6 : 1))), new { @class = "form-control", onchange = $"priceDiff({item.quote_seq});", style="font-size: medium; min-width: 85px; max-width: 85px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].price_diff", item.price_diff, new { @type = "number", @step = ".01", @class = "hideBorder", style="text-align: right; font-size: medium; min-width: 75px; max-width: 75px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].tariff", item.tariff, new { @type = "number", @step = ".01", @autocomplete = "off", @onfocusout = $"priceAllIn({item.quote_seq});", @class = "form-control", style="text-align: right; font-size: medium; min-width: 75px; max-width: 75px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].price_all_in", item.price_all_in, new { @type = "number", @step = ".0001", @class = "hideBorder", style="text-align: right; font-size: medium; min-width: 75px; max-width: 75px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].moq", item.moq, new { @type = "number", @autocomplete = "off", @class = "form-control", style="text-align: right; font-size: medium; min-width: 75px; max-width: 75px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].lead", item.lead, new { @type = "text", @autocomplete = "off", @class = "form-control", style="font-size: medium; min-width: 120px; max-width: 120px;" })
+                                        </td>
+                                        <td align="center">
+                                            @Html.TextBox($"theQuotes[{item.quote_seq}].supplier_info", item.supplier_info, new { @type = "text", @autocomplete = "off", @class = "form-control", style="font-size: 14px; min-width: 265px; max-width: 265px;" })
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+
+<script type="text/javascript">
+    var module = @Html.Raw(Json.Encode(Model));
+    //var quotesCount = module.theQuotes.length;
+    var PreloadList = @Html.Raw(Json.Encode(ViewData["PreloadList_SO"]));
+    var SupplierList = @Html.Raw(Json.Encode(ViewData["SupplierList"]));
+    var cluster = '@ViewBag.cluster';
+    var LatestExchangeRate = @Html.Raw(Json.Encode(ViewData["LatestExchangeRate"]));
+    var step = -1;
+    if (cluster == "FTB")
+        step = module.theFTB.step;
+
+
+    function PrepareForPage() {
+        //alert('Start Prepare!');
+        let j = 0;
+
+        if (cluster != "FTB") {
+            document.getElementById('sourcing').checked = false;
+            if (module.sourcing === 'Y')
+                document.getElementById('sourcing').checked = true;
+            if (module.cluster === 'Domestic')
+                document.getElementById('urgent').checked = module.urgent;
+        }
+
+        if (PreloadList != null)
+        {
+            if (document.getElementById('preload_so').selectedIndex <= 0)
+                document.getElementById('preload_so').selectedIndex = 1;
+        }
+        
+        //alert(quotesCount);
+        for (j = 1; j < module.theQuotes.length; j++) {
+            //alert("j: " + j);
+            let Price_Diff = document.getElementById('theQuotes_' + j + '__price_diff');
+            let diff = parseFloat(Price_Diff.value.replace(' ', '').replace('%', ''));
+            Price_Diff.val = diff;
+            if (diff <= 100) {
+                Price_Diff.style.color = 'green';
+            }
+            else {
+                Price_Diff.style.color = 'red';
+            }
+            
+            FetchVendorList(j);
+            //alert(module.theQuotes[j].z_status);
+            document.getElementById("theQuotes_" + j + "__z_status").value = module.theQuotes[j].z_status;
+            if (module.theQuotes[j].z_status === 'T') {
+                CheckApprove(j);
+            }
+        }
+        
+        let partial = "@Html.Raw(ViewBag.notesPath)";
+        //alert(partial);
+        $('#toUpdate').load(partial);
+        
+        //alert('Prepare Okay');
+    }
+
+
+    function priceDiff(theNo) {
+        let LatestExchangeRate = @Html.Raw(Json.Encode(ViewData["LatestExchangeRate"]));
+        let currency_id = document.getElementById('theQuotes_'+theNo+'__currency_id').value;
+        @*let theExchangeRate = parseFloat('@decimal.Parse(ViewData["LatestExchangeRate"].ToString())');*@
+        let theExchangeRate = LatestExchangeRate.find(f => f.currency_id == currency_id).exchange_rate;
+        document.getElementById('theQuotes_' + theNo + '__currency_rate').value = theExchangeRate;
+        //alert(currency_id + '\r\n' + theExchangeRate);
+        let new_price = document.getElementById('theQuotes_' + theNo + '__unit_price').value;
+
+        //alert(new_price);
+        if (currency_id == 1) {
+            document.getElementById('theQuotes_' + theNo + '__price_usd').value = new_price;
+        }
+        else {
+            document.getElementById('theQuotes_' + theNo + '__price_usd').value = (new_price / theExchangeRate).toFixed(4);
+        }
+        //alert(document.getElementById('theQuotes_' + theNo + '__price_usd').value);
+
+        new_price = document.getElementById('theQuotes_' + theNo + '__price_usd').value;
+        let last_price = document.getElementById('last_price').value;
+        let diff = (((parseFloat(new_price) / parseFloat(last_price)) - 1) * 100).toFixed(2);
+        //alert(theNo + '\r\n' + last_price + '\r\n' + new_price + '\r\n' + diff);
+        document.getElementById('theQuotes_'+theNo+'__price_diff').value = diff;
+        if (diff <= 100) {
+            document.getElementById('theQuotes_'+theNo+'__price_diff').style.color = 'green';
+        }
+        else {
+            document.getElementById('theQuotes_'+theNo+'__price_diff').style.color = 'red';
+        }
+        //alert('priceDiff okay.');
+
+        priceAllIn(theNo);
+
+        if (cluster == "FTB" && theNo == 1) {
+            grand_total();
+        }
+    }
+
+
+    function priceAllIn(theNo) {
+        let price_usd = parseFloat(document.getElementById('theQuotes_'+theNo+'__price_usd').value);
+        let tariff = parseFloat(document.getElementById('theQuotes_' + theNo + '__tariff').value);
+        if (price_usd > 0) {
+            document.getElementById('theQuotes_' + theNo + '__price_all_in').value = (price_usd * (1+tariff/100)).toFixed(4);
+        }
+    }
+
+
+    function total() {
+        let qty = document.getElementById('new_quantity').value;
+
+        let weight = document.getElementById('unit_weight').value;
+        let totweight = (((parseFloat(weight) * parseFloat(qty))) * 0.453592).toFixed(2);
+        document.getElementById('total_weight').value = totweight;
+
+        //EA= 1
+        //C = 100
+        let last_price = 0;
+        if (cluster == "FTB") {
+            last_price = document.getElementById('supplier_standard_cost').value; //EA
+            let currency = document.getElementById('primary_supplier_currency').value;
+            let theExchangeRate = LatestExchangeRate.find(f => f.currency_id == currency).exchange_rate;
+            last_price = last_price / theExchangeRate;
+        }
+        else {
+            last_price = document.getElementById('last_price').value; //OS: C, Domestic: EA
+        }
+        //let totvalue = ((parseFloat(qty) * parseFloat(last_price)) / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        let totvalue = parseFloat(qty) * parseFloat(last_price);
+        if (cluster == "OS")
+            totvalue = totvalue / 100;
+        //totvalue = totvalue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        //document.getElementById('total_value').value = totvalue;
+        document.getElementById('total_value').value = totvalue.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+        //alert(last_price + '\r\n' + qty + '\r\n' + weight + '\r\n' + totvalue + '\r\n' + totweight);
+        document.getElementById('PO_order_quantity_1').value = document.getElementById('new_quantity').value;
+        grand_total();
+    }
+
+
+    function grand_total() {
+        if (cluster == "FTB") {
+            //C = 100
+            //EA= 1
+            let qty = document.getElementById('PO_order_quantity_1').value;
+            let unit_price = document.getElementById('theQuotes_1__unit_price').value;
+            let totvalue = parseFloat(qty) * parseFloat(unit_price) / 100;
+            totvalue = totvalue + document.getElementById('theFTB_ppap_cost').value;
+            totvalue = totvalue + document.getElementById('theFTB_tc_cost').value;
+                        
+            let quoteCount = document.getElementsByClassName("quotes").length;
+            let currency = document.getElementById('primary_supplier_currency').value;
+            for (let i = 1; i < quoteCount; i++) {
+                if (document.getElementById('theQuotes_' + i + '__z_status').value === 'A')
+                    currency = document.getElementById('theQuotes_' + i + '__currency_id').value;
+            }
+            let theExchangeRate = LatestExchangeRate.find(f => f.currency_id == currency).exchange_rate;
+                totvalue = totvalue / theExchangeRate;
+
+            //totvalue = totvalue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            //document.getElementById('grand_total_value').value = totvalue;
+            document.getElementById('grand_total_value').value = totvalue.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+        //alert(document.getElementById('grand_total_value').value);
+    }
+
+
+    function CheckApprove(theNo) {
+        let id = 0;
+        let approve = '';
+
+        var combolBox = document.getElementById("theQuotes_"+theNo+"__z_status");
+        if (combolBox.options[combolBox.selectedIndex].value === 'T') {
+            document.getElementById('theQuotes_'+theNo+'__supplier_id').style.display = 'none';
+            document.getElementById('theQuotes_'+theNo+'__show_country').style.display = 'none';
+            document.getElementById('theQuotes_'+theNo+'__supplier_name').style.display = 'initial';
+            document.getElementById('theQuotes_'+theNo+'__vendor_id').options.length = 0;
+            document.getElementById("theQuotes_"+theNo+"__vendor_id").setAttribute("disabled", true);
+            document.getElementById('theQuotes_'+theNo+'__vendor_name').value = "";
+        }
+        else {
+            document.getElementById('theQuotes_'+theNo+'__supplier_id').style.display = 'initial';
+            document.getElementById('theQuotes_'+theNo+'__show_country').style.display = 'initial';
+            document.getElementById('theQuotes_'+theNo+'__supplier_name').style.display = 'none';
+            document.getElementById("theQuotes_"+theNo+"__vendor_id").removeAttribute("disabled");
+        }
+
+        let chkBox = document.getElementById('Quotations').querySelectorAll('.detailSelect');
+        for (let j = 1; j < chkBox.length; j++) {
+            if (document.getElementById("theQuotes_"+theNo+"__z_status").selectedIndex === 1) {   //This one is Approved
+                if (j != theNo && chkBox[j].options[chkBox[j].selectedIndex].value != 'T' ) {
+                    chkBox[j].selectedIndex = 0;    //Candidate
+                }
+            }
+
+            if (chkBox[j].options[chkBox[j].selectedIndex].value === 'A') {
+                var supplier = document.getElementById('theQuotes_'+j+'__supplier_id')
+                id = supplier.options[supplier.selectedIndex].value;
+                approve = supplier.options[supplier.selectedIndex].text;
+            }
+        }
+
+        document.getElementById('vendor_id').value = id;
+        document.getElementById('vendor_approve').value = approve;
+        //alert(theNo + ' Check Okay.');
+    }
+
+
+    function changeVendor(theNo) {
+        let vendorSelection = document.getElementById('theQuotes_'+theNo+'__vendor_id')
+        document.getElementById('theQuotes_'+theNo+'__vendor_name').value = vendorSelection.options[vendorSelection.selectedIndex].text;
+    }
+
+
+    function AppendFunc() {        
+        let newIndex = parseInt(document.getElementById('QuoteCount').value);
+        let afterIndex = newIndex - 1;
+        //alert(newIndex);
+
+        let newTR = document.createElement('tr');
+        let theHTML = document.getElementById("Quote_0").innerHTML;
+        theHTML = theHTML.replaceAll("Quote_0", `Quote_${newIndex}`);
+        theHTML = theHTML.replaceAll("theQuotes[0]", `theQuotes[${newIndex}]`);
+        theHTML = theHTML.replaceAll("theQuotes_0_", `theQuotes_${newIndex}_`);
+        theHTML = theHTML.replaceAll("herf_0", `herf_${newIndex}`);
+        theHTML = theHTML.replaceAll("priceDiff(0)", `priceDiff(${newIndex})`);
+        theHTML = theHTML.replaceAll("priceAllIn(0)", `priceAllIn(${newIndex})`);
+        theHTML = theHTML.replaceAll("CheckApprove(0)", `CheckApprove(${newIndex})`);
+        theHTML = theHTML.replaceAll("OnSupplierChanged(0)", `OnSupplierChanged(${newIndex})`);
+        theHTML = theHTML.replaceAll("changeVendor(0)", `changeVendor(${newIndex})`);
+        theHTML = theHTML.replaceAll("RemoveFunc(0)", `RemoveFunc(${newIndex})`);
+
+        //alert(theHTML);
+        newTR.innerHTML = theHTML;
+        newTR.style.display = 'table-row';
+        newTR.id = "Quote_" + newIndex;
+
+        let ele = document.getElementById("Quote_" + afterIndex);
+        ele.after(newTR);
+        document.getElementById("theQuotes_" + newIndex + "__quote_seq").value = newIndex.toString();
+        document.getElementById("herf_" + newIndex).removeAttribute("disabled");
+        document.getElementById('QuoteCount').value = (newIndex + 1).toString();
+        
+        let chkBox = document.getElementById("theQuotes_" + newIndex + "__currency_id");
+        chkBox.selectedIndex = 0;
+        if (cluster === 'OS') 
+            chkBox.value = 6;
+
+        let previousHerf = document.getElementById("herf_" + afterIndex);
+        if (previousHerf != null)
+            previousHerf.setAttribute("disabled", true);
+
+        //alert('OkayAppend');
+    } 
+
+
+    function RemoveFunc(theNo) {
+        document.getElementById("Quote_" + theNo).remove(); 
+
+        document.getElementById('QuoteCount').value = document.getElementById('QuoteCount').value - 1;
+        let afterIndex = document.getElementById('QuoteCount').value - 1;
+        let previousHerf = document.getElementById("herf_" + afterIndex);
+        if (previousHerf != null)
+            previousHerf.removeAttribute("disabled");
+    } 
+    
+
+    function OnSupplierChanged(theNo) {
+        //alert('onchange');
+        FetchVendorList(theNo);
+        FetchSupplierInfo(theNo);
+        
+        //alert(theNo);
+        let supplier = document.getElementById('theQuotes_'+theNo+'__supplier_id')
+        //alert(supplier.selectedIndex);
+        //alert(supplier.options[supplier.selectedIndex].text);
+        document.getElementById("theQuotes_"+theNo+"__supplier_name").value = supplier.options[supplier.selectedIndex].text;
+        //alert('ok');
+    }
+
+
+    function FetchVendorList(theNo) {
+        //alert("theNo: " + theNo);
+        let supplier_id = parseInt($("#theQuotes_" + theNo + "__supplier_id").val());
+        let company_id = $("#company_id").val();
+        let items = '';
+        var vendorJsonData;
+        //alert('supplier_id: ' + supplier_id + '\r\n' + 'company_id: ' + company_id);
+
+        $("#theQuotes_"+theNo+"__vendor_id").prop("disabled", true);
+        $("#theQuotes_"+theNo+"__vendor_id").empty();
+        if (supplier_id > 0) {
+            //alert(theNo + " call");
+            $.when(ajax_call(supplier_id, company_id))
+                .done(function () {
+                    //alert(theNo + ' Done');
+                    if (vendorJsonData == null) {
+                        alert("Error returned vendor data from quote " + theNo + ".");
+                    } else {
+                        $(vendorJsonData).each(function () {
+                            items += "<option value='" + this.vendor_id + "'>" + this.vendor_name + " [" + this.terms_desc + "]</option>";
+                        });
+                        //alert(items);
+                        $("#theQuotes_" + theNo + "__vendor_id").html(items);
+                        //alert($("#theQuotes_" + theNo + "__vendor_id option").length);
+
+                        let selection = document.getElementById("theQuotes_"+theNo+"__vendor_id");
+                        if (selection.length >= 1) {
+                            $("#theQuotes_"+theNo+"__vendor_id").val(supplier_id);
+                            document.getElementById('theQuotes_'+theNo+'__vendor_name').value = selection.options[selection.selectedIndex].text;
+                        }
+                        //alert('Vendor ok');
+                    }
+
+                    //alert(theNo + ' Supplier changed');
+                })
+                .fail(function() {
+                    alert("Couldn't find the vendor data for quote " + theNo + ".");
+                })
+            ;
+        }
+        $("#theQuotes_"+theNo+"__vendor_id").prop("disabled", false);
+
+        function ajax_call(supplier_id, company_id) {
+            //alert(supplier_id + '\r\n' + company_id);
+            return $.ajax({
+                    cache: false,
+                    url: '@Url.Action("GetVendorList", "Procurement")',
+                    data: { "supplier_id": supplier_id, "company_id": company_id },
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: JSON,
+                    success: function (result) {
+                        vendorJsonData = result;
+                    }/*,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(textStatus + ": Vendor list fetching error.\r\n" + formatErrorMessage(jqXHR, errorThrown));
+                    }*/
+            });
+        }
+    }
+
+
+    function FetchSupplierInfo(theNo) {
+        //alert(cluster);
+        $("#theQuotes_"+theNo+"__show_country").prop("disabled", true);
+        let supplier_id = $("#theQuotes_"+theNo+"__supplier_id").val();
+        let ItemID = $("#ItemID").val();
+        let po_to_loc = $("#po_to_loc").val();
+        $.ajax({
+            cache: false,
+            url: '@Url.Action("GetSupplierInfo", "Procurement")',
+            data: { "location_id": po_to_loc, "item_id": ItemID, "supplier_id": supplier_id },
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            datatype: JSON,
+            success: function (result) {
+                //alert(result.supplier_part_no);
+                $("#theQuotes_"+theNo+"__supplier_country").val(result.phys_country);
+                $("#theQuotes_"+theNo+"__show_country").val(result.phys_country);
+                $("#theQuotes_" + theNo + "__show_country").prop("disabled", false);
+                $("#theQuotes_"+theNo+"__currency_id").val(result.currency_id);
+
+                //alert(supplier_id + '\r\n' + module.primary_supplier_id)
+                if (cluster == "Domestic") {
+                    if (Model.primary_supplier_id == supplier_id) {
+                        $("#theQuotes_"+theNo+"__unit_price").prop("disabled", true);
+                        $("#theQuotes_"+theNo+"__unit_price").val(result.cost);
+                        $("#theQuotes_" + theNo + "__unit_price").prop("disabled", false);
+                    }
+                    $("#theQuotes_"+theNo+"__supplier_info").prop("disabled", true);
+                    $("#theQuotes_"+theNo+"__supplier_info").val(result.supplier_part_no);
+                    $("#theQuotes_"+theNo+"__supplier_info").prop("disabled", false);
+                }
+                //alert('SupplierInfo ok');
+            }
+        });
+    }
+
+
+    function onRequiredDateChange() {
+        //document.getElementById("ship_out_date").valueAsDate = document.getElementById("required_date").valueAsDate;
+        document.getElementById("expected_date").valueAsDate = document.getElementById("required_date").valueAsDate;
+    }
+
+
+    function onChangePPAP() {
+        let combolBox = document.getElementById("theFTB_ppap_level");
+        if (combolBox.options[combolBox.selectedIndex].value != '') {
+            document.getElementById("theFTB_ppap_cost").removeAttribute("disabled");
+            document.getElementById("theFTB_ppap_cost").setAttribute("required", "");
+            document.getElementById("theFTB_ppap_note").removeAttribute("disabled");
+        }
+        else {
+            document.getElementById("theFTB_ppap_cost").setAttribute("disabled", true);
+            document.getElementById("theFTB_ppap_cost").removeAttribute("required");
+            document.getElementById("theFTB_ppap_note").setAttribute("disabled", true);
+        }
+
+        onFTBchanged();
+    }
+
+
+    function onCheckTC() {
+        if (document.getElementById('theFTB_tc').checked) {
+            document.getElementById("theFTB_tc_cost").removeAttribute("disabled");
+            document.getElementById("theFTB_tc_cost").setAttribute("required", "");
+            document.getElementById("theFTB_tc_note").removeAttribute("disabled");
+        }
+        else {
+            document.getElementById("theFTB_tc_cost").setAttribute("disabled", true);
+            document.getElementById("theFTB_tc_cost").removeAttribute("required");
+            document.getElementById("theFTB_tc_note").setAttribute("disabled", true);
+        }
+    }
+
+
+    function onCheckDrawing() {
+        if (document.getElementById('theFTB_drawing').checked) {
+            document.getElementById("theFTB_print_no").setAttribute("required", "");
+            document.getElementById("theFTB_print_no").removeAttribute("disabled");
+            document.getElementById("theFTB_rev_no").setAttribute("required", "");
+            document.getElementById("theFTB_rev_no").removeAttribute("disabled");
+        }
+        else {
+            document.getElementById("theFTB_print_no").removeAttribute("required");
+            document.getElementById("theFTB_print_no").setAttribute("disabled", true);
+            document.getElementById("theFTB_rev_no").removeAttribute("required");
+            document.getElementById("theFTB_rev_no").setAttribute("disabled", true);
+        }
+    }
+
+
+    function onCheckCPAL() {
+        if (document.getElementById('theFTB_cpal_required').checked) {
+            document.getElementById("theFTB_cpal_ship_approval").removeAttribute("disabled");
+            document.getElementById("theFTB_cpal_complete").removeAttribute("disabled");
+        }
+        else {
+            document.getElementById("theFTB_cpal_ship_approval").setAttribute("disabled", true);
+            document.getElementById("theFTB_cpal_complete").setAttribute("disabled", true);
+        }
+    }
+
+
+    function onClickSample(selectObject) {
+        //alert(selectObject.value);
+        if (selectObject.value === 'True') {
+            document.getElementById("theFTB_sample_tracking_number").removeAttribute("disabled");
+            document.getElementById("theFTB_sample_tracking_number").setAttribute("required", "");
+        }
+        else {
+            document.getElementById("theFTB_sample_tracking_number").setAttribute("disabled", true);
+            document.getElementById("theFTB_sample_tracking_number").removeAttribute("required");
+        }
+    }
+
+    
+    function onFTBchanged() {
+        if (cluster === "FTB" && step > 1) {
+            document.getElementById("isRollBackSourcing").value = '1';
+        }
+        //alert(document.getElementById("isRollBackSourcing").value);
+    }
+
+
+    function onFormSubmit() {
+        if (cluster === 'FTB' && document.getElementById("isFTBchanged").value == '1') {
+            return confirm('The status will be rolled back to Sourcing since FTB information has been modified. Are you sure to save data?');
+        }
+        else {
+            return confirm('Are you sure to update this buy?');
+        }
+    }
+
+
+    window.addEventListener("load", PrepareForPage);
+</script>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

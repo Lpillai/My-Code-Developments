@@ -1,0 +1,208 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Supplier>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+@*@Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow-y: auto;
+        /*display: inline-block;*/
+        height: calc(100vh - 155px);
+        margin: auto;
+        max-width: 800px;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="supplierModal" tabindex="-1" role="dialog" aria-labelledby="supplierModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("GoSave_InspectionFree", "Procurement", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="supplierModalLabel">New excluded Supplier</h4>
+                </div>
+                <div class="modal-body">
+                    <input id="pm_suppler_id" name="pm_suppler_id" type="number" placeholder="Supplier ID" class="form-control" style="font-size: x-large;" />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Save" @attr_html />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="theSheet" class="tableScrollY">
+    <table class="table table-hover" style="width: 95%;">
+        <thead>
+            <tr>
+                <th>
+                    @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                    &nbsp;
+                    <a href="#supplierModal" data-toggle="modal">Create</a>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.supplier_id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.supplier_name)
+                </th>
+                <th>
+                    &nbsp;
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model == null || Model.Count() <= 0)
+                { 
+                    <tr>
+                        <td colspan="4" style="text-align:center;">No data found.</td>
+                    </tr>
+                }
+                else
+                {
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+                        <tr>
+                            <td align="right">
+                                @Html.Raw(i)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.supplier_id)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.supplier_name)
+                            </td>
+                            <td align="right">
+                                @Html.ActionLink("Delete", "GoDelete_InspectionFree", "Procurement", new { pm_suppler_id = @item.supplier_id }, new { onclick = "return confirm('Are you sure you want to delete this record?');", @class = @attr_css })
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

@@ -1,0 +1,173 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<CodeCluster>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        /*padding: 0 10px 0 10px;*/
+        height: calc(100vh - 130px);
+        width: 250px;
+    }
+
+    .divContent {
+        vertical-align: top;
+        max-width: calc(100vw - 300px);
+        /*width: 83%;*/
+        max-height: calc(100vh - 150px);
+        display: inline-block;
+        margin-left: 10px;
+        padding-left: 10px;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+        var pm_cluster = '@ViewData["pm_cluster"]';
+        //alert(pm_cluster);
+        if (pm_cluster != '')
+            $("#query").load('@Url.Action("Show_ClusterDetails", "IT")?pm_cluster=' + pm_cluster);
+    });
+</script>
+<script type="text/javascript">
+    function onLinkClicked() {
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(window.opts).spin(target);
+    }
+</script>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div style="padding-top: 15px;">
+    <div class="tableScrollY">
+        <table class="table table-hover" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">
+                        @Model.Count()
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.Cluster)
+                        @Ajax.ActionLink("Create", "Show_CodeDetails", "IT", new { pm_CRUD = "C", pm_cluster = "", pm_code = -1 }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count() <= 0)
+                { 
+                    <tr>
+                        <td colspan="2" style="text-align: center;">Empty list.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.no)
+                            </td>
+                            <td>
+                                @Ajax.ActionLink(@item.Cluster, "Show_ClusterDetails", "IT", new { pm_cluster = @item.Cluster }, new AjaxOptions { UpdateTargetId = "query", InsertionMode = InsertionMode.Replace }, new { onclick = "onLinkClicked();" })
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="divContent">
+        <div id="query">
+        </div>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

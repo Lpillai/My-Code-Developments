@@ -1,0 +1,55 @@
+﻿<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+    })
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("GoDownLoad_GoodsNote_Shipping", "Reports", new { pm_cluster = @ViewBag.cluster }, FormMethod.Post, new { id = "fileform", enctype = "multipart/form-data", target="_blank" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-inline form-group">
+        @Html.Label("Invoice No", htmlAttributes: new { @class = "control-label" })
+        &nbsp;
+        <input type="text" name="pmInvoices" size="120" autocomplete="off" class="form-control" style="font-size: medium; width: 600px; max-width: 600px;" />
+    </div>
+    <div class="form-inline form-group" style="text-align: right;">
+        <input type="submit" class="btn btn-primary" value="Download" />
+    </div>
+}
+
+
+<div id="output">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ Please delimit each invoice number with a comma. For instance: '5697149,5695774,5693659'.")
+        <br>
+        @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

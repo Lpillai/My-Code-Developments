@@ -1,0 +1,42 @@
+﻿<style type="text/css">
+</style>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Open_CleanedPart3", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+{ 
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_label", ViewData["label"].ToString())
+    
+    <div class="form-horizontal" style="width: 500px; margin-left: 15px;">
+        <div class="form-group">
+            @Html.Label("PT No", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" id ="pm_process_x_transaction_uid" name ="pm_process_x_transaction_uid" autofocus class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Lot No", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" id ="pm_lot" name ="pm_lot" autofocus class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Quantity", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" id ="pm_qty" name ="pm_qty" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group" style="margin-right: 10%; text-align: right;">
+            <input type="submit" id="btn_print" value="Print" class="btn btn-primary" />
+        </div>
+    </div>
+}

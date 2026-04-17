@@ -1,0 +1,236 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Lot_Number>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 150px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function Occupy(theNo) {
+        var moduleList = @Html.Raw(Json.Encode(@Model));
+        //alert(theNo + '\r\n' + moduleList[theNo-1].lot_uid + '\r\n' + moduleList[theNo-1].group_name);
+        document.getElementById('pm_lot_uid').value = moduleList[theNo-1].lot_uid;
+        document.getElementById('pm_group_name').innerHTML = moduleList[theNo-1].group_name;
+    }
+</script>
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="OccupyModal" tabindex="-1" role="dialog" aria-labelledby="OccupyModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myOccupy">
+            @using (Html.BeginForm("GoOccupyLotNumber", "Procurement", null, FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return confirm('Are you sure you want to occupy for this group?');" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title">Occupy for group</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="pm_lot_uid" name="pm_lot_uid">
+                    <h5 id="pm_group_name"></h5>
+                    <input name="pm_po_no" type="number" min="4000000" max="5000000" required placeholder="PO number" class="form-control" />
+                    <input name="pm_po_line" type="number" min="1" max="200" required placeholder="PO line number" class="form-control" />
+                    <input name="pm_amount" type="number" min="1" max="100" required placeholder="Lot amount" class="form-control" />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Occupy" @attr_html />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="groupModalLabel">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content" id="myGroup">
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div style="width: 85%; display: block; margin-left: auto; margin-right: auto;">
+    <div class="row" style="padding: 0 10px 0 15px;">
+        @Ajax.ActionLink("Create One Vendor Group", "Show_VendorGroup", "Procurement", new { group_id = 0 }, new AjaxOptions { UpdateTargetId = "myGroup", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#groupModal", @class = "btn btn-default action_btn" })
+    </div>
+
+    <div style="width: 85%; display: block; margin-left: auto; margin-right: auto;">
+        <div class="bodyScrollY">
+            <table class="table table-hover">
+                @*<colgroup>
+                    <col id="col_01" style="width: 40px;">
+                    <col id="col_02" style="width: 240px;">
+                    <col id="col_03" style="width: 80px;">
+                    <col id="col_04" style="width: 80px;">
+                    <col id="col_05" style="width: 100px;">
+                    <col id="col_06" style="width: 80px;">
+                    <col id="col_07" style="width: 100px;">
+                </colgroup>*@
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">
+                            @Model.Count().ToString()
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.group_name)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.range_start)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.range_end)
+                        </th>
+                        <th style="text-align: center;">
+                            &nbsp;
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.current_used)
+                        </th>
+                        <th style="text-align: center;">
+                            &nbsp;
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model != null)
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td align="center">
+                                        @Html.ValueFor(modelItem => item.i)
+                                    </td>
+                                    <td>
+                                        @Ajax.ActionLink(item.group_name, "Show_VendorGroup", "Procurement", new { group_id = @item.group_id }, new AjaxOptions { UpdateTargetId = "myGroup", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#groupModal" })
+                                    </td>
+                                    <td align="center">
+                                        @Html.ValueFor(modelItem => item.range_start)
+                                    </td>
+                                    <td align="center">
+                                        @Html.ValueFor(modelItem => item.range_end)
+                                    </td>
+                                    <td style="padding-left: 20px;">
+                                        @Html.ActionLink("+100", "GoIncreaseLotNumber", "Procurement", new { group_id = @item.group_id, amount = 100 }, new { onclick = "return confirm('Add one hundred more numbers for this group?');", @class = @attr_css })
+                                        &nbsp;&nbsp;
+                                        @Html.ActionLink("+1000", "GoIncreaseLotNumber", "Procurement", new { group_id = @item.group_id, amount = 1000 }, new { onclick = "return confirm('Add 1 thousand more numbers for this group?');", @class = @attr_css })
+                                    </td>
+                                    <td align="center">
+                                        @Html.ValueFor(modelItem => item.current_used)
+                                    </td>
+                                    <td style="padding-left: 15px;">
+                                        <a href="#OccupyModal" class="@attr_css @(item.lot_uid == 0 ? "isDisabled" : "")" data-toggle="modal" onclick="Occupy(@item.i);" >Occupy</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

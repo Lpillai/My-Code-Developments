@@ -1,0 +1,218 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Currency>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 295px);
+        width: 100%;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        display: inline-block;
+        float: left;
+        width: 360px;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+        padding-bottom: 10px;
+    }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    /* Style the counter cards */
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="chartsModal" tabindex="-1" role="dialog" aria-labelledby="chartsModalLabel">
+    <div class="modal-dialog" style="width: 70%;" role="document">
+        <div class="modal-content" id="myCharts">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+    <div class="row" style="overflow-x: auto;">
+        <table>
+            <tr>
+                @{
+                    int grp = 0;
+                    while (true)
+                    {
+                        grp++;
+                        var group = Model.ToList().FindAll(m => m.grp == grp).ToList();
+                        if (group.Count() == 0)
+                        {
+                            break;
+                        }
+                        <td>
+                            <div class="column">
+                                <div class="card">
+                                    <h3 style="text-align: center">
+                                        @Ajax.ActionLink(group.ToList()[0].to_currency_name, "ShowRates_CurrencyCharts", "Procurement", new { pm_currency_name = group.ToList()[0].to_currency_name }, new AjaxOptions { UpdateTargetId = "myCharts", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#chartsModal" })
+                                    </h3>
+
+                                    <div class="bodyScrollY">
+                                        <table class="table table-hover">
+                                            <colgroup>
+                                                <col id="col_02" style="width: 80px;">
+                                                <col id="col_03" style="width: 80px;">
+                                            </colgroup>
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align: center;">
+                                                        @Html.DisplayNameFor(model => model.exchange_date)
+                                                    </th>
+                                                    <th style="text-align: center;">
+                                                        @Html.DisplayNameFor(model => model.exchange_rate)
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in group)
+                                                {
+                                                    <tr>
+                                                        <td align="center">
+                                                            @Html.DisplayFor(modelItem => item.exchange_date)
+                                                        </td>
+                                                        <td align="right" style="padding-right: 30px;">
+                                                            @Html.DisplayFor(modelItem => item.exchange_rate)
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    }
+                }
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<p style="color: brown; font-size: medium; margin-top: 3px;">
+    @Html.Raw("※ Only the latest 90 days of exchange rates are showed here.")
+    <br>
+    @Html.Raw("※ The base currency of above exchange rates is USD.")
+    <br>
+    @Html.Raw("※ The exchange rates were provided by https://exchangerate.host/, and feeded into P21 automatically.")
+</p>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

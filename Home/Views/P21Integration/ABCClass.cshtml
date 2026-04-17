@@ -1,0 +1,111 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+@using (Html.BeginForm("goUpdateABCClass", "P21Integration", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row" style="margin: 10px 0 0 0;">
+        <div class="col-md-1" style="text-align: right; padding-top: 7px;">
+            @Html.Label("Spreadsheet", htmlAttributes: new { @class = "control-label" })
+        </div>
+        <div class="col-md-3">
+            @Html.TextBox("pm_file", "", new { type = "file", id = "filepath", accept = ".xls, .xlsx", @class = "form-control", style = "max-width: 450px; width: 450px;" })
+            @Html.ActionLink("Download example sheet", "ExampleSheet_ABCClass", "P21Integration", null, new { @target = "_blank" })
+        </div>
+        <div class="col-md-1">
+            <input type="submit" id="btnSubmit" value="Upload" class="btn btn-primary" />
+        </div>
+    </div>
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ This app will only process the first sheet from the selected file. Please have what you want to upload to be the first one in your spreadsheet without any filters working.")
+    </div>
+}
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

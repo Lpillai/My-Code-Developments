@@ -1,0 +1,170 @@
+﻿@model IEnumerable<RuntimeVariables.Lot_PO>
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        document.getElementById('btn_search').removeAttribute("disabled");
+        //document.getElementById('btn_search').value = "Search";
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bulkScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 315px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+        font-size: medium;
+    }
+
+    .key {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        padding-top: 5px;
+        /*width: 80px;*/
+        text-align: center;
+    }
+</style>
+
+
+
+<div>
+    <form action="" method="post" target="_blank">
+    @*@using (Html.BeginForm("OpenLabel_Carton", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {*@
+        @Html.AntiForgeryToken()
+        @Html.Hidden("pm_PO", @ViewData["PO"])
+
+        <div class="form-group" style="text-align: right;">
+            <input type="submit" value="Carton (6x4)" name="ReportOSBuyAction:Carton" @attr_html class="btn btn-primary" />
+            &nbsp;
+            <input type="submit" value="Bulk (4x3)" name="ReportOSBuyAction:Bulk" @attr_html class="btn btn-primary" />
+            &nbsp;&nbsp;&nbsp;
+            <input type="submit" value="Bag (2.5x2)" name="ReportOSBuyAction:Bag" @attr_html class="btn btn-primary" />
+            &nbsp;&nbsp;&nbsp;
+        </div>
+        <div class="form-group">
+            <div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                <div class="bulkScrollY">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.po_line)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.item_id)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.line_qty)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.lot_no)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.mfg_lot)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.carton_string)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model == null || Model.Count() <= 0)
+                                {
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">
+                                            @Html.Raw("No data found.")
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    var index = 0;
+                                    foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            @if (item.lot_count == 1)
+                                            {
+                                                <td align="center">
+                                                    @Html.ValueFor(modelItem => item.po_line)
+                                                </td>
+                                                <td>
+                                                    @Html.ValueFor(modelItem => item.item_id)
+                                                </td>
+                                                <td align="right" style="padding: 0 15px 0 0;">
+                                                    @Html.DisplayFor(modelItem => item.line_qty)
+                                                </td>
+                                            }
+                                            else if (item.lot_count > 1 && item.rrn == 1)
+                                            { 
+                                                <td rowspan="@item.lot_count" align="center">
+                                                    @Html.ValueFor(modelItem => item.po_line)
+                                                </td>
+                                                <td rowspan="@item.lot_count">
+                                                    @Html.ValueFor(modelItem => item.item_id)
+                                                </td>
+                                                <td rowspan="@item.lot_count" align="right" style="padding: 0 15px 0 0;">
+                                                    @Html.DisplayFor(modelItem => item.line_qty)
+                                                </td>
+                                            }
+                                            <td align="center">
+                                                @Html.TextBox($"pm_Lots[{index}].lot_no", item.lot_no, new { @readonly = "readonly", @class = "key" })
+                                            </td>
+                                            <td align="center">
+                                                <input name="pm_Lots[@index].mfg_lot" value="@item.mfg_lot" class="form-control input-sm" style="font-size: medium; width: 150px; max-width: 150px;">
+                                            </td>
+                                            <td align="center">
+                                                <input name="pm_Lots[@index].carton_string" value="@item.carton_string" class="form-control input-sm" style="font-size: medium; width: 250px; max-width: 250px;">
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 5px; font-size: larger; color: darkorange;">
+                    @Html.Raw("※ Please delimit Print Quantities with a comma. For instance: '5,5,10,15,20'.")
+                    <br>
+                    @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+                </div>
+            </div>
+        </div>
+    @*}*@
+    </form>
+</div>
+
+

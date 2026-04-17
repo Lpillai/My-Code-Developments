@@ -1,0 +1,96 @@
+﻿@model RuntimeVariables.BuySheet_TransitTime_Country
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(function () {
+        if ("@ViewBag.pmCRUD" == "U") {
+            $("#from_country_id").prop("disabled", true);
+            $("#to_loc_id").prop("disabled", true);
+        }
+    });
+
+    //right before the form submits, we re-enable the fields, to make them submit.
+    $("#transitForm").submit(function (event) {
+        $("#from_country_id").prop("disabled", false);
+        $("#to_loc_id").prop("disabled", false);
+    });
+</script>
+
+
+
+
+@using (Html.BeginForm("GoSaveTransitTime_Country", "Transfer", FormMethod.Post, new { id = "transitForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.i)
+    <input type="hidden" name="pmCRUD" value="@ViewBag.pmCRUD">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @if (ViewBag.pmCRUD == "C")
+            {
+                <span>New</span>
+            }
+            else
+            {
+                <span>@Html.Raw("No. " + Model.i)</span>
+            }
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.from_country_id, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewData["List_fromCountry"] != null)
+                {
+                    @Html.DropDownList("from_country_id", (SelectList)ViewData["List_fromCountry"], new { id = "from_country_id", @class = "form-control col-md-8", style = "font-size: medium;" })
+                }
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.to_loc_id, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewData["List_toLocation"] != null)
+                {
+                    @Html.DropDownList("to_loc_id", (SelectList)ViewData["List_toLocation"], new { id = "to_loc_id", @class = "form-control col-md-8", style = "font-size: medium;" })
+                }
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ship_method, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 0;" })
+                @Html.RadioButtonFor(model => model.ship_method, "Ocean", new { id = "Ocean", @checked = "checked", @style = "vertical-align: middle; margin: 0;" })
+                <label for="Ocean" style="vertical-align: middle; margin: 0;">Ocean</label>
+                &nbsp;&nbsp;
+                @Html.RadioButtonFor(model => model.ship_method, "Air", new { id = "Air", @style = "vertical-align: middle; margin: 0;" }) 
+                <label for="Air" style="vertical-align: middle; margin: 0;">Air</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.transit_days, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="transit_days" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.transit_days" type="number" style="font-size: medium; text-align: right;" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Save this transit record?');" @attr_html />
+    </div>
+}
+

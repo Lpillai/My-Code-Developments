@@ -1,0 +1,47 @@
+﻿
+
+<script type="text/javascript">
+    function CheckBeforeSubmit() {        
+        document.getElementById('btnSubmit').setAttribute('disabled', 'disabled');
+        document.getElementById('btnSubmit').value = "Processing...";
+        document.getElementById('ReportForm').submit();
+        return true;
+    }
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Run_SupplierScoreCard_Summary", "Reports", new { cluster = @ViewData["cluster"] }, FormMethod.Post, new { id = "ReportForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal" style="width: 500px; margin-left: 15px;">
+        <div class="form-group">
+            <p style="color: brown; font-size: medium; margin-left: 20px;">
+                @Html.Raw("The report will be sent to you in few minutes.")
+            </p>
+        </div>
+        <div class="form-group" style="margin-right: 10%; text-align: right;">
+            <input type="submit" id="btnSubmit" value="Produce Report" class="btn btn-primary btn-large" onclick="return CheckBeforeSubmit();" />
+        </div>
+    </div>
+}
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

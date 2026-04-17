@@ -1,0 +1,410 @@
+﻿@model IEnumerable<RuntimeVariables.palletizing_record2_line>
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+
+<style type="text/css">
+    .raw {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        padding: 2px 2px;
+        text-align: center;
+    }
+
+    a[disabled] {
+        pointer-events: none;
+        cursor: default;
+    }
+
+    .bodyScrollY {
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: inline-block;
+        height: calc(100vh - 195px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #eee;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table > thead > tr > td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+<script type="text/javascript">
+    function AppendFunc(line_number, line_seq, bin_seq) {
+        //alert(line_number + "\r\n" + line_seq + "\r\n" + bin_seq);
+        var newHerfStack = new Array();
+        if (document.getElementById('newHerfStack_'+line_number+'_'+line_seq).value != "")
+            newHerfStack = JSON.parse(document.getElementById('newHerfStack_'+line_number+'_'+line_seq).value);
+        var newDivStack = new Array();
+        if (document.getElementById('newDivStack_'+line_number+'_'+line_seq).value != "")
+            newDivStack = JSON.parse(document.getElementById('newDivStack_'+line_number+'_'+line_seq).value);
+        //alert(newDivStack);
+
+        var lineList = @Html.Raw(Json.Encode(@Model));
+        let newIndex = parseInt(document.getElementById('rows_count_' + line_number).value);
+        //alert(newIndex);
+        const ele = document.getElementById(newDivStack[newDivStack.length-1]);
+        const newDiv = document.createElement('div');
+        newDiv.innerHTML = `
+                <div id="line_detail_${line_number}_${newIndex}" class="form-group col-xs-12" style="color: lightslategrey; margin: 0px;">
+                    <div class="col-xs-2" style="text-align: center;">
+                        <input id="pm_lines_${newIndex}__palletizing_no" name="pm_lines[${newIndex}].palletizing_no" type="hidden" value="0">
+                        <input id="pm_lines_${newIndex}__line_number" name="pm_lines[${newIndex}].line_number" type="hidden" value="${line_number}">
+                        <input id="pm_lines_${newIndex}__oe_line_no" name="pm_lines[${newIndex}].oe_line_no" type="hidden" value="${lineList[line_number].oe_line_no}">
+                        <input id="pm_lines_${newIndex}__inv_mast_uid" name="pm_lines[${newIndex}].inv_mast_uid" type="hidden" value="${lineList[line_number].inv_mast_uid}">
+                        <input id="pm_lines_${newIndex}__item_id" name="pm_lines[${newIndex}].item_id" type="hidden" value="${lineList[line_number].item_id}">
+                        <input id="pm_lines_${newIndex}__customer_part_number" name="pm_lines[${newIndex}].customer_part_number" type="hidden" value="${lineList[line_number].customer_part_number}">
+                        <input id="pm_lines_${newIndex}__print_quantity" name="pm_lines[${newIndex}].print_quantity" type="hidden" value="${lineList[line_number].print_quantity}">
+                        <input id="pm_lines_${newIndex}__packing_person" name="pm_lines[${newIndex}].packing_person" type="hidden" value="${lineList[line_number].packing_person}">
+                        <input id="pm_lines_${newIndex}__line_seq" name="pm_lines[${newIndex}].line_seq" type="hidden" value="${line_seq}">
+                        <input id="pm_lines_${newIndex}__lot_cd" name="pm_lines[${newIndex}].lot_cd" type="hidden" value="${lineList[line_number].bins[bin_seq].lot_cd}">
+                        <input id="pm_lines_${newIndex}__bin_id" name="pm_lines[${newIndex}].bin_id" type="hidden" value="${lineList[line_number].bins[bin_seq].bin_id}">
+                        <input id="pm_lines_${newIndex}__country_of_origin" name="pm_lines[${newIndex}].country_of_origin" type="hidden" value="${lineList[line_number].bins[bin_seq].country_of_origin}">
+                        <input id="pm_lines_${newIndex}__qty_allocated_delta" name="pm_lines[${newIndex}].qty_allocated_delta" type="hidden" value="${lineList[line_number].bins[bin_seq].qty_allocated_delta}">
+                        <a id="herf_${line_number}_${newIndex}" class="btn" style="padding: 0 5px;" onclick="RemoveFunc(${line_number}, ${line_seq}, ${bin_seq}, ${newIndex})">@("\u2718")</a>
+                    </div>                      
+                    <input type="number" id="pm_lines_${line_number}_${newIndex}_qty_per_box" name="pm_lines[${newIndex}].qty_per_box" value="" placeholder="Qty" onfocus="this.select()" onchange="subtotalize(${line_number},${line_seq},${bin_seq},${newIndex})" autocomplete="off" class="col-xs-2" style="padding: 0 2px; text-align: right;">
+                    <input type="text" value="x" readonly tabIndex="-1" class="col-xs-1 raw">
+                    <input type="number" id="pm_lines_${line_number}_${newIndex}_total_boxes" name="pm_lines[${newIndex}].total_boxes" value="" placeholder="Box" onfocus="this.select()" onchange="subtotalize(${line_number},${line_seq},${bin_seq},${newIndex})" autocomplete="off" class="col-xs-1" style="padding: 0 2px; text-align: right;">
+                    <input type="text" value="=" readonly tabIndex="-1" class="col-xs-1 raw">
+                    <input type="text" id="subtotal_${line_number}_${line_seq}_${newIndex}" value="" readonly tabIndex="-1" class="col-xs-2 raw" style="text-align: right; padding-right: 12px;">
+                    <input type="number" id="pm_lines_${newIndex}__pallet_no" name="pm_lines[${newIndex}].pallet_no" value="" placeholder="Plt" onfocus="this.select()" autocomplete="off" class="col-xs-1" style="padding: 0 2px; text-align: right; margin-right: 2px;">
+                    <input type="number" id="pm_lines_${newIndex}__same_box_no" name="pm_lines[${newIndex}].same_box_no" value="" placeholder="SB" onfocus="this.select()" autocomplete="off" class="col-xs-1" style="padding: 0 2px; text-align: right;">
+                </div>
+            `;
+        ele.after(newDiv);
+
+        document.getElementById('rows_count_' + line_number).value = newIndex + 1;
+        newDivStack.push("line_detail_" + line_number + "_" + newIndex);
+        document.getElementById('newDivStack_'+line_number+'_'+line_seq).value = JSON.stringify(newDivStack);
+        
+        var previousHerf = document.getElementById(newHerfStack[newHerfStack.length-1]);
+        if (previousHerf != null)
+            previousHerf.classList.add("disabled");
+        newHerfStack.push("herf_" + line_number + "_" + newIndex);
+        document.getElementById('newHerfStack_'+line_number+'_'+line_seq).value = JSON.stringify(newHerfStack);
+
+        //alert('OkayAppend');
+    } 
+
+
+    function RemoveFunc(line_number, line_seq, bin_seq, theIndex) {
+        //alert(line_number + "\r\n" + line_seq + "\r\n" + bin_seq + "\r\n" + theIndex);
+        var newHerfStack = new Array();
+        let theStack = document.getElementById('newHerfStack_' + line_number + '_' + line_seq).value;
+        //alert(theStack);
+        if (theStack != "") {
+            newHerfStack = JSON.parse(theStack);
+            newHerfStack.pop();
+            if(document.getElementById(newHerfStack[newHerfStack.length-1]) != null)
+                document.getElementById(newHerfStack[newHerfStack.length-1]).classList.remove("disabled");
+            document.getElementById('newHerfStack_'+line_number+'_'+line_seq).value = JSON.stringify(newHerfStack);
+        }
+        
+        var newDivStack = new Array();
+        //alert(document.getElementById('newDivStack_' + line_number + '_' + line_seq).value);
+        if (document.getElementById('newDivStack_' + line_number + '_' + line_seq).value != "") {
+            newDivStack = JSON.parse(document.getElementById('newDivStack_' + line_number + '_' + line_seq).value);
+            newDivStack.pop();
+            document.getElementById('newDivStack_'+line_number+'_'+line_seq).value = JSON.stringify(newDivStack);
+        }
+
+        $("#line_detail_" + line_number + '_' + theIndex).remove();
+        document.getElementById('rows_count_' + line_number).value = parseInt(document.getElementById('rows_count_' + line_number).value) - 1;
+
+        summarize(line_number, line_seq, bin_seq);
+        //alert('OkayRemove');
+    } 
+
+
+    function subtotalize(line_number, line_seq, bin_seq, theIndex) {
+        //alert(line_number + "\r\n" + line_seq + "\r\n" + bin_seq + "\r\n" + theIndex);
+
+        let qty_per_box = document.getElementById("pm_lines_" + line_number + "_" + theIndex + "_qty_per_box");
+        let total_boxes = document.getElementById("pm_lines_" + line_number + "_" + theIndex + "_total_boxes");
+        //alert(qty_per_box + "\r\n" + total_boxes);
+        if (qty_per_box != null && total_boxes != null && qty_per_box.value != "" && total_boxes.value != "") {
+            document.getElementById("subtotal_" + line_number + "_" + line_seq + "_" + theIndex).value = (qty_per_box.value * total_boxes.value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        else {
+            document.getElementById("subtotal_" + line_number + "_" + line_seq + "_" + theIndex).value = "";
+        }
+        
+        summarize(line_number, line_seq, bin_seq);
+        //alert('OkaySummarize');
+    } 
+
+
+    function summarize(line_number, line_seq, bin_seq) {
+        //alert(line_number + "\r\n" + line_seq + "\r\n" + bin_seq);
+        
+        var lineList = @Html.Raw(Json.Encode(@Model));
+        let wk_qty_allocated_delta = lineList[line_number].bins[bin_seq].qty_allocated_delta;
+        //alert(wk_qty_allocated_delta);
+        let wkSubtotals = 0;
+        let indexCount = parseInt(document.getElementById('rows_count_' + line_number).value);
+        //alert(indexCount);
+        for (let i = 0; i < indexCount; i++) {
+            let subtotal = "subtotal_" + line_number + "_" + line_seq + "_" + i;
+            let wkElement = document.getElementById(subtotal);
+            if (wkElement != null && wkElement.value != "") {
+                //alert(i + ": " + subtotal + " is not null.");
+                wkSubtotals += parseInt(wkElement.value.replaceAll(',', ''));
+                //alert(wkSubtotals);
+            }
+        }
+        //alert(wkSubtotals);
+        let wkSummary = wk_qty_allocated_delta - wkSubtotals;
+        //alert(wkSummary);
+        if (wkSummary == 0) {
+            document.getElementById("summary_"+line_number+"_"+line_seq).value = "";
+        }
+        else {
+            document.getElementById("summary_"+line_number+"_"+line_seq).value = wkSummary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        //alert('OkaySummarize');
+    } 
+</script>
+
+
+
+
+<div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover" style="margin-right: 10px;">
+            <thead>
+                <tr>
+                    @*<th>
+                        @Html.DisplayNameFor(model => model.line_number)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bins[0].qty_per_box)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bins[0].total_boxes)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bins[0].pallet_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.bins[0].same_box_no)
+                    </th>*@
+                    <th style="padding: 0;">
+                        <div class="row" style="font-weight: 600; padding: 3px; border-bottom: 1px solid lightsteelblue;">
+                            <div class="col-xs-1" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.line_number)
+                            </div>
+                            <div class="col-xs-5" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.item_id)
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.print_quantity)
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.packing_person)
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                &nbsp;
+                            </div>
+                        </div>
+                        <div class="row" style="font-weight: 600; padding: 3px;">
+                            <div class="col-xs-2" style="text-align: center;">
+                                &nbsp;
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.bins[0].lot_cd)
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.bins[0].bin_id)
+                            </div>
+                            <div class="col-xs-2" style="text-align: center;">
+                                @Html.DisplayNameFor(model => model.bins[0].qty_allocated_delta)
+                            </div>
+                            <div class="col-xs-4" style="padding-left: 5px;">
+                                @Html.Raw("Difference")
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ 
+                    if (Model == null || Model.Count() <= 0)
+                    {
+                        <tr>
+                            <td style="text-align: center;">No lines found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int k = 0; 
+                        foreach (var line in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="row">
+                                        @using (Html.BeginForm("GoUpdate_Palletizing", "Warehouse", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            @Html.Hidden("pm_pick_ticket_no", ViewData["pick_ticket_no"], null)
+                                    
+                                            <div class="form-group" style="font-weight: 600; margin: 0;">
+                                                <div class="col-xs-1">
+                                                    @Html.DisplayFor(l => line.line_number)
+                                                </div>
+                                                <div class="col-xs-5">
+                                                    @Html.DisplayFor(l => line.item_id)
+                                                </div>
+                                                <div class="col-xs-2" style="text-align: right;">
+                                                    @Html.DisplayFor(l => line.print_quantity)
+                                                </div>
+                                                <div class="col-xs-2">
+                                                    @Html.DisplayFor(l => line.packing_person)
+                                                </div>
+                                                <div class="col-xs-2" style="text-align: right;">
+                                                    @Html.Hidden("rows_count_" + k.ToString(), line.bins.Count(), null)
+                                                    @*<input type="submit" value="&#128427;" class="btn btn-primary" style="padding: 2px 4px 0 4px; border-radius: 4px; font-size: larger;" @attr_html onclick="return confirm('Update this line?');" />*@
+                                                    <input type="submit" value="Save" class="btn btn-primary" style="padding: 2px 3px 0 3px; border-radius: 4px; font-size: small;" @attr_html onclick="return confirm('Update this line?');" />
+                                                </div>
+                                            </div>
+
+                                            if (line.bins == null || line.bins.Count() <= 0)
+                                            {
+                                                <div class="form-group" style="color: green; text-align:center;">No lots or bins found.</div>
+                                            }
+                                            else
+                                            {
+                                                int i = 0;
+                                                int palletizing_count = 0;
+                                                foreach (var bin in line.bins)
+                                                {
+                                                    if (bin.palletizing_no > 0)
+                                                    {
+                                                        palletizing_count = 0;
+                                                        <div class="form-group col-xs-12" style="color: green; margin: 6px 0 0 0;">
+                                                            <div class="col-xs-2">
+                                                                @Html.Hidden("newHerfStack_" + k.ToString() + "_" + bin.line_seq.ToString(), "["+string.Join(",", line.bins.Where(b => b.line_seq == bin.line_seq).Select(a => "\"herf_"+k.ToString()+"_"+(a.bin_seq > 0 ? a.bin_seq-1 : a.bin_seq).ToString()+"\""))+"]", null)
+                                                                @Html.Hidden("newDivStack_" + k.ToString() + "_" + bin.line_seq.ToString(), "["+string.Join(",", line.bins.Where(b => b.line_seq == bin.line_seq).Select(a => "\"line_detail_"+k.ToString()+"_"+(a.bin_seq > 0 ? a.bin_seq-1 : a.bin_seq).ToString()+"\""))+"]", null)
+                                                            </div>
+                                                            <div class="col-xs-2">
+                                                                @Html.DisplayFor(l => bin.lot_cd)
+                                                            </div>
+                                                            <div class="col-xs-2">
+                                                                @Html.DisplayFor(l => bin.bin_id)
+                                                            </div>
+                                                            <div class="col-xs-2" style="text-align: right;">
+                                                                @Html.DisplayFor(l => bin.qty_allocated_delta)
+                                                            </div>
+                                                            <div class="col-xs-1">
+                                                                @*<a class="btn" style="padding: 0; margin: 0 10px;" onclick="AppendFunc(@k, @bin.line_seq, @(bin.bin_seq > 0 ? bin.bin_seq-1 : bin.bin_seq))">@("\u271A")</a>*@
+                                                                <a class="btn" style="padding: 0; margin: -2px 0 0 0;" onclick="AppendFunc(@k, @bin.line_seq, @(bin.bin_seq > 0 ? bin.bin_seq-1 : bin.bin_seq))">  &#10010;  </a>
+                                                            </div>
+                                                            <div class="col-xs-3" style="color: red; padding: 0 3px;">
+                                                                <input type="text" id="summary_@(k)_@bin.line_seq" value="@(bin.qty_allocated_delta == bin.summary ? "" : (bin.qty_allocated_delta - bin.summary).ToString("N0"))" readonly tabIndex="-1" class="raw" style="text-align: left; padding: 0;" />
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    palletizing_count++;
+                                                    <div id="line_detail_@(k)_@(i)">
+                                                        <div class="form-group col-xs-12" style="color: lightslategrey; margin: 0px;">
+                                                            <div class="col-xs-2" style="text-align: center;">
+                                                                @Html.Hidden($"pm_lines[{i}].palletizing_no", bin.palletizing_no, null)
+                                                                @Html.Hidden($"pm_lines[{i}].line_number", line.line_number, null)
+                                                                @Html.Hidden($"pm_lines[{i}].oe_line_no", line.oe_line_no, null)
+                                                                @Html.Hidden($"pm_lines[{i}].inv_mast_uid", line.inv_mast_uid, null)
+                                                                @Html.Hidden($"pm_lines[{i}].item_id", line.item_id, null)
+                                                                @Html.Hidden($"pm_lines[{i}].customer_part_number", line.customer_part_number, null)
+                                                                @Html.Hidden($"pm_lines[{i}].print_quantity", line.print_quantity, null)
+                                                                @Html.Hidden($"pm_lines[{i}].packing_person", line.packing_person, null)
+                                                                @Html.Hidden($"pm_lines[{i}].line_seq", bin.line_seq, null)
+                                                                @Html.Hidden($"pm_lines[{i}].lot_cd", bin.lot_cd, null)
+                                                                @Html.Hidden($"pm_lines[{i}].bin_id", bin.bin_id, null)
+                                                                @Html.Hidden($"pm_lines[{i}].country_of_origin", bin.country_of_origin, null)
+                                                                @Html.Hidden($"pm_lines[{i}].qty_allocated_delta", bin.qty_allocated_delta, null)
+                                                                @if (bin.palletizing_no == 0)
+                                                                {
+                                                                    <a id="herf_@(k)_@(i)" class="btn" @(line.bins.Where(w => w.line_seq == bin.line_seq).Count() == palletizing_count ? "" : "disabled") style="padding: 0; margin: 0;" onclick="RemoveFunc(@k, @bin.line_seq, @(bin.bin_seq > 0 ? bin.bin_seq-1 : bin.bin_seq), @i)">  @("\u2718")  </a>
+                                                                }
+                                                            </div>
+                                                            @*<input type="number" name="qty_per_box" value="@bin.qty_per_box" autocomplete="off" class="col-xs-2" style="padding: 0 2px; text-align: right;" />*@
+                                                            @Html.TextBox($"pm_lines[{i}].qty_per_box", bin.qty_per_box.ToString("0;;' '"), new { @type = "number", @id = $"pm_lines_{k}_{i}_qty_per_box", @placeholder = "Qty", @autocomplete = "off", @onfocus = "this.select()", @onchange = $"subtotalize({k}, {bin.line_seq}, {(bin.bin_seq > 0 ? bin.bin_seq-1 : bin.bin_seq)}, {i});", @class = "col-xs-2", style = "padding: 0 2px; text-align: right;" })
+                                                            <input type="text" value="x" readonly tabIndex="-1" class="col-xs-1 raw" />
+                                                            @Html.TextBox($"pm_lines[{i}].total_boxes", bin.total_boxes.ToString("0;;' '"), new { @type = "number", @id = $"pm_lines_{k}_{i}_total_boxes", @placeholder = "Box", @autocomplete = "off", @onfocus = "this.select()", @onchange = $"subtotalize({k}, {bin.line_seq}, {(bin.bin_seq > 0 ? bin.bin_seq-1 : bin.bin_seq)}, {i});", @class = "col-xs-1", style = "padding: 0 2px; text-align: right;" })
+                                                            <input type="text" value="=" readonly tabIndex="-1" class="col-xs-1 raw" />
+                                                            <input type="text" id="subtotal_@(k)_@(bin.line_seq)_@(i)" value="@((bin.qty_per_box * bin.total_boxes) == 0 ? "" : (bin.qty_per_box * bin.total_boxes).ToString("N0"))" readonly tabIndex="-1" class="col-xs-2 raw" style="text-align: right; padding-right: 12px;" />
+                                                            @Html.TextBox($"pm_lines[{i}].pallet_no", (bin.pallet_no == "0" ? "" : bin.pallet_no), new { @type = "number", @placeholder = "Plt", @autocomplete = "off", @onfocus = "this.select()", @class = "col-xs-1", style = "padding: 0 2px; text-align: right; margin-right: 2px;" })
+                                                            @Html.TextBox($"pm_lines[{i}].same_box_no", bin.same_box_no.ToString("0;;' '"), new { @type = "number", @placeholder = "SB", @autocomplete = "off", @onfocus = "this.select()", @class = "col-xs-1", style = "padding: 0 2px; text-align: right;" })
+                                                        </div>
+                                                    </div>
+
+                                                    i++;
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        
+                            k++;
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

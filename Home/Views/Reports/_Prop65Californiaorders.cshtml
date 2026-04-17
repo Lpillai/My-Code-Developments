@@ -1,0 +1,13 @@
+﻿<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+@using (Html.BeginForm("Open_Prop65Californiaorders", "Reports", null, FormMethod.Post, new { target = "_blank" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_label", ViewData["label"].ToString())
+
+    <div style="margin-left: 15px;">
+        <input type="submit" value="Print" class="btn btn-primary" />
+    </div>
+}

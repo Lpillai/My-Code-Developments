@@ -1,0 +1,161 @@
+﻿@model IList<RuntimeVariables.Lot_VendorGroup>
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        z-index: 1;
+    }
+
+    tbody th {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background-color: white;
+        /* Browsers tend to drop borders on sticky elements, so we emulate the border-right using a box-shadow to ensure it stays: */
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    .tableScrollY {
+        height: calc(100vh - 400px);
+        width: 100%;
+        overflow: auto;
+        display: inline-block;
+    }
+
+    td, th {
+        padding: 3px;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function disable_tr(theNo) {
+        var i;
+        var inputElement = document.getElementById('tr' + theNo).querySelectorAll(".element");
+        if (document.getElementById('tr' + theNo).className == 'showRow') {
+            document.getElementById('tr' + theNo).className = 'disableRow';
+            document.getElementById('selected' + theNo).value = false;
+            for (i = 0; i < inputElement.length; i++)
+                inputElement[i].setAttribute("disabled", "");
+            document.getElementById('disableBtn' + theNo).value = '\u2795';
+        }
+        else {
+            document.getElementById('tr' + theNo).className = 'showRow';
+            document.getElementById('selected' + theNo).value = true;
+            for (i = 0; i < inputElement.length; i++)
+                inputElement[i].removeAttribute("disabled");
+            document.getElementById('disableBtn' + theNo).value = '\u2718';
+        }
+    }
+    
+    function ChangeGroupName() {
+        var i;
+        for (i = 0; i < @Model.Count(); i++)
+            document.getElementById('group_name' + i).value = document.getElementById('group_name').value;
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm("GoUpdateVendorGroup", "Procurement", null, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.First().group_name, htmlAttributes: new { @class = "control-label col-md-2", @Style = "text-align: right; display: inline-block; vertical-align: sub;" })
+            <div class="col-md-8">
+                @Html.TextBoxFor(m => m.First().group_name, new { @id = "group_name", @class = "form-control element", @Style = "font-size: medium; display: inline; width: 480px; max-width: 480px;", @onfocusout = "ChangeGroupName();" })
+            </div>
+        </div>
+    </div>
+    <div class="modal-body">
+        <div id="theSheet" class="tableScrollY">
+            <table id="tbVendors" class="table table-hover" style="font-size: medium; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th style="text-align:center; width: 80px; max-width: 80px;">
+                            &nbsp;
+                        </th>
+                        <th style="text-align: center; width: 60px; max-width: 60px;">
+                            No
+                        </th>
+                        <th style="text-align: center; width: 120px; max-width: 120px;">
+                            @Html.DisplayNameFor(m => m.First().vendor_id)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(m => m.First().vendor_name)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Count(); i++)
+                    {
+                        <tr id="@("tr" + i)" class="@(Model[i].selected == true ? "showRow" : "disableRow")">
+                            <td align="center" style="padding-top: 9px;">
+                                @Html.HiddenFor(m => Model[i].selected, new { @id = "selected" + i })
+                                @Html.HiddenFor(m => Model[i].group_id)
+                                @Html.HiddenFor(m => Model[i].group_name, new { @id = "group_name" + i })
+                                <input type="button" id="@("disableBtn" + i)" value="@(Model[i].selected == true ? "\u2718" : "\u2795")" onclick="disable_tr(@i)" class="btn btn-default">
+                            </td>
+                            <td style="text-align:center; padding-top: 12px;">
+                                @(i + 1)
+                            </td>
+                            <td style="text-align:center;">
+                                @{
+                                    var attr_vendor_id = new Dictionary<string, object> {
+                                        { "id" , "vendor_name" },
+                                        { "type" , "number"},
+                                        { "class" , "form-control element" },
+                                        { "Style", "font-size: 15px; width:100%;" }        
+                                    };
+                                    if (!Model[i].selected)
+                                    {
+                                        attr_vendor_id.Add("disabled", "disabled");
+                                    }
+                                }
+                                @Html.EditorFor(m => Model[i].vendor_id, new { htmlAttributes = attr_vendor_id })
+                            </td>
+                            <td>
+                                @Html.ValueFor(model => model[i].vendor_name)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Save this vendor group settings?');" @attr_html />
+    </div>
+}
+

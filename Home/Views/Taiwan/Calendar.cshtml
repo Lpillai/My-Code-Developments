@@ -1,0 +1,196 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<tw_Calendar>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: medium;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<table class="table table-hover" style="width: 80%;">
+    <thead>
+        <tr>
+            <th style="text-align: center">
+                @if (Model == null || Model.Count() <= 0)
+                {
+                    @Html.Raw("0")
+                }
+                else
+                {
+                    @Html.Raw(Model.Count().ToString())
+                }
+            </th>
+            <th style="text-align: center">
+                @Html.DisplayNameFor(model => model.holiday)
+                &nbsp;
+                @*@Ajax.ActionLink("新增", "ShowCalendarDetails", "Taiwan", new { pm_Holiday = DateTime.Today, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })*@
+                @Ajax.ActionLink("新增", "ShowCalendarDetails", "Taiwan", null, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+            </th>
+            <th style="text-align: center">
+                @Html.DisplayNameFor(model => model.start_time)
+            </th>
+            <th style="text-align: center">
+                @Html.DisplayNameFor(model => model.end_time)
+            </th>
+            <th style="text-align: center">
+                @Html.DisplayNameFor(model => model.z_memo)
+            </th>
+            <th style="text-align: center">
+                &nbsp;
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model == null || Model.Count() <= 0)
+            {
+                <tr>
+                    <td colspan="5" style="text-align:center;">No data found.</td>
+                </tr>
+            }
+            else
+            {
+                int i = 0;
+                foreach (var item in Model)
+                {
+                    i++;
+
+                    <tr>
+                        <td align="right">
+                            @Html.Raw(i)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.holiday)
+                            @*@Ajax.ActionLink(@item.holiday.ToString("yyyy-MM-dd"), "ShowCalendarDetails", "Taiwan", new { pm_Holiday = @item.holiday, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })*@
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.start_time)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.end_time)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.z_memo)
+                        </td>
+                        <td align="center">
+                            @Html.ActionLink("Delete", "goDeleteCalendar", "Taiwan", new { theHoliday = item.holiday.ToString("yyyy-MM-dd") }, new { onclick = "return confirm('確認刪除？');", @class = @attr_css })
+                        </td>
+                    </tr>
+                }
+
+            }
+        } 
+    </tbody>
+</table>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

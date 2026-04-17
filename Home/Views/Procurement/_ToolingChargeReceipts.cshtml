@@ -1,0 +1,115 @@
+﻿@model IEnumerable<RuntimeVariables.Charge_ToolingReceipts>
+
+
+<style>
+    .bulkScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 250px);
+        width: 100%;
+    }
+</style>
+
+
+
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&Chi;</span>
+    </button>
+    <h4 class="modal-title" id="detailsModalLabel" style="margin-left: 10px;">
+        <span>[@ViewData["vendor_name"]]  @ViewData["part_no"]</span>
+    </h4>
+</div>
+<div class="modal-body">
+    <div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <div class="bulkScrollY">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">
+                            @if (Model == null || Model.Count() <= 0)
+                            {
+                                @Html.Raw("0")
+                            }
+                            else
+                            {
+                                @Model.Count().ToString()
+                            }
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.receipt_number)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.line_number)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.receipt_date)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.po_number)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.po_line_number)
+                        </th>
+                        <th style="text-align: center;">
+                            @Html.DisplayNameFor(model => model.qty_received)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model == null || Model.Count() <= 0)
+                        {
+                            <tr>
+                                <td colspan="7" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            var index = 0;
+                            foreach (var item in Model)
+                            {
+                                index++;
+                                <tr>
+                                    <td align="right">
+                                        @Html.Raw(index)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.receipt_number)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.line_number)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.receipt_date)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.po_number)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.po_line_number)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.qty_received)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@if (Model != null && Model.Count() > 0)
+{
+    <div class="modal-footer">
+        @using (Html.BeginForm("Download_ReceiptsSheet", "Procurement", FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="submit" value="Download" class="btn btn-default" />
+        }
+    </div>
+}
+

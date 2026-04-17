@@ -1,0 +1,91 @@
+﻿@model RuntimeVariables.BuySheet_Rates_Metals
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<script type="text/javascript">
+    $(function () {
+        if ("@ViewBag.pmCRUD" == "U") {
+            $("#metal_id").prop("disabled", true);
+        }
+    });
+
+    //right before the form submits, we re-enable the fields, to make them submit.
+    $("#ratesForm").submit(function (event) {
+        $("#metal_id").prop("disabled", false);
+    });    
+</script>
+
+
+
+
+@using (Html.BeginForm("GoSaveRates_Metals", "Procurement", FormMethod.Post, new { id = "ratesForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.i)
+    <input type="hidden" name="pmCRUD" value="@ViewBag.pmCRUD">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @if (ViewBag.pmCRUD == "C")
+            {
+                <span>New</span>
+            }
+            else
+            {
+                <span>&nbsp;</span>
+            }
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.metal_name, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewData["List_Metals"] != null)
+                {
+                    @Html.DropDownList("metal_id", (SelectList)ViewData["List_Metals"], new { id = "metal_id", @class = "form-control col-md-8", style = "font-size: 16px;" })
+                }
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.rate_date_start, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewBag.pmCRUD == "C")
+                {
+
+                    @Html.TextBoxFor(model => model.rate_date_start, new { @type = "date", @class = "form-control datepicker", @Value = DateTime.Today.ToString("yyyy-MM-dd") })
+                }
+                else
+                {
+                    <div class="col-md-2" style="padding-top: 5px;">
+                        <input type="hidden" name="rate_date_start" value="@Model.rate_date_start.ToString("yyyy-MM-dd")">
+                        @Html.DisplayFor(model => model.rate_date_start)
+                    </div>
+                }
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.metal_rate, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @Html.EditorFor(model => model.metal_rate, new { htmlAttributes = new { @class = "col-md-2 input-sm form-control has-text-align-right", @style = "font-size: 14px; text-align: right;" } })
+                <div class="col-md-2" style="padding-top: 5px;">
+                    @Html.Raw(ViewData["MetalUnit"])
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Save this rate?');" @attr_html />
+    </div>
+}
+

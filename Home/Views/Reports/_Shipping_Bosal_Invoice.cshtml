@@ -1,0 +1,49 @@
+﻿<style type="text/css">
+    .SearchFields {
+        max-width: 120px;
+        width: 120px;
+        font-size: 14px;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#btn_search").click(function () {
+            document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+            //document.getElementById('btn_search').value = "Searching...";
+
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);
+
+            var pm_invoice_no = $('#pm_invoice_no').val();
+            $("#output").load('@Url.Action("Get_Bosal_Invoice", "Reports")?pm_invoice_no=' + pm_invoice_no);
+        });
+    })
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+<form id="submit-button">
+    <div class="form-inline form-group">
+        @Html.Label("Invoice", htmlAttributes: new { @class = "control-label", style = "margin-left: 15px;" })
+        &nbsp;
+        <input type="text" id="pm_invoice_no" name="pm_invoice_no" class="form-control SearchFields" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" id="btn_search" value="Search" class="btn btn-default" />
+    </div>
+</form>
+
+<div id="output">
+</div>

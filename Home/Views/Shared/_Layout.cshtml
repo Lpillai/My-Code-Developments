@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="@Url.Action("GetSiteIconIamge")">
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/unobtrusive")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="~/Scripts/spin.min.js"></script>
+    <script src="~/Scripts/SessionUpdater.js"></script>
+    
+
+    <style>
+        .isDisabled {
+            color: currentColor;
+            cursor: not-allowed;
+            opacity: 0.5;
+            text-decoration: none;
+        }
+
+        a.isDisabled {
+            pointer-events: none;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+        }
+
+        #loadingcontent {
+            display: table;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #loadingspinner {
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+            text-align: center;
+            font-size: x-large;
+            color: white;
+            background-color: rgba(255, 255, 255, 0.15);
+            /*padding-top: 10px;*/
+        }
+
+
+        .caret.caret-up {
+            border-top-width: 0;
+            border-bottom: 4px solid #fff;
+        }
+
+        .dropdown-submenu {
+            position: relative;
+        }
+
+            .dropdown-submenu .dropdown-menu {
+                top: 0;
+                left: 100%;
+                margin-top: -1px;
+            }
+
+
+        /* Remove Arrows/Spinners for input */
+        /* Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+
+        input[type=checkbox] {
+            position: relative;
+            cursor: pointer;
+            width: 0px;
+            height: 0px;
+        }
+
+            input[type=checkbox]:checked:before {
+                content: "";
+                display: block;
+                position: relative;
+                width: 20px;
+                height: 20px;
+                border: 2px solid LightSteelBlue;
+                border-radius: 14px;
+                background-color: white;
+                transition: all 0.2s linear;
+            }
+
+
+            input[type=checkbox]:before {
+                content: "";
+                display: block;
+                position: relative;
+                width: 20px;
+                height: 20px;
+                border: 2px solid LightSteelBlue;
+                border-radius: 2px;
+                background-color: white;
+            }
+
+
+            input[type=checkbox]:after {
+                content: "";
+                display: block;
+                width: 0px;
+                height: 0px;
+                border: solid LightSteelBlue;
+                border-width: 0 0px 0px 0;
+                -webkit-transform: rotate(180deg);
+                -ms-transform: rotate(180deg);
+                transform: rotate(180deg);
+                position: relative;
+                top: 0px;
+                left: 30px;
+                transition: all 0.2s linear;
+            }
+
+            input[type=checkbox]:checked:after {
+                content: "";
+                display: block;
+                width: 8px;
+                height: 18px;
+                border: solid MidnightBlue;
+                border-width: 0 3px 3px 0;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+                position: relative;
+                top: -24px;
+                left: 10px;
+            }
+
+
+        .word-wrap {
+            /* Warning: Needed for oldIE support, but words are broken up letter-by-letter */
+            -ms-word-break: break-all;
+            word-break: break-all;
+            /* Non standard for webkit */
+            word-break: break-word;
+            -webkit-hyphens: auto;
+            -moz-hyphens: auto;
+            -ms-hyphens: auto;
+            hyphens: auto;
+        }
+    </style>
+
+
+    <script type='text/javascript'>
+        //$(document).ready(function () {   
+            var opts = {
+                lines: 12, // The number of lines to draw
+                length: 69, // The length of each line
+                width: 31, // The line thickness
+                radius: 79, // The radius of the inner circle
+                scale: 1, // Scales overall size of the spinner
+                corners: 1, // Corner roundness (0..1)
+                rotate: 0, // The rotation offset
+                animation: 'spinner-line-shrink', // The CSS animation name for the lines
+                direction: 1, // 1: clockwise, -1: counterclockwise
+                color: 'White', // #rgb or #rrggbb
+                speed: 0.5, // Rounds per second
+                trail: 60, // Afterglow percentage
+                shadow: false, // Whether to render a shadow
+                hwaccel: false // Whether to use hardware acceleration
+            };
+            //var target = document.getElementById('loading');
+            //var spinner = new Spinner(opts).spin(target);
+        //})
+    </script>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.Raw(Html.Action("GetHomeLink", "Home"))
+            </div>
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav">
+                    @Html.Raw(Html.Action("GetLoginMenu", "Login"))
+                </ul>
+                <!--Right Aligned Menu Start-->
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                            @Html.Action("GetLoginName", "Login")
+                            <span class="caret" />
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Change Password", "ChangePassword", "Login")</li>
+                            <li>@Html.ActionLink("Log Out", "StartLogOut", "Login", null, new { onclick = "return confirm('Are you sure you want to log out?');" })</li>
+                        </ul>
+                    </li>
+                </ul>
+                @*<ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" href="#" data-toggle="dropdown">
+                            Help Desk
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Help Desk", "ComingSoon", "Home")</li>
+                        </ul>
+                    </li>
+                </ul>*@
+                <!--Right Aligned Menu End-->
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid body-content">
+        @RenderBody()
+    </div>
+    
+    <div id="loading">
+        <div id="loadingcontent">
+            <p id="loadingspinner">
+                Searching
+            </p>
+        </div>
+    </div>
+    
+    <script type='text/javascript'>
+        $(document).ready(function() {
+            $(".dropdown").on("hide.bs.dropdown", function() {
+                $(this).find('.dropdown-toggle span').removeClass("caret-up");
+            });
+
+            $(".dropdown").on("show.bs.dropdown", function() {
+                $(this).find('.dropdown-toggle span').addClass('caret-up');
+            });
+                
+            $('.dropdown-submenu .submenu').on("click", function(e) {
+                $(this).next('ul').toggle();
+
+                /* check display for caret */
+                if ( $(this).next('ul').css('display') == 'none' ) {
+                    $(this).find('span').removeClass("caret-up");
+                }
+                else {
+                    $(this).find('span').addClass("caret-up");
+                }
+                /* check display for caret || */
+
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
+            SessionUpdater.Setup('@Url.Action("KeepSessionAlive", "Home")');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+﻿@model RuntimeVariables.AccountItem
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 48%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+
+    div.display {
+        font-size: medium;
+        padding-top: 7px;
+    }
+
+    div.fill {
+        padding: 2px 0 0 medium;
+    }
+
+    textarea {
+        padding: 10px;
+        max-width: 100%;
+        line-height: 1.5;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 1px 1px 1px #999;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function onCheck() {
+        let module = @Html.Raw(Json.Encode(@Model));
+
+        if (document.getElementById('chk_z_status').checked)
+            document.getElementById('z_status').value = 'D';
+        else {
+            if (module.z_status === 'A')
+                document.getElementById('z_status').value = 'A';
+            else
+                document.getElementById('z_status').value = '';
+        }
+        //alert(document.getElementById('z_status').value);
+    }
+</script>
+
+
+<script type="text/javascript"> 
+    document.getElementById('chk_z_status').checked = false;
+    let module = @Html.Raw(Json.Encode(@Model));
+    if (module.z_status === 'D')
+        document.getElementById('chk_z_status').checked = true;
+
+    $("#loading").fadeOut();
+    //alert('test');
+</script>
+
+
+
+
+<form action="" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            @Html.Hidden("pm_isNew", ViewData["isNew"], new { @id = "pm_isNew" })
+            <span class="col-md-2" style="text-align: center; font-size: x-large; padding: 0 0 0 25px;">
+                @if (!(bool)ViewData["isNew"])
+                {
+                    @Model.id
+                }
+                else
+                {
+                    @Html.Raw("New Account")
+                }
+            </span>
+            <div class="col-md-7">
+                @if (!(bool)ViewData["isNew"])
+                {
+                    <input type="submit" value="Send Welcome Mail" name="AdminAccountAction:Welcome" class="btn btn-default" onclick="return confirm('Send mail?');" />
+                    <input type="submit" value="Reset Password" name="AdminAccountAction:ResetPW" class="btn btn-default" onclick="return confirm('Reset password for this account?');" />
+                    @Html.Raw("　")
+                    @Html.ActionLink("Which group is in?", "WhichGroupIsIn", new { pm_AccountID = Model.id }, new { target = "_blank" })
+                }
+            </div>
+            <div class="col-md-3">
+                <input type="submit" value="Save" name="AdminAccountAction:Save" @attr_html class="btn btn-primary" onclick="return confirm('Save this account?');" />
+            </div>
+        </div>
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row">
+
+            <div class="column">
+                <div class="card">
+                    <h3 style="text-align: center">Account Info</h3><br>
+
+                    @if (!(bool)ViewData["isNew"])
+                    {
+                        @Html.HiddenFor(model => model.id)
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.id, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 fill">
+                                <input name="id" class="form-control input-sm" autocomplete="off" value="@Model.id" type="text" style="font-size: medium;" />
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.first_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            <input name="first_name" class="form-control input-sm" autocomplete="off" value="@Model.first_name" type="text" style="font-size: medium;" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.last_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            <input name="last_name" class="form-control input-sm" autocomplete="off" value="@Model.last_name" type="text" style="font-size: medium;" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.email, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            <input name="email" class="form-control input-sm" autocomplete="off" value="@Model.email" type="text" style="font-size: medium;" />
+                            @Html.ValidationMessageFor(model => model.email, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.ext, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            <input name="ext" class="form-control input-sm" autocomplete="off" value="@Model.ext" type="number" style="font-size: medium;" />
+                        </div>
+                    </div>
+                    @if (!(bool)ViewData["isNew"])
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.expired, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 display">
+                                @Html.DisplayFor(model => model.expired)
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.area, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            @Html.DropDownList("area", (SelectList)ViewData["area_name"], new { @class = "form-control col-md-2", style = "font-size: medium;" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="card">
+                    <h3 style="text-align: center">IT Info</h3><br>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8 fill">
+                            <textarea name="z_memo" placeholder="Note here" rows="4" style="width: 90%; font-size: medium;">@Html.Raw(Model.z_memo)</textarea>
+                        </div>
+                    </div>
+                    @if (!(bool)ViewData["isNew"])
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.z_status, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8" style="padding: 5px 0 0 14px;">
+                                @Html.HiddenFor(model => model.z_status)
+                                @if(Model.z_status != "")
+                                {
+                                    <input type="checkbox" id="chk_z_status" value="" checked onclick="javascript:onCheck();" style="height: 20px;" />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" id="chk_z_status" value="" onclick="javascript:onCheck();" style="height: 20px;" />
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.z_date, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 display">
+                                @Html.DisplayFor(model => model.z_date)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.z_pgm, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 display">
+                                @Html.DisplayFor(model => model.z_pgm)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.z_usr, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8 display">
+                                @Html.DisplayFor(model => model.z_usr)
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+    var message = @Html.Raw(Json.Encode(TempData["message"]));
+    alert(message);
+    </script>
+}
+

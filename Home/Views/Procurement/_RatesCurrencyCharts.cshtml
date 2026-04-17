@@ -1,0 +1,19 @@
+﻿<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&Chi;</span>
+    </button>
+    <h3 class="modal-title" id="detailsModalLabel">
+        <span>@ViewData["CurrencyName"]</span>
+    </h3>
+</div>
+<div class="modal-body">
+    <div class="form-horizontal">
+        <div class="form-group">
+            <center>
+                <img src="@Url.Action("GetCurrencyChart", "Procurement", new { pm_currency_name = ViewData["CurrencyName"] })" alt="Line Chart" style="max-width: 100%; height: auto;" />
+            </center>
+        </div>
+    </div>
+</div>
+
+

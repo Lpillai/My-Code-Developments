@@ -1,0 +1,135 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    });
+</script>
+<script type="text/javascript">
+    function onTakerChang() {
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(window.opts).spin(target);
+
+        var pm_taker_group = '@ViewData["pm_taker_group"]';
+        var pm_taker = $("#pm_taker option:selected").text();
+        $("#orders").load('@Url.Action("GetTakerOrders", "Sales")?pm_taker_group=' + pm_taker_group + '&pm_taker=' + pm_taker);
+        
+        var path = '@Url.Action("FilterSO", "Sales")?pm_taker_group=' + pm_taker_group + '&pm_taker=' + pm_taker;
+        document.getElementById("btnFilters").href = path;
+        var path = '@Url.Action("SheetToExcel_OpenSalesOrder", "Sales")?pm_taker=' + pm_taker;
+        document.getElementById("btnDownload").href = path;
+    }
+
+
+    function pageLoad() {
+        onTakerChang();
+    }
+    window.onload = pageLoad;
+</script>
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="filtersModal" tabindex="-1" role="dialog" aria-labelledby="filtersModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myFilters">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row">
+    <label class="control-label col-md-1" style="text-align: right; padding-top: 7px;">Taker</label>
+    @Html.DropDownList("pm_taker", (SelectList)ViewData["List_Takers"], new { @class = "form-control col-md-1", @onchange = "onTakerChang()" })
+    &nbsp;&nbsp;&nbsp;
+    @Ajax.ActionLink("Filters", "FilterSO", "Sales", new { pm_taker_group = @ViewData["pm_taker_group"] }, new AjaxOptions { UpdateTargetId = "myFilters", InsertionMode = InsertionMode.Replace }, new { id = "btnFilters", data_toggle = "modal", data_target = "#filtersModal", @class = "btn btn-default action_btn" })
+    @Html.ActionLink("Download", "SheetToExcel_OpenSalesOrder", "Sales", new { pm_taker = @ViewData["pm_taker"] }, new { id = "btnDownload", @class = "btn btn-default action_btn"})
+</div>
+
+
+<div id="orders">
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

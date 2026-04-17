@@ -1,0 +1,310 @@
+﻿@{
+    Layout = null;
+}
+@*<link rel="shortcut icon" type="image/ico" href="~/Images/specialtybolt_favicon.png">*@
+<link rel="shortcut icon" type="image/ico" href="@Url.Action("GetSiteIconIamge", "Home")">
+<title>@ViewBag.Title</title>
+
+
+<style>
+    body {
+        margin: 0;
+        color: #6a6f8c;
+        /*background: rgb(170 139 139 / 0.20);*/
+        @*background: @(ViewBag.dev == "True" ? "rgb(153 102 0 / 0.05)" : "rgb(170 139 139 / 0.2)");*@
+        background: @((bool)ViewBag.dev ? "#faf9f7" : "rgb(170 139 139 / 0.2)");
+        font: 600 20px/22px 'Open Sans', sans-serif;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .login-box {
+        margin: auto;
+        width: 500px;
+        height: 480px;
+        position: relative;
+        background-color: #EBEBEB;
+        box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .24), 0 17px 50px 0 rgba(0, 0, 0, .19)
+    }
+
+    @@media
+    only screen and (min-device-width: 525px) {
+        .login-box {
+            width: 100%;
+            margin: auto;
+            max-width: 525px;
+            min-height: 640px;
+            position: relative;
+            background: url('@Url.Action("GetImage", "Login")') no-repeat bottom;
+            box-shadow: 0 12px 15px 0 rgba(0, 0, 0, .24), 0 17px 50px 0 rgba(0, 0, 0, .19)
+        }
+    }
+
+    .login-snip {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        padding: 90px 70px 50px 70px;
+        /*background: rgba(0, 77, 77, .15)*/
+        @*background: @((bool)ViewBag.dev ? "rgba(153, 102, 0, .10)" : "rgba(0, 77, 77, .15)");*@
+        background: @((bool)ViewBag.dev ? "rgba(255, 255, 255, .15)" : "rgba(0, 77, 77, .15)");
+    }
+
+        .login-snip .login,
+        .login-snip .sign-up-form {
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            position: absolute;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+            transition: all .4s linear
+        }
+
+        .login-snip .sign-in,
+        .login-snip .sign-up,
+        .login-space .group .check {
+            display: none;
+        }
+
+        .login-snip .tab {
+            font-size: 22px;
+            margin-right: 15px;
+            padding-bottom: 5px;
+            margin: 0 15px 10px 0;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            color: #aaa;
+        }
+
+        .login-snip .sign-in:checked + .tab,
+        .login-snip .sign-up:checked + .tab {
+            color: darkslategray;
+            border-color: #1161ee;
+        }
+
+    .login-space {
+        min-height: 345px;
+        position: relative;
+        perspective: 1000px;
+        transform-style: preserve-3d
+    }
+
+        .login-space .group {
+            margin-bottom: 15px
+        }
+
+            .login-space .group .input,
+            .login-space .group .button {
+                width: 100%;
+                color: #666;
+                display: block;
+                font-size: 20px !important;
+                border: none;
+                padding: 15px 20px;
+                /*border-radius: 25px;*/
+                border-radius: @((bool)ViewBag.dev ? "8px" : "25px");
+                background: rgba(255, 255, 255, .7);
+            }
+
+            /*.login-space .group input[data-type="password"] {
+                text-security: circle;
+                -webkit-text-security: circle;
+            }*/
+
+            .login-space .group .label {
+                width: 100%;
+                display: block;
+                /*color: white;*/
+                color: @((bool)ViewBag.dev ? "rgba(153, 102, 0, .65)" : "white");
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            .login-space .group .button {
+                background: #b3cc93;
+            }
+
+            .login-space .group label .icon {
+                width: 15px;
+                height: 15px;
+                border-radius: 2px;
+                position: relative;
+                display: inline-block;
+                background: rgba(255, 255, 255, .1)
+            }
+
+                .login-space .group label .icon:before,
+                .login-space .group label .icon:after {
+                    content: '';
+                    width: 10px;
+                    height: 2px;
+                    background: #fff;
+                    position: absolute;
+                    transition: all .2s ease-in-out 0s
+                }
+
+                .login-space .group label .icon:before {
+                    left: 3px;
+                    width: 5px;
+                    bottom: 6px;
+                    transform: scale(0) rotate(0)
+                }
+
+                .login-space .group label .icon:after {
+                    top: 6px;
+                    right: 0;
+                    transform: scale(0) rotate(0)
+                }
+
+            .login-space .group .check:checked + label {
+                color: white;
+            }
+
+                .login-space .group .check:checked + label .icon {
+                    background: #b3cc93
+                }
+
+                    .login-space .group .check:checked + label .icon:before {
+                        transform: scale(1) rotate(45deg)
+                    }
+
+                    .login-space .group .check:checked + label .icon:after {
+                        transform: scale(1) rotate(-45deg)
+                    }
+
+    .login-snip .sign-in:checked + .tab + .sign-up + .tab + .login-space .login {
+        transform: rotate(0)
+    }
+
+    .login-snip .sign-up:checked + .tab + .login-space .sign-up-form {
+        transform: rotate(0)
+    }
+
+    *,
+    :after,
+    :before {
+        box-sizing: border-box
+    }
+
+    .clearfix:after,
+    .clearfix:before {
+        content: '';
+        display: table
+    }
+
+    .clearfix:after {
+        clear: both;
+        display: block
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none
+    }
+
+    .hr {
+        height: 2px;
+        margin: 60px 0 50px 0;
+        background: rgba(255, 255, 255, .2)
+    }
+
+    .foot {
+        text-align: center
+    }
+
+    .card {
+        width: 500px;
+        left: 100px;
+    }
+
+    /*::placeholder {
+        color: #b3b3b3
+    }*/
+
+    .box input[type="submit"]:hover {
+        background-color: white;
+        color: #9cb37f;
+        border: 2px solid #9cb37f;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+
+    .box input[type="submit"]:active {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+
+
+<div id="tries" class="row">
+    <div class="col-xs-6 col-sm-6 col-md-6 mx-auto p-0">
+        <div class="card" style="@((bool)ViewBag.dev ? "border-style: ridge; border-width: medium; border-color: rgba(153, 102, 0, .25);  border-radius: 8px;" : "")">
+            <div class="login-box">
+                <div class="login-snip">
+                    <input id="tab-1" type="radio" name="tab" class="sign-in" checked>
+                    <label for="tab-1" class="tab">@((bool)ViewBag.dev ? "DEV" : "Login")</label>
+                    <input id="tab-2" type="radio" name="tab" class="sign-up">
+                    <label for="tab-2" class="tab">Forgot Password</label>
+                    <div class="login-space">
+                        <div class="login">
+                            @using (Html.BeginForm("StartLogin", "Login", FormMethod.Post, new { @class = "box" }))
+                            {
+                                @Html.AntiForgeryToken() 
+                                <div class="group" style="margin: 40px 0 0 0;">
+                                    <label for="user" class="label">Account</label>
+                                    <input id="user" type="text" class="input" name="pm_Account" required>
+                                </div>
+                                <div class="group" style="margin: 12px 0 0 0;">
+                                    <label for="pass" class="label">Password</label>
+                                    <input id="pass" type="password" class="input" name="pm_Password" data-type="password" required>
+                                </div>
+                                <div class="group" style="margin: 35px 0 0 0;">
+                                    <input type="submit" id="myButton" data-loading-text="Logging..." class="button" value="@(((bool)ViewBag.debug ? "[Debug] " : "") + ((bool)ViewBag.dev ? "Log In DEV" : "Log In"))">
+                                </div>
+                            }
+                        </div>
+                        <div class="sign-up-form">
+                            @using (Html.BeginForm("ForgetPassword", "Login", FormMethod.Post, new { @class = "box" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="group" style="margin: 70px 0 0 0;">
+                                    <label for="user" class="label">Email Address</label>
+                                    <input id="user" type="text" class="input" name="pm_email" placeholder="Enter your email address">
+                                </div>
+                                <br>
+                                <br>
+                                <div class="group">
+                                    <input type="submit" class="button" value="Reset Password">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+</script>
+<script type="text/javascript">
+    function pageLoad() {
+    }
+    window.onload = pageLoad;
+</script>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

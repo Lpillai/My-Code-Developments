@@ -1,0 +1,164 @@
+﻿@model IEnumerable<RuntimeVariables.LoginReport>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Reports";
+    ViewBag.PageName = "Rpt " + ViewData["cluster"];
+    ViewBag.Path = "Reports / " + ViewData["cluster_name"];
+}
+
+
+@Scripts.Render("~/bundles/jquery")
+@*<script src="~/Scripts/jquery-3.4.1.js"></script>
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+*@
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        /*padding: 0 10px 0 10px;*/
+        height: calc(100vh - 160px);
+        width: 250px;
+    }
+
+    .divContent {
+        vertical-align: top;
+        max-width: 85%;
+        max-height: calc(100vh - 160px);
+        display: inline-block;
+        margin-left: 10px;
+        padding-left: 10px;
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div style="padding-top: 15px;">
+    <div class="tableScrollY">
+        <table class="table table-hover" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.report_name)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null)
+                { 
+                    <tr>
+                        <td style="text-align: center;">Empty list.</td>
+                    </tr>
+                }
+                else
+                {
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+                        <tr>
+                            <td>
+                                @if(item.output == "download")
+                                {
+                                    @*@Ajax.ActionLink(@item.report_name, @item.run, "Reports", null, null, new { onclick = "OnDownloadTriggered(@i)" })*@
+                                    @Html.ActionLink(@item.report_name, @item.run, "Reports", new { pm_cluster = @ViewData["cluster"], pm_path = @item.path, pm_parm = @item.param }, null)
+                                    @*@Html.ActionLink(@item.report_name, @item.run, "Reports", new { pm_cluster = @ViewData["cluster"], pm_path = @item.path, pm_parm = @item.param }, new { onclick = "OnDownloadTriggered(@i)" })*@
+                                    @Html.Raw(" " + "\u2B73")
+                                }
+                                else if(item.output == "tab") 
+                                {
+                                    @Html.ActionLink(@item.report_name, "Show_NewTab", "Reports", new { pm_cluster = @ViewData["cluster"], pm_path = @item.path, pm_parm = @item.param }, new { target = "_blank" })
+                                    @Html.Raw(" " + ((char)11100).ToString())
+                                }
+                                else if(item.output == "embed") 
+                                {
+                                    @Ajax.ActionLink(@item.report_name, "Show_EmbeddedSSRS", "Reports", new { pm_path = @item.path, pm_parm = @item.param }, new AjaxOptions { UpdateTargetId = "query", InsertionMode = InsertionMode.Replace }, null)
+                                    @Html.Raw(" " + ((char)10230).ToString())
+                                }
+                                else
+                                {
+                                    //further querying
+                                    @Ajax.ActionLink(@item.report_name, @item.run, "Reports", new { cluster = @ViewData["cluster"], rpt_name = @item.report_name, pm_parm = @item.param }, new AjaxOptions { UpdateTargetId = "query", InsertionMode = InsertionMode.Replace }, null)
+                                    @Html.Raw(" " + ((char)10230).ToString())
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="divContent">
+        <div id="query">
+        </div>
+    </div>
+</div>
+

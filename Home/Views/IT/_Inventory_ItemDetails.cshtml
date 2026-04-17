@@ -1,0 +1,341 @@
+﻿@model IEnumerable<RuntimeVariables.Inventory_Item>
+
+@{    
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style type="text/css">
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        /*height: 35vh;*/
+        height: calc(100vh - 120px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        text-align: center;
+        background-color: #eee;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .mystyle {
+        background-color: PaleGreen;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#loading").fadeOut();
+        //alert('@ViewBag.size');
+    })
+</script>
+<script type="text/javascript">
+    function showPurchase() {
+        let pm_dpt = $('#pm_dpt').val();
+        let pm_bin_cd = $('#pm_bin_cd').val();
+        $("#myActions").load('@Url.Action("ShowItemActions", "IT")?pm_dpt=' + pm_dpt + '&pm_bin_cd=' + pm_bin_cd + '&pm_action=Purchase&pm_item_uid=0&pm_item_id=');
+        jQuery('#actionsModal').modal(); 
+    }
+    
+    @*function onSelectItem(theNo) {
+        let collection = document.getElementsByClassName("mystyle");
+        for (let j = 0; j < collection.length; j++) {
+            collection[j].classList.remove("mystyle");
+        }
+        collection = document.getElementsByClassName("ThisIsSelected");
+        for (let j = 0; j < collection.length; j++) {
+            collection[j].checked = false;
+            collection[j].classList.remove("ThisIsSelected");
+        }
+        
+        document.getElementById('collected_item_uid').value = "";
+        document.getElementById('collected_item_id').value = "";
+
+        if (document.getElementById('chk_'+theNo).checked) {
+            document.getElementById("tr_" + theNo).classList.add("mystyle");
+            document.getElementById("chk_" + theNo).classList.add("ThisIsSelected");
+
+            let moduleList = @Html.Raw(Json.Encode(@Model));
+            document.getElementById('collected_item_uid').value = moduleList[theNo-1].item_uid;
+            document.getElementById('collected_item_id').value = moduleList[theNo-1].item_id;
+        }
+    }
+
+    function showAction(behavior) {
+        //alert(behavior);
+
+        if ($('#collected_item_uid').val() === "") {
+            alert('Plase select an item first.');
+        }
+        else {
+            let pm_dpt = $('#pm_dpt').val();
+            let pm_bin_cd = $('#pm_bin_cd').val();
+            let pm_item_uid = $('#collected_item_uid').val();
+            let pm_item_id = $('#collected_item_id').val();
+            $("#myActions").load('@Url.Action("ShowItemActions", "IT")?pm_dpt=' + pm_dpt + '&pm_bin_cd=' + pm_bin_cd + '&pm_action=' + behavior + '&pm_item_uid=' + pm_item_uid + '&pm_item_id=' + pm_item_id);
+            jQuery('#actionsModal').modal(); 
+        } 
+    }*@
+</script>
+
+
+
+
+<div class="modal fade" id="actionsModal" tabindex="-1" role="dialog" aria-labelledby="actionsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myActions">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div style="width: 98%; display: block; margin-left: auto; margin-right: auto;">
+    @Html.Hidden("pm_dpt", ViewData["pm_dpt"].ToString(), null)
+    @Html.Hidden("pm_bin_cd", ViewData["bin_cd"].ToString(), null)
+    @*<input type="text" id="isSmallScreen" />*@
+    
+    @if ((bool)ViewBag.IsMobileDevice) 
+    {
+        <!-- HTML here for mobile device -->
+        <div class="bodyScrollY">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 30px; max-width: 30px;">
+                            @Model.Count().ToString()
+                        </th>
+                        <th style="width: 160px; max-width: 160px;">
+                            @Html.DisplayNameFor(model => model.item_id)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model == null)
+                        {
+                            <tr>
+                                <td colspan="2" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int i = 0;
+
+                            foreach (var item in Model)
+                            {
+                                i++;
+
+                                <tr>
+                                    <td align="right" style="padding-right: 5px;">
+                                        @Html.Raw(i.ToString())
+                                    </td>
+                                    <td>
+                                        @Ajax.ActionLink(@item.item_id, "ShowItemInfo", "IT", new { pm_item_uid = @item.item_uid }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    } 
+    else 
+    {
+        <!-- HTML for desktop device -->
+        <div class="row" style="margin: 0 0 10px 0;">
+            <button @attr_html onclick="showPurchase()" class="btn btn-default">Purchase</button>&nbsp;
+            @*<input type="hidden" id="collected_item_uid">
+            <input type="hidden" id="collected_item_id">
+    
+            <button @attr_html onclick="showAction('Rename')" class="btn btn-default">Rename</button>&nbsp;
+            <button @attr_html onclick="showAction('Move')" class="btn btn-default">Move</button>&nbsp;
+            <button @attr_html onclick="showAction('Carry')" class="btn btn-default">Carry</button>&nbsp;
+            <button @attr_html onclick="showAction('Requisition')" class="btn btn-default">Requisition</button>&nbsp;
+            <button @attr_html onclick="showAction('Withdraw')" class="btn btn-default">Withdraw</button>&nbsp;
+            <button @attr_html onclick="showAction('Scrap')" class="btn btn-default">Scrap</button>*@
+        </div>
+
+        <div class="bodyScrollY">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 30px; max-width: 30px;">
+                            @Model.Count().ToString()
+                        </th>
+                        <th style="width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.category)
+                        </th>
+                        <th style="width: 160px; max-width: 160px;">
+                            @Html.DisplayNameFor(model => model.item_id)
+                        </th>
+                        <th style="width: 420px; max-width: 420px;">
+                            @Html.DisplayNameFor(model => model.item_desc)
+                        </th>
+                        <th style="width: 280px; max-width: 280px;">
+                            @Html.DisplayNameFor(model => model.SN)
+                        </th>
+                        <th style="width: 80px; max-width: 80px;">
+                            @*@Html.Raw("Total Amount")*@
+                            @Html.Raw("Subtotal")
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.amount)
+                        </th>
+                        @*<th style="width: 140px; max-width: 140px;">
+                            @Html.DisplayNameFor(model => model.p21_item_id)
+                        </th>*@
+                        <th>
+                            @Html.DisplayNameFor(model => model.z_memo)
+                        </th>
+                        <th>
+                            &nbsp;
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model == null)
+                        {
+                            <tr>
+                                <td colspan="8" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int i = 0;
+
+                            foreach (var item in Model)
+                            {
+                                i++;
+
+                                <tr id="tr_@i">
+                                    <td align="right">
+                                        @Html.Raw(i.ToString())
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.category)
+                                    </td>
+                                    <td>
+                                        @*<input type="checkbox" id="chk_@i" value="" onclick="onSelectItem(@i)" />&nbsp;&nbsp;
+                                        @Html.DisplayFor(modelItem => item.item_id)*@
+                                        @Ajax.ActionLink(item.item_id, "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Update", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.item_desc)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.SN)
+                                    </td>
+                                    <td align="right" style="padding-right: 15px;">
+                                        @Html.Raw((item.amount != null ? item.amount.Sum(s => s.quantity) : 0).ToString())
+                                    </td>
+                                    <td align="right" style="padding: 0px;">
+                                        @if(item.amount != null)
+                                        {
+                                            int j = 0;
+                                            <div>
+                                                <table>
+                                                    @foreach(var amt in item.amount)
+                                                    {
+                                                        j += 1;
+                                                        <tr>
+                                                            <td style="width: 280px; max-width: 280px;">
+                                                                @Html.DisplayFor(modelItem => amt.bin_hierarchy)
+                                                            </td>
+                                                            <td rowspan="2" align="right" style="width: 60px; max-width: 60px; padding-right: 15px;">
+                                                                @Html.DisplayFor(modelItem => amt.quantity)
+                                                            </td>
+                                                            @*<td style="width: 100px; max-width: 100px;">
+                                                                @Ajax.ActionLink("Move", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Move", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                @Ajax.ActionLink("Requisition", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Requisition", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                @Ajax.ActionLink("Scrap", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Scrap", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                            </td>*@
+                                                        </tr>
+                                                        <tr style="@(j < item.amount.Count() ? "border-bottom: 1px solid darkgray;" : "")">
+                                                            <td>
+                                                                @Ajax.ActionLink("Requisition", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Requisition", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                @Html.Raw("&nbsp;")
+                                                                @Ajax.ActionLink("Move", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Move", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                @*@if(!item.isConsumable && item.qty == 1)
+                                                                {
+                                                                    @Html.Raw("&nbsp;")
+                                                                    @Ajax.ActionLink("Carry", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Carry", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                    @Html.Raw("&nbsp;")
+                                                                    @Ajax.ActionLink("Withdraw", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Withdraw", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                }*@
+                                                                @Html.Raw("&nbsp;")
+                                                                @Ajax.ActionLink("Maintain", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Maintain", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                                @Html.Raw("&nbsp;")
+                                                                @Ajax.ActionLink("Scrap", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Scrap", pm_item_uid = item.item_uid, pm_item_id = item.item_id, pm_storage_code = amt.storage_code }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </table>
+                                            </div>
+                                        }
+                                    </td>
+                                    @*<td>
+                                        @Html.DisplayFor(modelItem => item.p21_item_id)
+                                    </td>*@
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.z_memo)
+                                    </td>
+                                    <td>
+                                        @Ajax.ActionLink("History", "ShowItemHistory", "IT", new { pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                        @if(!item.isConsumable && item.qty == 0)
+                                        {
+                                            @Html.Raw("&nbsp;")
+                                            @Ajax.ActionLink("Carry", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Carry", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                            @Html.Raw("&nbsp;")
+                                            @Ajax.ActionLink("Return", "ShowItemActions", "IT", new { pm_dpt = ViewData["pm_dpt"], pm_bin_cd = ViewData["bin_cd"], pm_action = "Return", pm_item_uid = item.item_uid, pm_item_id = item.item_id }, new AjaxOptions { UpdateTargetId = "myActions", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#actionsModal" })
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

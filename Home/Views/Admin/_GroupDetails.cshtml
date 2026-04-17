@@ -1,0 +1,244 @@
+﻿@model RuntimeVariables.GroupData
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .tableScrollY_grp {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 370px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    div.display_grp {
+        font-size: 14px;
+        padding-top: 7px;
+    }
+
+    div.fill_grp {
+        padding: 2px 0 0 14px;
+    }
+
+    .detailed_grp {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        margin-left: 4px;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        /*width: 50%;*/
+        width: 720px;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 15px -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    var moduleList = @Html.Raw(Json.Encode(@Model.accountList));
+    for (i = 0; i < moduleList.length; i++) {
+        document.getElementById('pmAccountList_' + i + '__account_chk').value = moduleList[i].account_chk;
+        document.getElementById('chk_id_' + (i+1)).checked = moduleList[i].account_chk;
+    }
+</script>
+
+
+<script type="text/javascript">
+    function onCheck(theNo) {
+        let i = theNo - 1;
+
+        if (document.getElementById('chk_id_' + theNo).checked) {
+            document.getElementById('pmAccountList_' + i + '__account_chk').value = true;
+            document.getElementById('check_count').value = Number(document.getElementById('check_count').value) + 1;
+        }
+        else {
+            document.getElementById('pmAccountList_' + i + '__account_chk').value = false;
+            document.getElementById('check_count').value = Number(document.getElementById('check_count').value) - 1;
+        }
+
+        document.getElementById('checked_count').innerHTML = document.getElementById('check_count').value + '/' + document.getElementById('list_count').value;
+        //alert(document.getElementById('pmAccountList_' + i + '__account_chk').value);
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm("SaveGroup", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row">
+            <div class="column">
+                <div class="card">
+                    <div class="form-group">
+                        <div class="col-md-3" style="text-align: right;">
+                            @if ((bool)ViewData["isNew"])
+                            {
+                                <h4>New</h4>
+                            }
+                            else
+                            {
+                                <h4>&nbsp;</h4>
+                            }
+                            @Html.LabelFor(model => model.group.group_name, htmlAttributes: new { @class = "control-label", style = "vertical-align: sub;" })
+                        </div>
+                        <div class="col-md-5 fill">
+                            @Html.Hidden("pm_group_id", @Model.group.group_id)
+                            @if ((bool)ViewData["isNew"])
+                            {
+                                <h4>&nbsp;</h4>
+                            }
+                            else
+                            {
+                                <h4>@Html.ValueFor(model => model.group.group_name)</h4>
+                            }
+                            <input name="pm_group_name" class="form-control input-sm" autocomplete="off" value="@Model.group.group_name" type="text" style="font-size: 14px;" />
+                        </div>
+                        <div class="col-md-1">
+                            <h4>&nbsp;</h4>
+                            @if (!(bool)ViewData["isNew"])
+                            {
+                                @Html.ActionLink("Remove", "RemoveGroup", new { pm_group_id = @Model.group.group_id }, new { style = "vertical-align: sub;", onclick = "return confirm('Are you sure you want to remove this group?');" })
+                            }
+                        </div>
+                        <div class="col-md-3" style="text-align: center;">
+                            <h4>&nbsp;</h4>
+                            <input type="submit" value="Save" @attr_html class="btn btn-primary" onclick="return confirm('Save this group?');" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <div class="card">
+                    <div class="tableScrollY_grp">
+                        @Html.Hidden("list_count", Model.accountList.Count())
+                        @Html.Hidden("check_count", Model.memberList.Count())
+                        <table class="table table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th id="checked_count" style="width: 50px; max-width: 50px;">
+                                        @(Model.memberList.Count().ToString() + "/" + Model.accountList.Count().ToString())
+                                    </th>
+                                    <th style="width: 200px; max-width: 200px;">
+                                        @Html.DisplayNameFor(model => model.accountList[0].id)
+                                    </th>
+                                    <th>
+                                        @Html.Raw("Name")
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    string RowColor = "";
+                                    foreach (var item in Model.accountList)
+                                    { 
+                                        switch (item.z_status)
+                                        {
+                                            case "A":
+                                                RowColor = "color: red;";
+                                                break;
+                                            case "D":
+                                                RowColor = "color: gray;";
+                                                break;
+                                            default:
+                                                RowColor = "color: black;";
+                                                break;
+                                        }
+
+                                        @*<tr style="color: @(item.z_status == "D" ? "gray" : "black");">*@
+                                        <tr style="@RowColor">
+                                            <td align="right" style="padding: 8px 10px 0 0;">
+                                                @Html.DisplayFor(modelItem => item.no)
+                                            </td>
+                                            <td style="vertical-align: middle; padding: 0 0 0 15px;">
+                                                @Html.Hidden($"pmAccountList[{item.no - 1}].account_chk", item.account_chk)
+                                                @Html.Hidden($"pmAccountList[{item.no - 1}].id", item.id)
+                                                <input type="checkbox" id="chk_id_@item.no" value="" onclick="javascript:onCheck(@item.no);" style="margin-right: 25px; height: 20px; " />
+                                                @*@Html.TextBox($"pmAccountList[{item.no - 1}].id", item.id, new { @readonly = "readonly", @class = "detailed_grp" })*@
+                                                @Html.DisplayFor(modelItem => item.id)
+                                            </td>
+                                            <td style="padding-top: 8px;">
+                                                @Html.DisplayFor(modelItem => item.first_name)
+                                                @Html.DisplayFor(modelItem => item.last_name)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

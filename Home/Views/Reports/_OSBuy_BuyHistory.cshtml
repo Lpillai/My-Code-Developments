@@ -1,0 +1,44 @@
+﻿
+<style type="text/css">
+    .SearchFields {
+        max-width: 120px;
+        width: 120px;
+        font-size: 14px;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+    })
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Run_OSBuyHistoryReport", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+{ 
+    @Html.AntiForgeryToken()
+    
+    <div class="form-inline form-group">
+        @Html.Label("Date Start", htmlAttributes: new { @class = "control-label", style = "margin-left: 15px;" })
+        &nbsp;
+        @Html.TextBox("pm_date_start", DateTime.Now.AddYears(-1).AddDays(1).ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        @Html.Label("Date End", htmlAttributes: new { @class = "control-label", style = "margin-left: 15px;" })
+        &nbsp;
+        @Html.TextBox("pm_date_end", DateTime.Now.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="btn_print" value="Download" class="btn btn-primary" />
+    </div>
+}
+

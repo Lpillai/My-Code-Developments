@@ -1,0 +1,282 @@
+﻿@model RuntimeVariables.Transfer_ShippingCalendar_Method
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 340px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 30%;
+        /*width: 400px;*/
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        /*margin: 15px -5px;*/
+        margin: 0;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="CreateOceanModal" tabindex="-1" role="dialog" aria-labelledby="CreateOceanModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("GoCreateShippingCalendar", "Transfer", new { pm_country_cd = @ViewData["pm_country_cd"], pm_location_cd = @ViewData["pm_location_cd"], pm_ship_method = "Ocean" }, FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return validateApply(this);" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="CreateOceanModalLabel">@ViewData["pm_new_label"]</h4>
+                </div>
+                <div class="modal-body">
+                    <label style="font-size: medium;">Ocean Ship Date</label>
+                    <br>
+                    @Html.TextBox($"pm_ship_date", DateTime.Now.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Save" @attr_html onclick="return confirm('Create a ship date?');" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="CreateAirModal" tabindex="-1" role="dialog" aria-labelledby="CreateAirModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("GoCreateShippingCalendar", "Transfer", new { pm_country_cd = @ViewData["pm_country_cd"], pm_location_cd = @ViewData["pm_location_cd"], pm_ship_method = "Air" }, FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return validateApply(this);" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="CreateAirModalLabel">@ViewData["pm_new_label"]</h4>
+                </div>
+                <div class="modal-body">
+                    <label style="font-size: medium;">Air Ship Date</label>
+                    <br>
+                    @Html.TextBox($"pm_ship_date", DateTime.Now.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Save" @attr_html onclick="return confirm('Create a ship date?');" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+@using (Html.BeginForm("GoSaveShippingCalendar", "Transfer", FormMethod.Post, new { id = "CalendarForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pm_country_cd" value="@ViewData["pm_country_cd"]">
+    <input type="hidden" name="pm_location_cd" value="@ViewData["pm_location_cd"]">
+    
+    <div class="row">
+        <div class="form-group col-md-7" style="text-align: right;">
+            <input type="submit" value="Update" class="btn btn-primary" @attr_html onclick="return confirm('Update calendar?');" />
+        </div>
+        <div class="form-group col-md-5">
+            &nbsp;
+        </div>
+    </div>
+
+    
+    <div class="row">
+        <div class="column">
+            <div class="card">
+                <h4 style="text-align: center">Ocean</h4>
+
+                <div id="theSheet" class="bodyScrollY">
+                    <table class="table table-hover">
+                        <colgroup>
+                            <col id="col_01" style="width: 30px;">
+                            <col id="col_02" style="width: 100px;">
+                            <col id="col_03" style="width: 50px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.Raw(((Model.Ocean == null || Model.Ocean.Count() == 0) ? 0 : Model.Ocean.Count()).ToString())
+                                    &nbsp;
+                                    <a href="#CreateOceanModal" data-toggle="modal">Create</a>
+                                </th>
+                                <th>
+                                    @*@Html.DisplayNameFor(model => model.ship_date)*@
+                                    @Html.Raw("Ship Date")
+                                </th>
+                                <th>
+                                    &nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.Ocean == null || Model.Ocean.Count() <= 0)
+                                { 
+                                    <tr>
+                                        <td colspan="3" style="text-align:center;">No data found.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.Ocean)
+                                    {
+                                        <tr>
+                                            <td align="right" style="padding-right: 15px;">
+                                                @Html.DisplayFor(modelItem => item.i)
+                                                <input type="hidden" name="pmShipDates.Ocean[@(item.i-1)].date_uid" value="@item.date_uid">
+                                            </td>
+                                            <td align="center">
+                                                @Html.TextBox($"pmShipDates.Ocean[{item.i-1}].ship_date", item.ship_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+                                            </td>
+                                            <td align="center">
+                                                @Html.ActionLink("Delete", "GoDeleteShippingCalendar", "Transfer", new { pm_country_cd = @ViewData["pm_country_cd"].ToString(), pm_location_cd = @ViewData["pm_location_cd"], pm_date_uid = @item.date_uid }, new { onclick = "return confirm('Are you sure you want to delete this record?');", @class = @attr_css })
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="column">
+            <div class="card">
+                <h4 style="text-align: center">Air</h4>
+
+                <div id="theSheet" class="bodyScrollY">
+                    <table class="table table-hover">
+                        <colgroup>
+                            <col id="col_01" style="width: 30px;">
+                            <col id="col_02" style="width: 100px;">
+                            <col id="col_03" style="width: 50px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.Raw(((Model.Air == null || Model.Air.Count() == 0) ? 0 : Model.Air.Count()).ToString())
+                                    &nbsp;
+                                    <a href="#CreateAirModal" data-toggle="modal">Create</a>
+                                </th>
+                                <th>
+                                    @*@Html.DisplayNameFor(model => model.ship_date)*@
+                                    @Html.Raw("Ship Date")
+                                </th>
+                                <th>
+                                    &nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.Air == null || Model.Air.Count() <= 0)
+                                { 
+                                    <tr>
+                                        <td colspan="3" style="text-align:center;">No data found.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var item in Model.Air)
+                                    {
+                                        <tr>
+                                            <td align="right" style="padding-right: 15px;">
+                                                @Html.DisplayFor(modelItem => item.i)
+                                                <input type="hidden" name="pmShipDates.Air[@(item.i-1)].date_uid" value="@item.date_uid">
+                                            </td>
+                                            <td align="center">
+                                                @Html.TextBox($"pmShipDates.Air[{item.i-1}].ship_date", item.ship_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", style="font-size: large;" })
+                                            </td>
+                                            <td align="center">
+                                                @Html.ActionLink("Delete", "GoDeleteShippingCalendar", "Transfer", new { pm_country_cd = @ViewData["pm_country_cd"].ToString(), pm_location_cd = @ViewData["pm_location_cd"], pm_date_uid = @item.date_uid }, new { onclick = "return confirm('Are you sure you want to delete this record?');", @class = @attr_css })
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

@@ -1,0 +1,409 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<AR_Item>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    var progressList = @Html.Raw(Json.Encode(@ViewData["progress"]));
+    var progress_count = parseFloat(@ViewData["progress_count"].ToString());
+
+
+    function backStep(theNo) {
+        let step = parseInt(document.getElementById('progress_' + theNo).value);
+        //alert(step);
+
+        if (step > 1) {
+            step = step - 1;
+            setStep(theNo, step);
+        }
+    }
+
+
+    function forwardStep(theNo) {
+        let step = parseInt(document.getElementById('progress_' + theNo).value);
+        //alert(step);
+        //alert(progressList.length);
+        if (step < progressList.length) {
+            step = step + 1;
+            setStep(theNo, step);
+        }
+    }
+
+
+    function setStep(theNo, theStep) {
+        //alert('theNo= ' + theNo + '\r\n' + 'theStep= ' + theStep);
+        let step_name = '';
+        let value_now = 0.0;
+        step_name = progressList[theStep-1].Value;
+        value_now = theStep * progress_count;
+        //alert('step_name= ' + step_name + '\r\n' + 'value_now= ' + value_now);
+
+        document.getElementById('progress_name_' + theNo).setAttribute("aria-valuenow", value_now);
+        document.getElementById('progress_name_' + theNo).style.width = value_now + "%";
+        //document.getElementById('progress_name_' + theNo).style.color = "red";
+        document.getElementById('progress_name_' + theNo).classList.remove('progress-bar-info');
+        document.getElementById('progress_name_' + theNo).classList.add('progress-bar-warning');
+        document.getElementById('progress_name_' + theNo).classList.add('progress-bar-striped');
+        document.getElementById('progress_name_' + theNo).innerHTML = step_name;
+        document.getElementById('step_name_' + theNo).value = step_name;
+        document.getElementById('progress_' + theNo).value = theStep;
+    }
+
+
+    function pageLoad() {
+        let pm_accounting_uid = '@ViewData["pm_accounting_uid"]';
+        if (pm_accounting_uid != 0) {
+            //alert(pm_accounting_uid);
+            document.getElementById('Attached_'+pm_accounting_uid).click();
+        }
+    }
+
+
+    window.onload = pageLoad;
+</script>
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 155px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="filtersModal" tabindex="-1" role="dialog" aria-labelledby="filtersModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myFilters">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myUploads">
+            @using (Html.BeginForm("goImportData_ASMLTW", "Accounting", null, FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return validateApply(this);" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="uploadsModalLabel">Upload ASMLTW data</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <input type="hidden" name="pm_location_id" value="@ViewData["pm_location_id"]">
+                        @*<input type="hidden" name="pm_taker_group" value="@ViewData["pm_taker_group"]">*@
+                        <div class="col-md-3" style="text-align: right; padding-top: 7px;">
+                            @Html.Label("Spreadsheet", htmlAttributes: new { @class = "control-label" })🗊
+                        </div>
+                        <div class="col-md-7">
+                            @Html.TextBox("pm_file", "", new { type = "file", id = "filepath", accept = ".xls, .xlsx", @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Upload" class="btn btn-primary" @attr_html onclick="return confirm('Are you sure to upload the spreadsheet?');" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+@using (Html.BeginForm("GoUpdateAR", "Accounting", FormMethod.Post, new { id = "ARForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pm_location_id" value="@ViewData["pm_location_id"]">
+    @*<input type="hidden" name="pm_taker_group" value="@ViewData["pm_taker_group"]">*@
+    
+    <div class="row" style="padding: 0;">
+        <div class="col-md-4" style="text-align:left;">
+            @*@Ajax.ActionLink("Filters", "FilterAR", "Accounting", new { pm_location_id = @ViewData["pm_location_id"], pm_taker_group = @ViewData["pm_taker_group"] }, new AjaxOptions { UpdateTargetId = "myFilters", InsertionMode = InsertionMode.Replace }, new { id = "btnFilters", data_toggle = "modal", data_target = "#filtersModal", @class = "btn btn-default action_btn" })*@
+            @Ajax.ActionLink("Filters", "FilterAR", "Accounting", new { pm_location_id = @ViewData["pm_location_id"] }, new AjaxOptions { UpdateTargetId = "myFilters", InsertionMode = InsertionMode.Replace }, new { id = "btnFilters", data_toggle = "modal", data_target = "#filtersModal", @class = "btn btn-default action_btn" })
+            <a href="#uploadModal" class="btn btn-default action_btn" data-toggle="modal">Upload ASMLTW data</a>
+        </div>
+        <div class="col-md-8">
+            <input type="submit" value="Update" class="btn btn-primary" @attr_html onclick="return confirm('Update the A/R list?');" />
+        </div>
+    </div>
+
+    <div id="theSheet" class="tableScrollY" style="margin: 5px 0 0 0;">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_date)
+                    </th>
+                    @*<th>
+                        @Html.DisplayNameFor(model => model.location_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.taker)
+                    </th>*@
+                    <th>
+                        @Html.DisplayNameFor(model => model.customer_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.po_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.total_amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.currency_id)
+                    </th>
+                    <th>
+                        @Html.Raw("Attachment")
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.default_paid_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.gui)
+                    </th>
+                    @*<th>
+                        @Html.DisplayNameFor(model => model.z_memo)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.z_status)
+                    </th>*@
+                    <th style="width: 150px; max-width: 150px;">
+                        @Html.DisplayNameFor(model => model.progress)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    { 
+                        <tr>
+                            <td colspan="11" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        //double progress_step = 20;
+                        double progress_step = (double)ViewData["progress_count"];
+
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                    <input type="hidden" name="pmAR[@(i-1)].invoice_period" value="@item.invoice_period">
+                                    <input type="hidden" name="pmAR[@(i-1)].invoice_date" value="@item.invoice_date">
+                                    <input type="hidden" name="pmAR[@(i-1)].location_id" value="@item.location_id">
+                                    <input type="hidden" name="pmAR[@(i-1)].taker_group" value="@item.taker_group">
+                                    <input type="hidden" name="pmAR[@(i-1)].taker" value="@item.taker">
+                                    <input type="hidden" name="pmAR[@(i-1)].customer_id" value="@item.customer_id">
+                                    <input type="hidden" name="pmAR[@(i-1)].customer_name" value="@item.customer_name">
+                                    <input type="hidden" name="pmAR[@(i-1)].invoice_no" value="@item.invoice_no">
+                                    <input type="hidden" name="pmAR[@(i-1)].po_no" value="@item.po_no">
+                                    <input type="hidden" name="pmAR[@(i-1)].total_amount" value="@item.total_amount">
+                                    <input type="hidden" name="pmAR[@(i-1)].currency_id" value="@item.currency_id">
+                                    <input type="hidden" name="pmAR[@(i-1)].exchange_rate" value="@item.exchange_rate">
+                                    <input type="hidden" name="pmAR[@(i-1)].default_paid_date" value="@item.default_paid_date">
+                                    <input type="hidden" name="pmAR[@(i-1)].z_status" value="@item.z_status">
+                                    <input type="hidden" id="progress_@(i-1)" name="pmAR[@(i-1)].progress" value="@item.progress">
+                                    <input type="hidden" id="step_name_@(i-1)" name="pmAR[@(i-1)].progress_name" value="@item.progress_name">
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.invoice_date)
+                                </td>
+                                @*<td align="center">
+                                    @Html.DisplayFor(modelItem => item.location_id)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.taker)
+                                </td>*@
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.customer_name)">
+                                    @Html.DisplayFor(modelItem => item.customer_id)
+                                </td>
+                                <td align="center">
+                                    @*@Html.DisplayFor(modelItem => item.invoice_no)*@
+                                    @Ajax.ActionLink(item.invoice_no.ToString(), "showAR_Details", "Accounting", new { pm_invoice_no = item.invoice_no.ToString() }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.po_no)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.total_amount)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.exchange_rate)">
+                                    @Html.DisplayFor(modelItem => item.currency_id)
+                                </td>
+                                <td align="center">
+                                    @Ajax.ActionLink("　"+item.att_count.ToString()+"　", "show_AccountingAttachments", "Accounting", new { pm_source = "AR", pm_location_id = (int)ViewData["pm_location_id"], pm_accounting_type = "AR", pm_accounting_uid = item.invoice_no }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { id = $"Attached_{@item.invoice_no}", data_toggle = "modal", data_target = "#detailsModal" })
+                                    @if (item.att_count > 0)
+                                    {
+                                        <span>|&nbsp;</span>
+                                        @Html.ActionLink("Zip", "zip_AccountingAttachments", new { pm_accounting_type = "AR", pm_accounting_uid = item.invoice_no }, new { target = "_blank" })
+                                    }
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].override_paid_date", item.override_paid_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].gui", item.gui, new { @type = "text", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                @*<td align="center">
+                                    @Html.TextBox($"pmAR[{i-1}].z_memo", item.z_memo, new { @type = "text", @class = "form-control input-sm", style="font-size: medium;" })
+                                </td>
+                                <td align="center">
+                                    @Html.CheckBox($"pmAR[{i-1}].chk_archive", item.chk_archive)
+                                </td>*@
+                                <td align="center">
+                                    <div class="progress" style="margin-bottom: 3px;">
+                                        <div id="progress_name_@(i-1)" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@(item.progress*progress_step)" aria-valuemin="0" aria-valuemax="100" style="width: @((item.progress*progress_step).ToString()+"%"); color: darkblue;">
+                                            @item.progress_name
+                                        </div>
+                                    </div>
+                                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                        <div class="btn-group btn-group-xs" role="group">
+                                            <button type="button" onclick="backStep(@(i-1));" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                        <div class="btn-group btn-group-xs" role="group">
+                                            <button type="button" onclick="forwardStep(@(i-1));" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

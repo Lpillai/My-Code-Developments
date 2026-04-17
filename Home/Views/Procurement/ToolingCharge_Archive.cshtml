@@ -1,0 +1,208 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Charge_Tooling>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style type="text/css">
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 165px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+</script>
+<script type="text/javascript">
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="ReceiptsModal" tabindex="-1" role="dialog" aria-labelledby="ReceiptsModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myReceipts">
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div style="width: 90%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Model.Count().ToString()
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.po_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.vendor_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.line_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.item_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.cost)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.tooling_qty)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.refund_date)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    {
+                        <tr>
+                            <td colspan="8" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.po_no)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.vendor_name)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.line_no)
+                                </td>
+                                <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.real_part_no)">
+                                    @Html.DisplayFor(modelItem => item.item_id)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.cost)
+                                </td>
+                                <td align="right">
+                                    @Ajax.ActionLink(String.Format("{0:0,0}", item.tooling_qty), "Show_ToolingChargeReceipts", "Procurement", new { pm_vendor_name = item.vendor_name, pm_vendor_id = item.vendor_id, pm_item_id = item.item_id, pm_real_part_no = item.real_part_no, pm_refund_date = item.refund_date }, new AjaxOptions { UpdateTargetId = "myReceipts", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#ReceiptsModal" })
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.refund_date)
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

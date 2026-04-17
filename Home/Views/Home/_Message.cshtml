@@ -1,0 +1,16 @@
+﻿
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&Chi;</span>
+    </button>
+    <h4 class="modal-title" id="detailsModalLabel" style="color: @(ViewData["msg_title"].ToString() == "Error" ? "red" : "");">
+        @Html.Raw(ViewData["msg_title"].ToString())
+    </h4>
+</div>
+<div class="modal-body">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw(ViewData["msg_text"].ToString())
+    </div>
+</div>
+

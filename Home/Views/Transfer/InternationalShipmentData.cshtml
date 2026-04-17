@@ -1,0 +1,136 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    function onEnterPressed(event) {
+        if (event.keyCode === 13) {
+            goSearch();
+        }
+    }
+
+    function goSearch() {
+        //alert('goSearch');
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+        
+        var pmPickTickets = $("#pick_ticket_no").val().replaceAll(" ", "");
+        $("#output").load('@Url.Action("show_InternationalShipments", "Transfer")?pmPickTickets=' + pmPickTickets);
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {    
+        //$("#pick_ticket_no").keyup(function (event) {
+        //    if (event.keyCode === 13) {
+        //        $("#btn_search").click();
+        //    }
+        //});
+    })
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="form-inline form-group">
+    @Html.Label("Pick Ticket No", htmlAttributes: new { @class = "control-label", style = "" })
+    &nbsp;
+    <input type="text" id="pick_ticket_no" name="pmPickTickets" autofocus autocomplete="off" size="120" onkeyup="onEnterPressed(event);" class="form-control" style="width: 400px; max-width: 400px; font-size: medium; " />
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="button" id="btn_search" value="Search" onclick="goSearch();" class="btn btn-default" />
+</div>
+
+
+
+
+<div id="output">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ Please delimit each pick ticket number with a comma. For instance: '3262834,3272749,3266553,3269002'.")
+        @*<br>
+        @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")*@
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

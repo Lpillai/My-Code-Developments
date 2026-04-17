@@ -1,0 +1,195 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<ReportItem>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+    
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 160px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="bulkModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content" id="myBulk">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row" style="padding: 10px 0 0 20px;">
+    @Ajax.ActionLink("Create One Report", "ShowReportDetails", "Admin", new { pm_ReportID = 0, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal", @class = "btn btn-default action_btn" })
+</div>
+
+<div style="width: 97%; display: block; margin-left: auto; margin-right: auto;">
+    <div class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="text-align: center;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.cluster)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.report_name)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.run)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.param)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.output)
+                    </th>
+                    <th colspan="3">
+                        &nbsp;
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td align="center">
+                                    @Html.ValueFor(modelItem => item.no)
+                                </td>
+                                <td align="center">
+                                    @Html.ValueFor(modelItem => item.cluster)
+                                </td>
+                                <td style="padding-left: 5px;">
+                                    @Ajax.ActionLink(@item.report_name, "ShowReportDetails", "Admin", new { pm_ReportID = @item.report_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                </td>
+                                <td>
+                                    @Html.ValueFor(modelItem => item.run)
+                                </td>
+                                <td>
+                                    @Html.ValueFor(modelItem => item.param)
+                                </td>
+                                <td align="center">
+                                    @Html.ValueFor(modelItem => item.output)
+                                </td>
+                                <td align="center">
+                                    @Ajax.ActionLink("Copy", "ShowReportCopy", "Admin", new { pm_ReportID = @item.report_id }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                </td>
+                                <td align="center">
+                                    @Html.ActionLink("Who has permission?", "WhoHasReportPermission", new { pm_ReportID = item.report_id.ToString(), pm_report_name = item.cluster + "/" + item.report_name }, new { target = "_blank" })
+                                </td>
+                                <td align="center">
+                                    @Html.ActionLink("Delete", "GoReportDelete", "Admin", new { pm_ReportID = item.report_id }, new { onclick = "return confirm('Are you sure you want to delete this record?');", @class = @attr_css })
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

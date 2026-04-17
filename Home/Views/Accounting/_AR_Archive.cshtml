@@ -1,0 +1,158 @@
+﻿@model IEnumerable<RuntimeVariables.AR_Item>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 160px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+</style>
+
+
+
+    
+<div style="width: 95%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="tableScrollY" style="margin: 5px 0 0 0;">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.location_id)
+                    </th>
+                    @*<th>
+                        @Html.DisplayNameFor(model => model.taker)
+                    </th>*@
+                    <th>
+                        @Html.DisplayNameFor(model => model.customer_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.invoice_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.po_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.total_amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.currency_id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.default_paid_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.att_count)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.gui)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.z_memo)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    { 
+                        <tr>
+                            <td colspan="12" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.invoice_date)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.location_id)
+                                </td>
+                                @*<td>
+                                    @Html.DisplayFor(modelItem => item.taker)
+                                </td>*@
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.customer_name)">
+                                    @Html.DisplayFor(modelItem => item.customer_id)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.invoice_no)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.po_no)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.total_amount)
+                                </td>
+                                <td align="center" data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.exchange_rate)">
+                                    @Html.DisplayFor(modelItem => item.currency_id)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.default_paid_date)
+                                </td>
+                                <td align="center">
+                                    @Html.ActionLink("　"+item.att_count.ToString()+"　", "zip_AccountingAttachments", new { pm_accounting_type = "AR", pm_accounting_uid = item.invoice_no }, new { target = "_blank" })
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.gui)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.z_memo)
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

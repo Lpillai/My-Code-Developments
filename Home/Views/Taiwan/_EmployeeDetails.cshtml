@@ -1,0 +1,320 @@
+﻿@model RuntimeVariables.tw_employee
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 48%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+
+    .action_btn {
+        color: steelblue;
+        border-style: none;
+    }
+
+    a.action_btn:hover, input.action_btn:hover {
+        /*color: white;*/
+        background-color: lightblue;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    input[type=checkbox] {
+        background-color: white;
+        border-radius: 2px;
+        outline: 1px solid skyblue;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        position: relative;
+    }
+
+        input[type=checkbox]:focus {
+            outline: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        input[type=checkbox]:checked {
+            background-color: #409fd6;
+            background: #409fd6 url("data:image/gif;base64,R0lGODlhCwAKAIABAP////3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat;
+        }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function onCheck() {
+        if (document.getElementById('chk_z_status').checked)
+            document.getElementById('z_status').value = 'D';
+        else
+            document.getElementById('z_status').value = '';
+        //alert(document.getElementById('z_status').value);
+    }
+</script>
+
+
+<script type="text/javascript">
+    document.getElementById('chk_z_status').checked = false;
+    var module = @Html.Raw(Json.Encode(@Model));
+    if (module.z_status === 'D')
+        document.getElementById('chk_z_status').checked = true;
+</script>
+
+
+<script type="text/javascript">
+    var module = @Html.Raw(Json.Encode(@Model));
+    $(document).ready(function () {
+        $('#shift').val(module.shift);
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+@using (Html.BeginForm("Go_SaveEmployeeDetails", "Taiwan", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <div class="row" style="margin-bottom: 10px;">
+            @Html.Hidden("pm_isNew", ViewData["isNew"], new { @id = "pm_isNew" })
+            <div class="col-md-1">
+            </div>
+            <span class="col-md-2" style="font-size: x-large;">
+                @if (!(bool)ViewData["isNew"])
+                {
+                    @Model.account_id
+                }
+                else
+                {
+                    @Html.Raw("New Account")
+                }
+            </span>
+            <div class="col-md-6">
+                @*@Html.ActionLink("個人考勤資料", "LeaveTakingManagement", new { pm_account_id = Model.account_id }, new { target = "_blank", @class = "btn btn-default action_btn" })*@
+            </div>
+            <div class="col-md-3">
+                <input type="submit" value="Save" name="action:Save" @attr_html class="btn btn-primary" onclick="return confirm('Save this employee?');" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <div class="card">
+                    <h3 style="text-align: center">個人資訊設定</h3><br>
+
+                    @if (!(bool)ViewData["isNew"])
+                    {
+                        @Html.HiddenFor(model => model.account_id)
+                        @Html.HiddenFor(model => model.onboard_date)
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.account_id, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.account_id, htmlAttributes: new { @type = "text", @autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.last_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.last_name, htmlAttributes: new { @type = "text", @autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.first_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.first_name, htmlAttributes: new { @type = "text", @autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    @if ((bool)ViewData["isNew"] || (bool)ViewData["isHR"])
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.onboard_date, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8">
+                                @Html.TextBox("onboard_date", Model.onboard_date.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", required = "required", style="font-size: medium;" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.onboard_date, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8" style="padding-top: 7px; font-size: medium;">
+                                @Html.DisplayFor(model => model.onboard_date)
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.full_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.full_name, htmlAttributes: new { @type = "text", @autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.dept, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.dept, htmlAttributes: new { @type = "text", @class = "form-control", required = "required", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.manager_id, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.manager_id, htmlAttributes: new { @type = "text", @class = "form-control", required = "required", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.personal_email, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.personal_email, htmlAttributes: new { @type = "text", @autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.SBS_email, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.SBS_email, htmlAttributes: new { @type = "text", @autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.birthday, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBox("birthday", @Model.birthday.ToString("yyyy-MM-dd"), new { @type = "date", @autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+                    
+                    @Html.HiddenFor(model => model.z_status)
+                    @if (!(bool)ViewData["isNew"])
+                    {
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.z_status, htmlAttributes: new { @class = "control-label col-md-4" })
+                            <div class="col-md-8" style="padding: 5px 0 0 14px;">
+                                <input type="checkbox" id="chk_z_status" value="" onclick="javascript:onCheck();" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="card">
+                    <h3 style="text-align: center">考勤設定</h3><br>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.annual_start, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBox("annual_start", Model.annual_start.ToString("yyyy-MM-dd"), new { @type = "date", @class = "form-control", required = "required", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.shift, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.DropDownList("shift", (SelectList)ViewData["shift"], new { @class = "form-control", required = "required", style = "font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.card_cd, htmlAttributes: new { @class = "control-label col-md-4" })
+                        <div class="col-md-8">
+                            @Html.TextBoxFor(model => model.card_cd, htmlAttributes: new { @type = "text", @autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="text-align: center">緊急聯絡人</h3><br>
+                                        
+                    <div class="form-group">
+                        <div class="col-md-2" style="text-align: right;">
+                            @Html.LabelFor(model => model.emergency_name1, htmlAttributes: new { @class = "control-label", style = "font-weight: 700;" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(model => model.emergency_name1, htmlAttributes: new { @type = "text", placeholder = "姓名", autocomplete = "off", required = "required", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                        <div class="col-md-5">
+                            @Html.TextBoxFor(model => model.emergency_contact1, htmlAttributes: new { @type = "text", placeholder = "聯絡方式", @autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2" style="text-align: right;">
+                            @Html.LabelFor(model => model.emergency_name2, htmlAttributes: new { @class = "control-label", style = "font-weight: 700;" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(model => model.emergency_name2, htmlAttributes: new { @type = "text", placeholder = "姓名", autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                        <div class="col-md-5">
+                            @Html.TextBoxFor(model => model.emergency_contact2, htmlAttributes: new { @type = "text", placeholder = "聯絡方式", autocomplete = "off", @class = "form-control", style="font-size: medium;" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+    var message = @Html.Raw(Json.Encode(TempData["message"]));
+    alert(message);
+    </script>
+}
+

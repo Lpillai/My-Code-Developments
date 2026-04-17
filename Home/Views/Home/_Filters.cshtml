@@ -1,0 +1,154 @@
+﻿@model IList<RuntimeVariables.Filters>
+
+@{
+    string goAction = ViewData["goAction"].ToString();
+    string goController = ViewData["goController"].ToString();
+    string theParameters = ViewData["pmParameters"].ToString();
+}
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    div.fill {
+        font-size: 14px;
+        padding-top: 2px;
+    }
+
+    .labelFor {
+        border: 0px none;
+        width: max-content;
+        background-color: transparent;
+        outline: none;
+        padding-top: 7px;
+        text-align: right;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    var moduleList = @Html.Raw(Json.Encode(@Model));
+    var selectElement = document.getElementById("filterBody").querySelectorAll(".opts");
+
+    for (var i = 0; i < selectElement.length; i++) {
+        var x = selectElement[i];
+        for (var j = 0; j < x.options.length; j++) {
+            if (x.options[j].value === moduleList[i].op) {
+                x.selectedIndex = j;
+                break;
+            }
+        }
+
+        if (moduleList[i].op === '~') {
+            document.getElementById('value_s' + i).placeholder = 'Value starts with';
+            document.getElementById('value_e' + i).placeholder = 'Value ends with';
+            document.getElementById('value_e' + i).removeAttribute('disabled');
+        }
+        else {
+            document.getElementById('value_s' + i).placeholder = 'Value';
+            document.getElementById('value_e' + i).placeholder = '';
+            document.getElementById('value_e' + i).setAttribute('disabled', '');
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    function OnDropDownSelected(theNo) {
+        var selectElement = document.getElementById('op' + theNo);
+
+        if (selectElement.options[selectElement.selectedIndex].value === '~') {
+            document.getElementById('value_s' + theNo).placeholder = 'Value starts with';
+            document.getElementById('value_e' + theNo).placeholder = 'Value ends with';
+            document.getElementById('value_e' + theNo).removeAttribute('disabled');
+        }
+        else {
+            document.getElementById('value_s' + theNo).placeholder = 'Value';
+            document.getElementById('value_e' + theNo).placeholder = '';
+            document.getElementById('value_e' + theNo).setAttribute('disabled', '');
+        }
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm(goAction, goController, new { pmParameters = theParameters }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h3 class="modal-title" id="filtersModalLabel">Filters</h3>
+    </div>
+
+    <div class="modal-body">
+
+        <div id="filterBody" class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            @for (var i = 0; i < Model.Count; i++)
+            {
+                <div class="form-group row" style="text-align: center;">
+                    @Html.HiddenFor(m => Model[i].key)
+                    @Html.HiddenFor(m => Model[i].value_type)
+                    <div class="col-md-3" style="font-size: medium;">
+                        @Html.TextBoxFor(m => Model[i].key_name, new { @type = "text", @class = "labelFor" })
+                    </div>
+                    <div class="col-md-3">
+                        @if (@Model[i].value_type == "text")
+                        {
+                            <select id="@("op" + i)" name="@("["+i+"].op")" style="font-size: medium;" class="form-control filters opts" onchange="OnDropDownSelected(@i);">
+                                <option value="">Operator</option>
+                                <option value="=">Equal</option>
+                                <option value="!=">Not Equal</option>
+                                <option value="%">Contains</option>
+                                <option value="!%">Not Contains</option>
+                                <option value=">=">Starts With</option>
+                                <option value="<=">Ends With</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select id="@("op" + i)" name="@("["+i+"].op")" style="font-size: medium;" class="form-control filters opts" onchange="OnDropDownSelected(@i);">
+                                <option value="">Operator</option>
+                                <option value="=">Equal</option>
+                                <option value="!=">Not Equal</option>
+                                <option value=">">Greater than</option>
+                                <option value=">=">Greater than or Equal</option>
+                                <option value="<">Less than</option>
+                                <option value="<=">Less than or Equal</option>
+                                <option value="~">Between</option>
+                            </select>
+                        }
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBoxFor(m => Model[i].value_s, new { @type = Model[i].value_type, @id = "value_s" + i.ToString(), @placeholder = "Value", @class = "form-control filters" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBoxFor(m => Model[i].value_e, new { @type = Model[i].value_type, @id = "value_e" + i.ToString(), @disabled = "disabled", @class = "form-control filters" })
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        @*<input type="submit" value="Reset" name="Filter:Reset" class="btn btn-default" style="font-size: medium;" />
+        <input type="submit" value="Filter" name="Filter:Filter" class="btn btn-default" style="font-size: medium;" />*@
+        <input type="submit" value="Reset" name="filter_action" class="btn btn-default" style="font-size: medium;" />
+        <input type="submit" value="Filter" name="filter_action" class="btn btn-default" style="font-size: medium;" />
+    </div>
+
+}
+

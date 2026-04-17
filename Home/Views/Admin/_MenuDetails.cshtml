@@ -1,0 +1,161 @@
+﻿@model RuntimeVariables.MenuItem
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+    textarea {
+        padding: 10px;
+        line-height: 1.5;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 1px 1px 1px #999;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function OnDropDownSelected() {
+        var selectElement = document.getElementById('opt_z_status');
+        document.getElementById('z_status').value = selectElement.options[selectElement.selectedIndex].value;
+    }
+</script>
+
+
+<script type="text/javascript">
+    var module = @Html.Raw(Json.Encode(@Model));
+    var selectElement = document.getElementById("opt_z_status");
+    for (var j = 0; j < selectElement.options.length; j++) {
+        if (selectElement.options[j].value === module.z_status) {
+            selectElement.selectedIndex = j;
+            break;
+        }
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm("MenuSave", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.menu_id)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @if ((bool)ViewData["isNew"])
+            {
+                <span>New</span>
+            }
+            else
+            {
+                @Html.ValueFor(model => model.menu_id)
+                @Html.Raw(" - ")
+                @Html.ValueFor(model => model.menu_name)
+            }
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.menu_name, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="menu_name" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.menu_name" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.parent_menu, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="parent_menu" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.parent_menu" type="number" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.folder, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="folder" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.folder" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.run, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="run" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.run" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.param, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <textarea name="param" placeholder="Parameters here" rows="4" class="col-md-4 input-sm form-control" style="font-size: 14px;">@Html.Raw(Model.param)</textarea>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.menu_sort, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="menu_sort" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.menu_sort" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <textarea name="z_memo" placeholder="Note here" rows="4" class="col-md-4 input-sm form-control" style="font-size: 14px;">@Html.Raw(Model.z_memo)</textarea>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_status, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @Html.HiddenFor(model => model.z_status)
+                <select id="opt_z_status" name="opt_z_status" class="col-md-8 form-control" style="font-size: 14px;" onchange="OnDropDownSelected();">
+                    <option value="">Enable</option>
+                    <option value="D">Disable</option>
+                    <option value="C">Coming Soon</option>
+                </select>
+            </div>
+            @if (!(bool)ViewData["isNew"])
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_date, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                    <span class="col-md-4" style="margin: 5px 0 0 0;">@Html.ValueFor(model => model.z_date)</span>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_usr, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                    <span class="col-md-4" style="margin: 5px 0 0 0;">@Html.ValueFor(model => model.z_usr)</span>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Save this menu item?');" />
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+    var message = @Html.Raw(Json.Encode(TempData["message"]));
+    alert(message);
+    </script>
+}
+

@@ -1,0 +1,167 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Local_P21_ID>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 115px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody td {
+        font-size: small;
+        max-height: 20px;
+        overflow: hidden;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    });
+</script>
+<script type="text/javascript">
+    function goSearch() {
+        let pm_address_id = '@ViewData["address_id"]';
+        let pm_address_name = '@ViewData["address_name"]';
+        //alert(pm_address_id + '\r\n' + pm_address_name);
+        if (pm_address_id != '' && pm_address_id != '0')
+            $("#thePartial").load('@Url.Action("showLocalInformation_Details", "Accounting")?pm_address_id=' + pm_address_id + '&pm_address_name=' + pm_address_name);
+    }
+    
+    window.addEventListener("load", goSearch);
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+<div>
+    <div id="theSheet" style="width: 14%;" class="tableScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 30px; max-width: 30px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.address_name)
+                        &nbsp;
+                        @Ajax.ActionLink("Create", "showLocalInformation_Details", "Accounting", new { pm_address_id = 0, pm_address_name = "", pm_isNew = true }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace })
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+
+                        <tr>
+                            <td align="right" style="padding-right: 5px;">
+                                @Html.Raw(i.ToString())
+                            </td>
+                            <td>
+                                @Ajax.ActionLink(item.address_name, "showLocalInformation_Details", "Accounting", new { pm_address_id = item.address_id, pm_address_name = item.address_name, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace })
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="margin: 0 0 0 20px; vertical-align: top; width: 84%; display: inline-block;">
+        <div id="thePartial"></div>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

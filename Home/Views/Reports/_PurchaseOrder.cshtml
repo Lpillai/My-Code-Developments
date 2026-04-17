@@ -1,0 +1,30 @@
+﻿<style type="text/css">
+    .SearchFields {
+        max-width: 120px;
+        width: 120px;
+        font-size: 14px;
+    }
+</style>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Open_PurchaseOrder", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+{ 
+    @Html.AntiForgeryToken()
+    
+    <div class="form-inline form-group">
+        @Html.Label("PO", htmlAttributes: new { @class = "control-label", style = "margin-left: 15px;" })
+        &nbsp;
+        <input type="number" id="pm_po_no" name="pm_po_no" class="form-control SearchFields" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="btn_print" value="Download" class="btn btn-primary" />
+    </div>
+}

@@ -1,0 +1,32 @@
+﻿<style type="text/css">
+</style>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Open_PalletsMark", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+{ 
+    @Html.AntiForgeryToken()
+        
+    <div class="form-inline form-group">
+        @Html.Label("Pick Ticket No", htmlAttributes: new { @class = "control-label", style = "" })
+        &nbsp;
+        <input type="text" id="pmPickTickets" name="pmPickTickets" value="@ViewData["pmPickTickets"]" size="120" autocomplete="off" class="form-control" style="font-size: medium; width: 400px; max-width: 400px;" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" id="btn_search" value="Search" class="btn btn-primary" />
+    </div>
+}
+
+
+<div id="output">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ Please delimit each pick ticket number with a comma. For instance: '3262834,3272749,3266553,3269002'.")
+    </div>
+</div>

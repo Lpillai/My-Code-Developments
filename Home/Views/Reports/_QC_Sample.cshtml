@@ -1,0 +1,51 @@
+﻿<style type="text/css">
+</style>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+@using (Html.BeginForm("Open_QC_Sample", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+{ 
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_label", ViewData["label"].ToString())
+    
+    <div class="form-horizontal" style="width: 800px; margin-left: 15px;">
+        <div class="form-group">
+            @Html.Label("PO number", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" id ="po_no" name ="po_no" autofocus autocomplete="off" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Line number", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" id ="line_no" name ="line_no" autofocus autocomplete="off" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Unit Weight", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" id ="unit_wgt" name ="unit_wgt" autofocus autocomplete="off" step = ".01" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Vendor Lot", htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" id ="vendor_lot" name ="vendor_lot" autofocus autocomplete="off" class="form-control" />
+            </div>
+        </div>
+        <div style="font-size: larger; color: darkorange;">
+            @Html.Raw("※ Please delimit each Lot with a comma. For instance: 'Lot-1,Lot-2,Lot-3,Lot-4'.")
+        </div>
+        <div class="form-group" style="margin-right: 10%; text-align: right;">
+            <input type="submit" id="btn_print" value="Print" class="btn btn-primary" />
+        </div>
+    </div>
+}

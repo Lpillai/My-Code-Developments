@@ -1,0 +1,65 @@
+﻿
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#btn_search").click(function () {
+            document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);
+            
+            let pmPickTickets = $("#pmPickTickets").val().replaceAll(" ", "");
+            $("#output").load('@Url.Action("Show_PackingDetails", "Reports")?pmPickTickets=' + pmPickTickets);
+        });
+    })
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+<form id="submit-button">
+    <div class="form-inline form-group">
+        @Html.Label("Pick Ticket No", htmlAttributes: new { @class = "control-label", style = "" })
+        &nbsp;
+        <input type="text" id="pmPickTickets" name="pmPickTickets" value="@ViewData["pmPickTickets"]" size="120" autocomplete="off" class="form-control" style="font-size: medium; width: 400px; max-width: 400px;" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" id="btn_search" value="Search" class="btn btn-default" />
+    </div>
+</form>
+
+
+<div id="output">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ Please delimit each pick ticket number with a comma. For instance: '3262834,3272749,3266553,3269002'.")
+        <br>
+        @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

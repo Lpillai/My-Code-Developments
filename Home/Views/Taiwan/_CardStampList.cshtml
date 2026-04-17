@@ -1,0 +1,209 @@
+﻿@model IEnumerable<RuntimeVariables.tw_CardStamp>
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: medium;
+    }
+
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 115px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+</style>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    });
+</script>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="cardModal" tabindex="-1" role="dialog" aria-labelledby="cardModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myCard">
+            @using (Html.BeginForm("goImportCardStamp", "Taiwan", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="cardModalLabel">上傳</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal" style="margin-top: 10px; ">
+                        <div class="form-group">
+                            <div class="col-md-3" style="text-align: right;">
+                                @Html.Label("打卡資料檔", htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-7">
+                                @Html.TextBox("pm_file", "", new { type = "file", accept = ".txt",  multiple = "multiple", @class = "form-control", @style = "width:450px; max-width: 400px;" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3" style="text-align: right;">
+                                @Html.Label("已登錄考勤日期", htmlAttributes: new { @class = "control-label" })
+                            </div>
+                            <div class="col-md-7">
+                                <input type="date" name="assigned_date" class="form-control input-sm" autocomplete="off" style="font-size: medium;" value="@ViewData["AssignedDate"]" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="上傳" class="btn btn-primary" @attr_html onclick="return confirm('確認上傳？');" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row" style="padding: 10px;">
+    <a href="#cardModal" class="btn btn-default action_btn" data-toggle="modal">上傳打卡資料</a>
+</div>
+
+
+
+
+<table class="table table-hover" style="width: 80%;">
+    <thead>
+        <tr>
+            <th style="max-width: 40px; padding-right: 10px;">
+                @if (Model == null || Model.Count() <= 0)
+                {
+                    @Html.Raw("0")
+                }
+                else
+                {
+                    @Html.Raw(Model.Count().ToString())
+                }
+            </th>
+            <th style="">
+                @Html.DisplayNameFor(model => model.card_cd)
+            </th>
+            <th style="">
+                @Html.DisplayNameFor(model => model.card_stamp)
+            </th>
+            <th style="">
+                @Html.DisplayNameFor(model => model.override_stamp)
+            </th>
+            <th style="">
+                @Html.DisplayNameFor(model => model.full_name)
+            </th>
+            <th style="">
+                &nbsp;
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model == null || Model.Count() <= 0)
+            {
+                <tr>
+                    <td colspan="6" style="text-align:center;">No data found.</td>
+                </tr>
+            }
+            else
+            {
+                int i = 0;
+                foreach (var item in Model)
+                {
+                    i++;
+
+                    <tr>
+                        <td align="right">
+                            @Html.Raw(i)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.card_cd)
+                        </td>
+                        <td align="center">
+                            @Ajax.ActionLink(@item.card_stamp.ToString("HH:mm"), "ShowCardStampDetails", "Taiwan", new { pm_card_cd = item.card_cd, pm_card_stamp = item.card_stamp }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.override_stamp)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.full_name)
+                        </td>
+                        <td>
+                            @Html.Raw((item.z_status == "O" ? "外出" : ""))
+                        </td>
+                    </tr>
+                }
+
+            }
+        } 
+    </tbody>
+</table>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

@@ -1,0 +1,31 @@
+﻿<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+@using (Html.BeginForm("Open_LotAttribute", "Reports", FormMethod.Post, new { target = "_blank" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_label", ViewData["label"])
+
+    <div class="form-horizontal" style="width: 500px; margin-left: 15px;">
+
+        <div class="form-group">
+            @Html.Label("Lot No", new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="text" name="pm_lot_no" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Location ID", new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                <input type="number" name="pm_location_id" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="form-group text-right">
+            <input type="submit" value="Print" class="btn btn-primary" />
+        </div>
+
+    </div>
+}

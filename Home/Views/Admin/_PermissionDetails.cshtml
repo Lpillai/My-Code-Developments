@@ -1,0 +1,292 @@
+﻿@model RuntimeVariables.PermissionData
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 315px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    div.display {
+        font-size: 14px;
+    }
+
+    .detailed {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        margin-left: 4px;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        /*width: 50%;*/
+        width: 760px;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 15px -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function fnOnCheck(theNo) {
+        if (!document.getElementById('menuList_' + theNo + '__menu_chk').checked)
+            document.getElementById('menuList_' + theNo + '__menu_chk_read').checked = document.getElementById('menuList_' + theNo + '__menu_chk').checked;
+        document.getElementById('menuList_' + theNo + '__menu_chk_read').disabled = !document.getElementById('menuList_' + theNo + '__menu_chk').checked;
+    }
+    
+    function fnOnRptCheck(theNo) {
+        if (!document.getElementById('reportList_' + theNo + '__rpt_chk').checked)
+            document.getElementById('reportList_' + theNo + '__rpt_chk_read').checked = document.getElementById('reportList_' + theNo + '__rpt_chk').checked;
+        document.getElementById('reportList_' + theNo + '__rpt_chk_read').disabled = !document.getElementById('reportList_' + theNo + '__rpt_chk').checked;
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm("SavePermission", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row">
+            <div class="column">
+                <div class="form-group" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); background-color: #f1f1f1; margin: 0px; padding: 16px 0px;">
+                    <div class="col-md-3" style="text-align: right;">
+                        @if ((bool)ViewBag.pm_isNew)
+                        {
+                            @Html.Label("New", htmlAttributes: new { @class = "control-label" })
+                        }
+                        @if (ViewData["pm_kind"].ToString() == "I")
+                        {
+                            @Html.LabelFor(model => model.permissionList[0].account_id, htmlAttributes: new { @class = "control-label" })
+                        }
+                        else
+                        {
+                            @Html.LabelFor(model => model.permissionList[0].group_name, htmlAttributes: new { @class = "control-label" })
+                        }
+                    </div>
+                    <div class="col-md-6" style="padding-top: 7px;">
+                        @if ((bool)ViewBag.pm_isNew)
+                        {
+                            if (ViewData["pm_kind"].ToString() == "I")
+                            {
+                                @Html.DropDownList("pm_account_id", (SelectList)ViewData["AccountList"], new { id = "pm_account_id", @class = "form-control", style = "margin-top: -7px; font-size: 14px;" })
+                            }
+                        }
+                        else
+                        {
+                            if (ViewData["pm_kind"].ToString() == "I")
+                            {
+                                @Html.Hidden("pm_account_id", ViewData["pm_account_id"])
+                                @Html.Raw(ViewData["pm_account_id"].ToString())
+                                @Html.Raw("　")
+                                @Html.ActionLink("Remove", "RemovePermission", new { pm_group_id = -1, pm_account_id = @ViewData["pm_account_id"] }, new { onclick = "return confirm('Are you sure you want to remove all the individual permission settings for this account id?');" })
+                            }
+                            else
+                            {
+                                @Html.Hidden("pm_group_id", ViewData["pm_group_id"])
+                                @Html.Raw(ViewData["group_name"].ToString())
+                                @Html.Raw("　")
+                                @Html.ActionLink("Remove", "RemovePermission", new { pm_group_id = @ViewData["pm_group_id"], pm_account_id = "" }, new { onclick = "return confirm('Are you sure you want to remove all the permission settings for this group?');" })
+                            }
+                        }
+                    </div>
+                    <div class="col-md-3">
+                        <input type="submit" value="Save" @attr_html class="btn btn-primary" onclick="return confirm('Save these permission settings?');" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <div class="card">
+                    <div class="tableScrollY">
+                        <table class="table table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px; max-width: 30px;">
+                                        @Model.menuList.Count().ToString()
+                                    </th>
+                                    @*<th style="text-align: center;">
+                                        @Html.DisplayNameFor(model => model.menuList[0].menu_id)
+                                    </th>*@
+                                    <th style="width: 160px; max-width: 160px;">
+                                        @Html.DisplayNameFor(model => model.menuList[0].parent_menu_name)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.menuList[0].menu_name)
+                                    </th>
+                                    <th style="width: 80px; max-width: 80px;">
+                                        @Html.DisplayNameFor(model => model.menuList[0].menu_chk_read)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    for (var i = 0; i < Model.menuList.Count(); i++)
+                                    {
+                                        object menu_attr = new { @style = "height: 20px;" };
+                                        if (!Model.menuList[i].menu_chk)
+                                        {
+                                            menu_attr = null;
+                                            menu_attr = new { disabled = "disabled", @style = "height: 20px;" };
+                                        }
+                                        <tr>
+                                            <td align="right" style="padding: 8px 15px 0 0;">
+                                                @Html.Raw((i + 1).ToString())
+                                            </td>
+                                            @*<td align="right" style="padding: 8px 30px 0 0;">
+                                                @Html.ValueFor(x => Model.menuList[i].menu_id)
+                                            </td>*@
+                                            <td style="padding: 8px 0 0 15px;">
+                                                @Html.ValueFor(x => Model.menuList[i].parent_menu_name)
+                                            </td>
+                                            <td style="vertical-align: middle; padding-left: 5px; line-height: 20px;">
+                                                @Html.HiddenFor(x => Model.menuList[i].menu_id)
+                                                @Html.CheckBoxFor(x => Model.menuList[i].menu_chk, new { @onclick = "fnOnCheck("+@i+")", @style = "margin-right: 25px; height: 20px;" })
+                                                @Html.ValueFor(x => Model.menuList[i].menu_name)
+                                                @*@Html.DisplayFor(x => Model.menuList[j].menu_name, new { @style = "line-height: 20px;" })*@
+                                            </td>
+                                            <td align="center" style="vertical-align: middle;">
+                                                @Html.CheckBoxFor(x => Model.menuList[i].menu_chk_read, menu_attr)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="column">
+                <div class="card">
+                    <div class="tableScrollY">
+                        <table class="table table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px; max-width: 30px;">
+                                        @Model.reportList.Count().ToString()
+                                    </th>
+                                    @*<th style="text-align: center;">
+                                        @Html.DisplayNameFor(model => model.reportList[0].report_id)
+                                    </th>*@
+                                    <th style="width: 160px; max-width: 160px;">
+                                        @Html.DisplayNameFor(model => model.reportList[0].cluster)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.reportList[0].report_name)
+                                    </th>
+                                    <th style="width: 80px; max-width: 80px;">
+                                        @Html.DisplayNameFor(model => model.reportList[0].rpt_chk_read)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    for (var j = 0; j < Model.reportList.Count(); j++)
+                                    {
+                                        object rpt_attr = new { @style = "height: 20px;" };
+                                        if (!Model.reportList[j].rpt_chk)
+                                        {
+                                            rpt_attr = null;
+                                            rpt_attr = new { disabled = "disabled", @style = "height: 20px;" };
+                                        }
+                                        <tr>
+                                            <td align="right" style="padding: 8px 2px 0 0;">
+                                                @Html.Raw((j + 1).ToString())
+                                            </td>
+                                            @*<td align="right" style="padding: 8px 30px 0 0;">
+                                                @Html.ValueFor(x => Model.reportList[j].report_id)
+                                            </td>*@
+                                            <td style="padding: 8px 0 0 15px;">
+                                                @Html.ValueFor(x => Model.reportList[j].cluster)
+                                            </td>
+                                            <td style="vertical-align: middle; padding: 0 0 0 5px; line-height: 20px;">
+                                                @Html.HiddenFor(x => Model.reportList[j].report_id)
+                                                @Html.CheckBoxFor(x => Model.reportList[j].rpt_chk, new { @onclick = "fnOnRptCheck("+@j+")", @style = "margin-right: 25px; height: 20px;" })
+                                                @Html.ValueFor(x => Model.reportList[j].report_name)
+                                                @*@Html.DisplayFor(x => Model.reportList[j].report_name, new { @style = "line-height: 20px;" })*@
+                                            </td>
+                                            <td align="center" style="vertical-align: middle;">
+                                                @Html.CheckBoxFor(x => Model.reportList[j].rpt_chk_read, rpt_attr)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

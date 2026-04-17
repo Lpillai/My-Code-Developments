@@ -1,0 +1,309 @@
+﻿@using RuntimeVariables;
+@model AuthorityData
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+    
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+@Scripts.Render("~/bundles/jquery")
+
+
+
+
+<style>
+    .headerScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 180px);
+    }
+    
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        @*<li role="presentation" class="active">
+            <a href="#Permission" aria-controls="Permission" role="tab" data-toggle="tab">Permission</a>
+        </li>*@
+
+        <li role="presentation" class="dropdown active">
+            <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown" aria-controls="myTabDrop1-contents">Permission Control <span class="caret"></span></a>
+            <ul class="dropdown-menu" aria-labelledby="myTabDrop1" id="myTabDrop1-contents">
+                <li><a href="#Permission_Group" role="tab" id="dropdown1-tab" data-toggle="tab" aria-controls="Permission_Group">Group</a></li>
+                <li><a href="#Permission_Individual" role="tab" id="dropdown2-tab" data-toggle="tab" aria-controls="Permission_Individual">Individual</a></li>
+            </ul>
+        </li>
+
+        <li role="presentation">
+            <a href="#Group" aria-controls="Group" role="tab" data-toggle="tab">Group Control</a>
+        </li>
+
+        <li role="presentation">
+            <a href="#Cover" aria-controls="Cover" role="tab" data-toggle="tab">Cover Settings</a>
+        </li>
+
+        <li role="presentation">
+            <a href="#Query" aria-controls="Query" role="tab" data-toggle="tab">Query Authority</a>
+        </li>
+    </ul>
+
+
+    <!-- Tab panes -->
+    <div class="tab-content" style="padding-top: 15px;">
+        @*<div role="tabpanel" class="tab-pane fade in active" id="Group">
+            Permission
+        </div>*@
+
+        <div role="tabpanel" class="tab-pane fade in active" id="Permission_Group" aria-labelledby="dropdown1-tab">
+            <div style="width: 15%;" class="headerScrollY">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Model.distinctPermissionList.Count().ToString()
+                            </th>
+                            <th style="text-align: left; padding-left: 25px;">
+                                @Html.DisplayNameFor(model => model.distinctPermissionList[0].group_name)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var index = 0;
+                            foreach (var item in Model.distinctPermissionList)
+                            {
+                                index++;
+                                <tr>
+                                    <td align="right" style="padding-right: 12px;">
+                                        @Html.Raw(index.ToString())
+                                    </td>
+                                    <td style="padding-left: 8px;">
+                                        @Ajax.ActionLink(@item.group_name, "ShowPermissionDetails", "Admin", new { pm_kind = "G", pm_group_id = @item.group_id, pm_account_id = "", pm_isNew = false }, new AjaxOptions { UpdateTargetId = "thePermissionPartial", InsertionMode = InsertionMode.Replace })
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin: 0 0 0 20px; vertical-align: top; width: 83%; display: inline-block;">
+                <div id="thePermissionPartial"></div>
+            </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane fade" id="Permission_Individual" aria-labelledby="dropdown2-tab">
+            <div style="width: 15%;" class="headerScrollY">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Model.distinctIndividualList.Count().ToString()
+                            </th>
+                            <th style="text-align: left; padding-left: 25px;">
+                                @Html.DisplayNameFor(model => model.distinctIndividualList[0].account_id)
+                                &nbsp;
+                                @Ajax.ActionLink("Add", "ShowPermissionDetails", "Admin", new { pm_kind = "I", pm_group_id = -1, pm_account_id = "", pm_isNew = true }, new AjaxOptions { UpdateTargetId = "theIndividualPartial", InsertionMode = InsertionMode.Replace })
+                            </th>
+                            <th>
+                                &nbsp;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            index = 0;
+                            foreach (var item in Model.distinctIndividualList)
+                            {
+                                index++;
+                                <tr>
+                                    <td align="right" style="padding-right: 12px;">
+                                        @Html.Raw(index.ToString())
+                                    </td>
+                                    <td style="padding-left: 8px;">
+                                        @Ajax.ActionLink(@item.account_id, "ShowPermissionDetails", "Admin", new { pm_kind = "I", pm_group_id = -1, pm_account_id = @item.account_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "theIndividualPartial", InsertionMode = InsertionMode.Replace })
+                                    </td>
+                                    <td>
+                                        @Html.Raw(item.z_status)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin: 0 0 0 20px; vertical-align: top; width: 83%; display: inline-block;">
+                <div id="theIndividualPartial"></div>
+            </div>
+        </div>
+        
+        <div role="tabpanel" class="tab-pane fade" id="Group">
+            <div style="width: 20%;" class="headerScrollY">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Model.distinctGroupList.Count().ToString()
+                            </th>
+                            <th style="text-align: left; padding-left: 25px;">
+                                @Html.DisplayNameFor(model => model.distinctGroupList[0].group_name)
+                                &nbsp;
+                                @Ajax.ActionLink("Create", "ShowGroupDetails", "Admin", new { pm_group_id = -1, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "theGroupPartial", InsertionMode = InsertionMode.Replace })
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.distinctGroupList)
+                        {
+                            <tr>
+                                <td align="right" style="padding-right: 12px;">
+                                    @Html.DisplayFor(modelItem => item.no)
+                                </td>
+                                <td style="padding-left: 8px;">
+                                    @Ajax.ActionLink(@item.group_name, "ShowGroupDetails", "Admin", new { pm_group_id = @item.group_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "theGroupPartial", InsertionMode = InsertionMode.Replace })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin: 0 0 0 20px; vertical-align: top; width: 77%; display: inline-block;">
+                <div id="theGroupPartial"></div>
+            </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane fade" id="Cover">
+            @using (Html.BeginForm("GoCoverSettings", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-horizontal" style="margin-top: 10px; ">
+                    <div class="form-group">
+                        <div class="col-md-4" style="text-align: right;">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-2" style="text-align: center;">
+                            <input type="submit" value="Save" @attr_html class="btn btn-primary" onclick="return confirm('Are you sure to cover the settings');" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2" style="text-align: right;">
+                            @Html.Label("Source Account ID", htmlAttributes: new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-10">
+                            @Html.DropDownList("pm_AccountID_source", (SelectList)ViewData["AccountSelectList"], new { id = "pm_AccountID_source", @class = "form-control", style = "font-size: 14px;" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2" style="text-align: right;">
+                            @Html.Label("Target Account ID", htmlAttributes: new { @class = "control-label" })
+                        </div>
+                        <div class="col-md-10">
+                            @Html.DropDownList("pm_AccountID_target", (SelectList)ViewData["AccountSelectList"], new { id = "pm_AccountID_target", @class = "form-control", style = "font-size: 14px;" })
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div role="tabpanel" class="tab-pane fade" id="Query">
+            <div style="width: 15%;" class="headerScrollY">
+                @{ 
+                    string RowColor = "";
+                    var AccountList = (List<AccountItem>)ViewData["AccountQueryList"];
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.Label(AccountList.ToList().Count().ToString())
+                                </th>
+                                <th style="text-align: left; vertical-align: sub; padding-left: 25px;">
+                                    @Html.Label("Name", htmlAttributes: new { @class = "control-label" })
+                                </th>
+                                <th>
+                                    &nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                index = 0;
+                                foreach (var item in @AccountList.ToList())
+                                {
+                                    index++;
+                                    switch (item.z_status)
+                                    {
+                                        case "A":
+                                            RowColor = "color: red;";
+                                            break;
+                                        case "D":
+                                            RowColor = "color: gray;";
+                                            break;
+                                        default:
+                                            RowColor = "color: black;";
+                                            break;
+                                    }
+
+                                    <tr style="@RowColor">
+                                        <td align="right" style="padding-right: 20px;">
+                                            @Html.Raw(index.ToString())
+                                        </td>
+                                        <td style="padding-left: 8px;">
+                                            @Ajax.ActionLink(@item.full_name, "ShowQueryTree", "Admin", new { pm_account_id = @item.id }, new AjaxOptions { UpdateTargetId = "theQueryPartial", InsertionMode = InsertionMode.Replace })
+                                        </td>
+                                        <td>
+                                            @Html.Raw(item.z_status)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <div style="margin: 0 0 0 20px; vertical-align: top; width: 83%; display: inline-block;">
+                <div id="theQueryPartial"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

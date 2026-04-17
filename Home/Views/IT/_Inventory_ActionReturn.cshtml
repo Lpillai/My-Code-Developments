@@ -1,0 +1,59 @@
+﻿
+
+<style>
+</style>
+
+
+<script type="text/javascript">
+</script>
+
+
+@using (Html.BeginForm("Inventory_GoItemAction", "IT", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_bin_cd", ViewData["pm_bin_cd"].ToString(), null)
+    @Html.Hidden("pm_history.dpt", ViewData["pm_dpt"].ToString(), null)
+    @Html.Hidden("pm_history.behavior", "Return", null)
+    @Html.Hidden("pm_history.item_uid", ViewData["pm_item_uid"].ToString(), null)
+    @Html.Hidden("pm_history.item_id", ViewData["pm_item_id"].ToString(), null)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @Html.Raw("Return ")
+            @Html.Raw(ViewData["pm_item_id"].ToString())
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            @if ((bool)ViewData["isConsumable"])
+            {
+                <div class="form-group">
+                    @Html.Label("Return Qty", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                    <div class="col-md-9">
+                        @Html.TextBox("pm_history.quantity", "", new { @type = "number", required="required", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                @Html.Label("Return Date", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-9">
+                    @*@Html.TextBox("pm_history.requisition_date", "", new { @type = "date", @class = "form-control", style = "font-size: medium;" })*@
+                    <input type="date" name="pm_history.requisition_date" class="form-control" autocomplete="off" style="font-size: medium;" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.Label("Return to", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-9">
+                    @Html.DropDownList("pm_history.storage_code", (SelectList)ViewData["AvailableBins"], new { required = "required", @class = "form-control", style = "font-size: medium; width: 400px; max-width: 400px;" })
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Return this item?');" />
+    </div>
+}
+

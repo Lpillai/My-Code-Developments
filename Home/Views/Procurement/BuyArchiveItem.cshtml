@@ -1,0 +1,414 @@
+﻿@model IEnumerable<RuntimeVariables.Buy_ArchiveItem>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Archive Item";
+    ViewBag.PageName = "Archive Item";
+    ViewBag.Source = "BuyArchiveItem";
+}
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>
+    @ViewBag.PageName
+</h4>
+
+
+
+<div class="modal fade" id="splitsModal" tabindex="-1" role="dialog" aria-labelledby="splitsModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="mySplits" style="padding: 10px 30px 10px 30px;">
+        </div>
+    </div>
+</div>
+
+
+
+
+<style>
+    table.detailed {
+        border-spacing: 20px 1px;
+        border-collapse: separate;
+    }
+
+    .action_btn {
+        font-size: 15px;
+    }
+
+    /* Set a fixed scrollable wrapper */
+    .tableScroll {
+        height: calc(100vh - 155px);
+        width: calc(100vw - 30px);
+        overflow: auto;
+        display: inline-block;
+    }
+
+    .noteScrollY {
+        display: none;
+        width: 265px;
+        vertical-align: top;
+        overflow-x: hidden;
+        padding: 0 0 0 5px;
+    }
+
+    .noteList {
+        width: 100%;
+        height: calc(100vh - 155px);
+        overflow-x: hidden;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background-color: #eee;
+        z-index: 1;
+    }
+
+        thead th:nth-child(3) {
+            left: 0;
+            z-index: 3;
+        }
+
+        thead th:nth-child(4) {
+            left: 60px;
+            z-index: 3;
+        }
+
+    tbody th:nth-child(3) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    tbody th:nth-child(4) {
+        position: sticky;
+        left: 60px;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    table {
+        border-collapse: collapse;
+    }
+/*
+    td, th {
+        padding: 6px 4px 0 4px; 
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+*/
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    td.display {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+
+
+
+<script type='text/javascript'>
+    function yesnoCheck() {
+        if (document.getElementById('yesCheck').checked) {
+            document.getElementById('ifYes').style.display = 'table-cell';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 300px)';
+        }
+        else {
+            document.getElementById('ifYes').style.display = 'none';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 30px)';
+        }
+    }
+
+
+    function ScrollPosition() {
+        var divElement = document.getElementById('toUpdate');
+        divElement.scroll({
+            top: divElement.scrollHeight,//scroll to bottom of the element
+            //top: 0,//scroll to top of the element
+            behavior: 'smooth' //auto, smooth, initial, inherit
+        });
+    }
+
+
+    function getOne(theNo) {
+        if (!document.getElementById('yesCheck').checked) {
+            document.getElementById('yesCheck').checked = true;
+            document.getElementById('ifYes').style.display = 'table-cell';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 300px)';
+        }
+    }
+</script>
+
+
+
+
+<div class="row" style="padding: 0 0 5px 5px;">
+    <div class="col-md-1">
+        <div style="display: inline-block;">
+            @using (Html.BeginForm("DownloadArchiveItemSheet", "Procurement", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="pm_archive" value="@ViewData["archiveList"]">
+                <input type="submit" value="Export" class="btn btn-default" @(Model.Count() > 0 ? "" : "disabled") />
+            }
+        </div>
+    </div>
+    <div class="col-md-8" style="padding-top: 7px;">
+        <input type="radio" onclick="javascript:yesnoCheck();" name="yesno" id="yesCheck">Show Notes&nbsp;
+        <input type="radio" onclick="javascript:yesnoCheck();" name="yesno" id="noCheck" checked="checked">Hide Notes
+    </div>
+</div>
+
+
+
+
+<div style="display: table;">
+    <div id="theSheet" class="tableScroll">
+        <table class="table table-sm table-hover table-striped align-middle" style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th style="text-align:right; width: 40px; max-width: 40px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="text-align:center; width: 80px; max-width: 80px;">
+                        Quotes / Notes / Splits
+                    </th>
+                    <th style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.viewID)
+                    </th>
+                    <th style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.ItemID)
+                    </th>
+                    <th style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.cluster)
+                    </th>
+                    @if (Model != null && Model.Count() > 0 && Model.First().cluster != "FTB")
+                    {
+                        <th id="th_planner" style="text-align:center; width: 90px; max-width: 90px;">
+                            @Html.DisplayNameFor(model => model.planner)
+                        </th>
+                    }
+                    <th id="th_PO_no" style="text-align: center; width: 115px; max-width: 115px;">
+                        @Html.DisplayNameFor(model => model.PO_no)
+                    </th>
+                    <th id="th_po_to_loc" style="text-align:center; width: 65px; max-width: 65px;">
+                        @Html.DisplayNameFor(model => model.po_to_loc)
+                    </th>
+                    <th id="th_package" style="width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.package)
+                    </th>
+                    <th id="th_total_value" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.total_value)
+                    </th>
+                    <th id="th_total_weight" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.total_weight)
+                    </th>
+                    <th id="th_PPAP" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.PPAP)
+                    </th>
+                    <th id="th_supplier_name" style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.supplier_name)
+                    </th>
+                    <th id="th_order_date" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.order_date)
+                    </th>
+                    <th id="th_unit_price" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.unit_price)
+                    </th>
+                    <th id="th_currency" style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.currency)
+                    </th>
+                    <th id="th_qty_ordered" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.qty_ordered)
+                    </th>
+                    <th id="th_twd" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.twd)
+                    </th>
+                    <th id="th_carbon_steel" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.carbon_steel)
+                    </th>
+                    <th id="th_stainless_steel" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.stainless_steel)
+                    </th>
+                    <th id="th_nickel" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.nickel)
+                    </th>
+                    <th id="th_copper" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.copper)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.rrn)
+                        </td>
+                        <td align="center">
+                            @Ajax.ActionLink(" " + @item.quotes_count.ToString() + " ", "ShowArchive_Quotes", "Procurement", new { pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                            @Html.Raw(" / ")
+                            @Ajax.ActionLink(" " + @item.noteCount.ToString() + " ", "ShowNotes", "Procurement", new { cluster = @item.cluster, pm_Source = "", pm_entryID = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "toUpdate", InsertionMode = InsertionMode.Replace }, new { onclick = "getOne('" + @item.rrn + "')" })
+                            @Html.Raw(" / ")
+                            @Ajax.ActionLink(" " + @item.Splits + " ", "ShowSplits", "Procurement", new { cluster = @item.cluster, pm_Source = "ArchiveItem", pm_entryId = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                        </td>
+                        <th style="text-align: center;">
+                            @Html.DisplayFor(modelItem => item.viewID)
+                        </th>
+                        <th style="word-wrap: break-word;">
+                            @Html.DisplayFor(modelItem => item.ItemID)
+                        </th>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.cluster)
+                        </td>
+                        @if (item.cluster != "FTB")
+                        {
+                            <td class="display" align="center" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.planner)">
+                                @Html.DisplayFor(modelItem => item.planner)
+                            </td>
+                        }
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.PO_no)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.po_to_loc)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.package)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.total_value)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.total_weight)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.PPAP)
+                        </td>
+                        <td align="center" class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.supplier_name)">
+                            @Html.DisplayFor(modelItem => item.supplier_name)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.order_date)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.unit_price)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.currency)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.qty_ordered)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.twd)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.carbon_steel)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.stainless_steel)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.nickel)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.copper)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.Count() <= 0)
+        {
+            <div style="font-size: larger; text-align: center; color: darkorange;">No data from querying.</div>
+        }
+    </div>
+
+    <div id="ifYes" class="noteScrollY">
+        <div class="noteList">
+            <div id="toUpdate"></div>
+        </div>
+    </div>
+</div>
+
+
+@if (Model.Count() >= 50)
+{
+    <script type="text/javascript">
+        alert('This querying only returned the latest 50 records.');
+    </script>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

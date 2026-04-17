@@ -1,0 +1,234 @@
+﻿@using RuntimeVariables;
+@model P21SessionData
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    .detailed {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        padding: 5px 0 0 0;
+        width: 90px;
+        text-align: center;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        z-index: 1;
+        text-align: center;
+    }
+
+    tbody th {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background-color: white;
+        /* Browsers tend to drop borders on sticky elements, so we emulate the border-right using a box-shadow to ensure it stays: */
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    .tableScrollY {
+        height: calc(100vh - 150px);
+        width: 100%;
+        overflow: auto;
+        display: inline-block;
+    }
+
+    td, th {
+        padding: 3px;
+        /*
+        border: 1px solid black;
+        border-collapse: collapse;*/
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<script>
+    function toggle(source) {
+        var selectElement = document.getElementsByClassName("detailSelect");
+
+        for (var i = 0; i < selectElement.length; i++) {
+            selectElement[i].checked = source.checked;
+        }
+        //alert('checkbox');
+    }
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+@using (Html.BeginForm("GoDeleteSessions", "IT", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <div style="text-align: right; padding-right: 50px;">
+            <input type="submit" value="Delete" @attr_html class="btn btn-primary btn-large" onclick="return confirm('Are you sure to DELETE all of selected sessions?');" />
+        </div>
+        <div id="theSheet" class="tableScrollY">
+            <table class="table table-hover table-striped" style="font-size: medium; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 20px;">
+                    <col style="width: 30px;">
+                    <col style="width: 60px;">
+                    <col style="width: 90px;">
+                    <col style="width: 50px;">
+                    <col style="width: 90px;">
+                    <col style="width: 50px;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th align="right" style="padding-right: 4px;">
+                            @Model.sessionList.Count().ToString()
+                        </th>
+                        <th>
+                            <input type="checkbox" style="vertical-align: sub;" onClick="toggle(this)" /> Select all
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.sessionList[0].UserId)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.sessionList[0].SessionStart)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.sessionList[0].age)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.sessionList[0].LastAccess)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.sessionList[0].idle)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    @{ var index = 0; }
+                    @for (var i = 0; i < Model.sessionList.Count(); i++)
+                    {
+                        <tr style="color: @(Model.sessionList[i].deleteFlag == true ? "Red" : "Black") ">
+                            <td align="right" style="padding-right: 4px;">
+                                @Html.DisplayFor(x => Model.sessionList[i].rrn)
+                            </td>
+                            <td align="center">
+                                @Html.CheckBoxFor(x => Model.sessionList[i].chk, new { @style = "height: 20px; vertical-align: sub;", @class = "detailSelect" })
+                                @Html.HiddenFor(x => Model.sessionList[i].UserId)
+                                @Html.HiddenFor(x => Model.sessionList[i].SessionId)
+                                @Html.HiddenFor(x => Model.sessionList[i].sessionAge)
+                                @Html.HiddenFor(x => Model.sessionList[i].idleTime)
+                            </td>
+                            <td>
+                                @Html.ValueFor(x => Model.sessionList[i].UserId)
+                            </td>
+                            <td align="center">
+                                @Html.ValueFor(x => Model.sessionList[i].SessionStart)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(x => Model.sessionList[i].age)
+                            </td>
+                            <td align="center">
+                                @Html.ValueFor(x => Model.sessionList[i].LastAccess)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(x => Model.sessionList[i].idle)
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

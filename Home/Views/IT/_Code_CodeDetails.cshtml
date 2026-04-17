@@ -1,0 +1,129 @@
+﻿@model RuntimeVariables.CodeStore
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    .labelAdj {
+        text-align: right;
+        margin: 7px 0 0 0;
+    }
+    .boxAdj {
+        width: 500px;
+        max-width: 500px;
+    }
+</style>
+
+
+
+
+<script type="text/javascript"> 
+</script>
+
+
+
+
+@using (Html.BeginForm("GoSaveCode", "IT", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @*@Html.Hidden("Cluster", @ViewData["pm_cluster"])*@
+    <input type="hidden" name="pmCRUD" value="@ViewBag.pmCRUD">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @if (ViewBag.pmCRUD == "C")
+            {
+                <span>New</span>
+            }
+            else
+            {
+                <span>&nbsp;</span>
+            }
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            @if (ViewBag.pmCRUD == "C")
+            {
+                <div class="form-group">
+                    @Html.Label("Cluster", htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                    @Html.TextBox("Cluster", "", new { @type = "text", @class = "form-control", @style = "font-size: medium;" })
+                </div>
+                <div class="form-group">
+                    @Html.Label("Code", htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                    @Html.TextBox("Code", "", new { @type = "Number", @class = "form-control", @style = "font-size: medium;" })
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Cluster, htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                    <div class="col-md-8" style="font-size: large; padding-top: 5px;">
+                        @Html.Hidden("Cluster", Model.Cluster)
+                        @Html.DisplayFor(model => model.Cluster)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                    <div class="col-md-8" style="font-size: large; padding-top: 5px;">
+                        @Html.Hidden("Code", Model.Code)
+                        @Html.DisplayFor(model => model.Code)
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                @Html.LabelFor(model => model.Value, htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                @Html.TextBoxFor(model => model.Value, new { @type = "text", @class = "form-control boxAdj" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                @Html.TextAreaFor(model => model.z_memo, new { @class = "form-control boxAdj" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_status, htmlAttributes: new { @class = "col-md-4 labelAdj" })
+                <select id="z_status" name="z_status" class="col-md-8 form-control" style="font-size: 14px;" onchange="OnDropDownSelected();">
+                    <option value="">Enable</option>
+                    <option value="D">Disable</option>
+                </select>
+            </div>
+            @if (ViewBag.pmCRUD != "C")
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_createDate, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right;" })
+                    @Html.DisplayFor(model => model.z_createDate)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_pgm, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right;" })
+                    @Html.DisplayFor(model => model.z_pgm)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_usr, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right;" })
+                    @Html.DisplayFor(model => model.z_usr)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_updateDate, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right;" })
+                    @Html.DisplayFor(model => model.z_updateDate)
+                </div>
+            }
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" class="btn btn-primary" value="Save" @attr_html onclick="return confirm('Save this code?');" />
+    </div>
+}
+

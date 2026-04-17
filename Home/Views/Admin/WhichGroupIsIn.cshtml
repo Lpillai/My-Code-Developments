@@ -1,0 +1,82 @@
+﻿@model IEnumerable<RuntimeVariables.GroupItem>
+
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Which group is in";
+    ViewBag.PageName = "Which authority group \"" + ViewData["Account"] + "\" is in?";
+}
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 125px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.PageName</h4>
+
+
+
+
+<div class="bodyScrollY">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th style="width: 40px; max-width: 40px;">
+                    @if (Model == null)
+                    {
+                        @Html.Raw(0);
+                    }
+                    else
+                    {
+                        @Html.Raw(Model.Count());
+                    }
+                </th>
+                <th style="width: 80px; max-width: 80px;">
+                    @Html.DisplayNameFor(model => model.group_id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.group_name)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ 
+                if (Model != null)
+                {
+                    var index = 1;
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td align="right" style="padding-right: 10px;">
+                                @Html.Raw(index.ToString())
+                            </td>
+                            <td align="right" style="padding-right: 20px; font-size: medium;">
+                                @Html.ValueFor(modelItem => item.group_id)
+                            </td>
+                            <td style="padding-left: 10px; font-size: medium;">
+                                @Html.ValueFor(modelItem => item.group_name)
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+

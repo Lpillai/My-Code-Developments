@@ -1,0 +1,140 @@
+﻿@model IEnumerable<RuntimeVariables.SPORTECH_PickTicket>
+
+
+
+
+<style type="text/css">
+    .bulkScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 300px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        document.getElementById('btn_search').removeAttribute("disabled");
+        //document.getElementById('btn_search').value = "Search";
+        $("#loading").fadeOut();
+    })
+</script>
+<script type="text/javascript">
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+<div>
+    @using (Html.BeginForm("Open_Shipping_SPORTECH_Box", "Reports", new { pick_ticket_no = ViewData["pick_ticket_no"], label_type = ViewData["pmLabelType"] }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group" style="text-align: right;">
+            <input id="btnPrint" type="submit" value="Print" class="btn btn-primary" />
+        </div>
+
+        <div class="form-group" style="margin-top: -10px;">
+            <div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                <div class="bulkScrollY">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line_number)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.lot_cd)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.item_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.qty_shipped)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.box_qty)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model == null || Model.Count() <= 0)
+                                {
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">
+                                            @Html.Raw("No data found.")
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    var index = 0;
+                                    foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td align="right" style="padding-right: 10px;">
+                                                <input type="hidden" name="pmLineList[@index].line_number" value="@item.line_number">
+                                                <input type="hidden" name="pmLineList[@index].lot_cd" value="@item.lot_cd">
+                                                <input type="hidden" name="pmLineList[@index].item_id" value="@item.item_id">
+                                                <input type="hidden" name="pmLineList[@index].qty_shipped" value="@item.qty_shipped">
+                                                @Html.DisplayFor(modelItem => item.line_number)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.lot_cd)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.item_id)
+                                            </td>
+                                            <td align="right" style="padding-right: 10px;">
+                                                @Html.DisplayFor(modelItem => item.qty_shipped)
+                                            </td>
+                                            <td align="center">
+                                                <input type="number" name="pmLineList[@index].box_qty" value="@item.box_qty" class="form-control" style="font-size: medium; max-width: 160px; width: 160px; text-align: right;">
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size: larger; color: darkorange;">
+                    @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

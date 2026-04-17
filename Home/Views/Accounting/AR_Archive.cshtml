@@ -1,0 +1,122 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+    })
+</script>
+<script type="text/javascript">
+    function goSearch() {
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        var pm_invoice_no = $("#pm_invoice_no").val();
+        var pm_customer_id = $("#pm_customer_id").val();
+        var pm_gui_no = $("#pm_gui_no").val();
+        $("#output").load('@Url.Action("showAR_Archive", "Accounting")?pm_invoice_no=' + pm_invoice_no + '&pm_customer_id=' + pm_customer_id + '&pm_gui_no=' + pm_gui_no);
+    }
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<form id="submit-button">
+    <div class="form-inline">
+        @Html.Label("Invoice", htmlAttributes: new { @class = "control-label col-md-1", style = "margin-top: 5px; text-align: right;" })
+        @Html.TextBox("pm_invoice_no", "", new { @type = "number", @placeholder="Invoice No", @class = "form-control col-md-1", style="font-size: medium;" })
+        @Html.Label("Customer", htmlAttributes: new { @class = "control-label col-md-1", style = "margin-top: 5px; text-align: right;" })
+        @Html.TextBox("pm_customer_id", "", new { @type = "number", @placeholder="Customer ID", @class = "form-control col-md-1", style="font-size: medium;" })
+        @Html.Label("GUI", htmlAttributes: new { @class = "control-label col-md-1", style = "margin-top: 5px; text-align: right;" })
+        @Html.TextBox("pm_gui_no", "", new { @type = "text", @class = "form-control col-md-1", style="font-size: medium;" })
+        <div class="form-group col-md-2" style="text-align: right;">
+            <input type="button" id="btn_search" value="Search" onclick="goSearch();" class="form-control btn btn-primary" />
+        </div>
+    </div>
+</form>
+
+
+<div id="output">
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

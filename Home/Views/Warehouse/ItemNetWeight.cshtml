@@ -1,0 +1,159 @@
+﻿@using RuntimeVariables;
+@model item_net_weight
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+
+<style type="text/css">
+    .SearchFields {
+        max-width: 280px;
+        width: 280px;
+        font-size: medium;
+    }
+/*
+    #loading {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: 1000;
+    }
+  
+    #loadingcontent {
+        display: table;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    #loadingspinner {
+        display: table-cell;
+        vertical-align: middle;
+        width: 100%;
+        text-align: center;
+        font-size: xx-large;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.15);
+        padding-top: 80px;
+    }*/
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+    })
+</script>
+<script type="text/javascript">
+    function onEnterPressed(event) {
+        if (event.keyCode === 13) {
+            goSearch();
+        }
+    }
+
+    function goSearch() {
+        //alert('goSearch');
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        var item_id = $('#item_id').val();
+        //alert(item_id);
+        $("#output").load('@Url.Action("ShowItemNetWeight", "Warehouse")?pm_item_id=' + item_id);
+    }
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+ 
+<div class="form-inline form-group">
+    @Html.Label("Part Number", htmlAttributes: new { @class = "col-md-1", @style = "text-align: right; margin: 7px 0 0 0;" })
+    @Html.TextBox("item_id", "", new { @type = "text", @onkeyup="onEnterPressed(event);", @class = "form-control SearchFields" })
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="button" id="btn_search" value="Search" onclick="goSearch();" class="btn btn-default" />
+</div>
+
+<div id="output">
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

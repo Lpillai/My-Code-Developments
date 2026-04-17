@@ -1,0 +1,327 @@
+﻿
+@using RuntimeVariables;
+@model IEnumerable<BOM_forecast>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")*@
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 150px);
+        width: 100%;
+    }
+
+    table {
+        table-layout: fixed;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    thead th:nth-child(2) {
+        left: 0;
+        z-index: 3;
+    }
+
+    thead th:nth-child(3) {
+        left: 140px;
+        z-index: 3;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    tbody th:nth-child(2) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    tbody th:nth-child(3) {
+        position: sticky;
+        left: 140px;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    .table-hover tbody tr:hover td {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 1);
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="InquiryModal" tabindex="-1" role="dialog" aria-labelledby="InquiryModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myInquiry">
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>
+    @ViewBag.Path
+</h4>
+
+
+
+    
+<div style="width: 98%; display: block; margin-left: auto; margin-right: auto; margin-top: 10px;">
+    @using (Html.BeginForm("Go_UpdateUsage_ASMLTW", "Sales", new { pm_WeekStart = @ViewData["WeekStart"] }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            @Html.ActionLink("Download", "SheetToExcel_BOM_ASMLTW", "Sales", null, new { id = "btnDownload", @class = "btn btn-default action_btn" })
+            <input type="submit" value="Recalculate" class="btn btn-default" />
+        </div>
+        <div id="theSheet" class="bodyScrollY">
+            <table class="table table-hover">
+                <colgroup>
+                    <col id="col_01" style="width: 35px;">
+                    <col id="col_02" style="width: 140px;">
+                    <col id="col_03" style="width: 80px;">
+                    <col id="col_04" style="width: 80px;">  
+                    <col id="col_05" style="width: 80px;">     
+                    <col id="col_06" style="width: 80px;">       
+                    @for (int l = 1; l <= 52; l++)
+                    {
+                        <col id="col_@((l + 6).ToString("00"))" style="width: 80px;">
+                    }
+                    <col id="col_59" style="width: 100px;">    
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>
+                            @Model.Count().ToString()
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.customer_part_no)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.UsagePerWeek)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.RollingROP)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.qty_on_hand)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.qty_past_due)
+                        </th>
+                        @*<th data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => Model.First().week01.period)">
+                            @Html.DisplayNameFor(model => model.week01)
+                        </th>*@                    
+                        @for (int k = 1; k <= 52; k++)
+                        {
+                            var thisWeek = (BOM_week)Model.First().GetType().GetProperties().First(w => w.Name == "week" + k.ToString("00")).GetValue(Model.First(), null);
+                            <th data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => thisWeek.period)">
+                                @Html.Raw(k.ToString("00"))
+                            </th> 
+                        }
+                        <th>
+                            &nbsp;
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                        if (Model == null || Model.Count() <= 0)
+                        {
+                            <tr>
+                                <td colspan="59" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                i++;
+                                <tr>
+                                    <td align="right">
+                                        <input type="hidden" name="pm_BOM[@(i-1)].i" value="@item.i">
+                                        @Html.DisplayFor(modelItem => item.i)
+                                    </td>
+                                    <th data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.item_desc)" style="font-size: medium; text-align: center; vertical-align: middle;">
+                                        <input type="hidden" name="pm_BOM[@(i-1)].customer_part_no" value="@item.customer_part_no">
+                                        <input type="hidden" name="pm_BOM[@(i-1)].item_desc" value="@item.item_desc">
+                                        @Html.DisplayFor(modelItem => item.customer_part_no)
+                                    </th>
+                                    <th style="text-align: right;">
+                                        @*@Html.DisplayFor(modelItem => item.UsagePerWeek)*@
+                                        <input type="hidden" name="pm_BOM[@(i-1)].UsagePerWeek" value="@item.UsagePerWeek">
+                                        @Html.TextBox($"pm_BOM[{i - 1}].UsageModified", item.UsagePerWeek, new { @type = "number", @class = "form-control input-sm", style = "font-size: medium; text-align: right" })
+                                    </th>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.RollingROP)
+                                    </td>
+                                    <td align="right">
+                                        <input type="hidden" name="pm_BOM[@(i-1)].qty_on_hand" value="@item.qty_on_hand">
+                                        @Html.DisplayFor(modelItem => item.qty_on_hand)
+                                    </td>
+                                    <td align="right">
+                                        <input type="hidden" name="pm_BOM[@(i-1)].qty_past_due" value="@item.qty_past_due">
+                                        @Html.DisplayFor(modelItem => item.qty_past_due)
+                                    </td>
+                                    @*<td align="right">
+                                        @if (item.week01.income)
+                                        { 
+                                            @Ajax.ActionLink(item.week01.final_qty.ToString(), "GetPOInquiry", "Sales", new { i = item.i, pm_week = 01 }, new AjaxOptions { UpdateTargetId = "myInquiry", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#InquiryModal" })
+                                        }
+                                        else
+                                        { 
+                                            @Html.DisplayFor(modelItem => item.week01.final_qty)
+                                        }
+                                    </td>*@
+                                    @for (int j = 1; j <= 52; j++)
+                                    {
+                                        var thisWeek = (BOM_week)item.GetType().GetProperties().First(w => w.Name == "week" + j.ToString("00")).GetValue(item, null);
+
+                                        string bg = "";
+                                        if (thisWeek.final_qty <= (item.UsagePerWeek * 8))
+                                        {
+                                            bg = "lightpink";
+                                        }
+                                        else if (thisWeek.final_qty <= (item.UsagePerWeek * 13))
+                                        {
+                                            bg = "lightyellow";
+                                        }
+                                        else
+                                        {
+                                            bg = "";
+                                        }
+
+                                        if (thisWeek.income)
+                                        {
+                                            <td align="right" style="font-weight: 600; color: @(j >= item.ShortageWeek ? "red" : ""); background-color: @bg;">
+                                                <u>
+                                                    @Ajax.ActionLink(string.Format("{0:N0}", thisWeek.final_qty), "GetPOInquiry", "Sales", new { i = item.i, pm_week = j }, new AjaxOptions { UpdateTargetId = "myInquiry", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#InquiryModal" })
+                                                </u>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td align="right" style="background-color: @bg; font-weight: @(thisWeek.final_qty <= 0 ? "600" : "400"); color: @(thisWeek.final_qty <= 0 ? "red" : "black");">
+                                                @Html.DisplayFor(modelItem => thisWeek.final_qty)
+                                            </td>
+                                        }
+                                    }
+                                    <td align="center">
+                                        @if (item.ShortageWeek < 1000)
+                                        {
+                                            @Ajax.ActionLink("Add a buy", "GetProcureInfoInquiry", "Sales", new { i = item.i-1, pm_ShortageWeek = item.ShortageWeek }, new AjaxOptions { UpdateTargetId = "myInquiry", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#InquiryModal" })
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

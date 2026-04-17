@@ -1,0 +1,123 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style type="text/css">
+    .SearchFields {
+        max-width: 280px;
+        width: 280px;
+        font-size: medium;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    function isEnter() {
+        var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+        if (keyCode == 13)
+            goSubmit();
+    } 
+
+    function goSubmit() {
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+        //document.getElementById('btn_search').value = "Searching...";
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        var pm_supplier_id = $('#pm_supplier_id').val();
+        var pm_target = $('#pm_target').val();
+        //alert(item_id);
+        $("#output").load('@Url.Action("Show_SupplierScorecard", "Procurement")?pm_supplier_id=' + pm_supplier_id + '&pm_target=' + pm_target);
+    } 
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<form id="submit-button"> 
+    @Html.AntiForgeryToken()
+    
+    <div class="form-inline">
+        <div class="form-group col-md-2">
+            @Html.Label("Target Decrease Percentage", htmlAttributes: new { @class = "control-label", style = "margin-right: 5px;" })
+            @Html.TextBox("pm_target", "5", new { @type = "number", @class = "form-control SearchFields", @style="text-align: right; width: 60px; max-width: 60px;" })
+        </div>
+        <div class="form-group col-md-2">
+            @Html.Label("Supplier ID", htmlAttributes: new { @class = "control-label", style = "margin-right: 5px;" })
+            @Html.TextBox("pm_supplier_id", "", new { @type = "number", @autofocus = "", @onkeypress = "isEnter()", @class = "form-control SearchFields", @style="width: 100px; max-width: 100px;" })
+        </div>
+        <div class="form-group col-md-1" style="align-items: center;">
+            <input type="button" id="btn_search" value="Search" class="btn btn-default" onclick="goSubmit()" />
+        </div>
+    </div>
+</form>
+
+
+<div id="output">
+</div>
+

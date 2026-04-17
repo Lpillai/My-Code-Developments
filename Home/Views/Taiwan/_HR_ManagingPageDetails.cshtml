@@ -1,0 +1,319 @@
+﻿@model RuntimeVariables.tw_LeaveTaking
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float columns side by side */
+    .column {
+        float: left;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    /* Style the counter cards */
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 10px 15px 1px 15px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+        font-size: medium;
+    }
+
+    tbody td {
+        font-size: large;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    .cen {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    });
+</script>
+<script type="text/javascript">
+</script>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row" style="margin-top: 10px;">
+    <div class="column" style="width: 10%;">
+        <div class="card">
+            <h3 style="text-align: center">打卡紀錄</h3>
+            
+            @if (Model.theCards != null && Model.theCards.Count() > 0)
+            {
+                <div class="cen" style="margin-top: 15px; margin-bottom: 15px;">
+                    <table>
+                        <tbody>
+                            @{ 
+                                int j = 0;
+                                foreach (var item in Model.theCards)
+                                {
+                                    j++;
+                                    <tr>
+                                        <td style="text-align: center; width: 105px; max-width: 105px;">
+                                            @Html.DisplayFor(modelItem => item.card_stamp)
+                                        </td>
+                                        <td style="text-align: center; width: 25px; max-width: 25px;">
+                                            @Html.DisplayFor(modelItem => item.z_status)
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="column" style="width: 58%;">
+        <div class="card">
+            <h3 style="text-align: center">請假紀錄</h3>
+            
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="max-width: 60px;">
+                            @if (Model.theApplys == null)
+                            {
+                                @Html.Raw("0")
+                            }
+                            else
+                            {
+                                @Model.theApplys.Count().ToString()
+                            }
+                            @*&nbsp;
+                            @Ajax.ActionLink("新增請假", "ShowLeaveTakingDetails", "Taiwan", new { pm_apply_uid = 0, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal", @class="" })*@
+                        </th>
+                        <th style="max-width: 30px;">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().apply_uid)
+                        </th>
+                        <th style="">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().day_year)
+                        </th>
+                        <th style="">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().day_name)
+                        </th>
+                        <th style="">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().day_start)
+                        </th>
+                        <th style="">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().day_end)
+                        </th>
+                        <th style="max-width: 90px; max-width: 90px;">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().day_hours)
+                        </th>
+                        <th style="max-width: 40px;">
+                            @Html.DisplayNameFor(model => model.theApplys.FirstOrDefault().sts)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model.theApplys == null || Model.theApplys.Count() <= 0)
+                        {
+                            <tr>
+                                <td colspan="8" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int i = 0;
+                            foreach (var item in Model.theApplys)
+                            {
+                                i++;
+                                string theUid = item.apply_uid.ToString("0000");
+                                <tr>
+                                    <td align="right">
+                                        @Html.Raw(i)
+                                    </td>
+                                    @if(item.day_start.Date >= DateTime.UtcNow.AddHours(8).Date)
+                                    {
+                                        <td align="center">
+                                            @Ajax.ActionLink(@theUid, "ShowLeaveTakingDetails", "Taiwan", new { pm_source = "_HR_ManagingPageDetails", pm_apply_uid = @item.apply_uid, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td align="center">
+                                            @Html.Raw(theUid)
+                                        </td>
+                                    }
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.day_year)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.day_name)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.day_start)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.day_end)
+                                    </td>
+                                    <td align="right" style="padding-right: 20px;">
+                                        @Html.DisplayFor(modelItem => item.day_hours)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.sts)
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+                    } 
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="column" style="width: 30%;">
+        <div class="card">
+            <h3 style="text-align: center">可用時數</h3>
+            
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="text-align: center">
+                            @Html.DisplayNameFor(model => model.theAvailable.FirstOrDefault().day_name)
+                            &nbsp;
+                            @Ajax.ActionLink("新增", "ShowAvailableDetails", "Taiwan", new { pm_account_id = ViewData["pm_account_id"].ToString(), pm_day_year = Int16.Parse(DateTime.Now.ToString("yyyy")), pm_day_id = 0, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal", @class="" })
+                        </th>
+                        <th style="text-align: center">
+                            @Html.DisplayNameFor(model => model.theAvailable.FirstOrDefault().available_start)
+                        </th>
+                        <th style="text-align: center">
+                            @Html.DisplayNameFor(model => model.theAvailable.FirstOrDefault().available_end)
+                        </th>
+                        <th style="text-align: center">
+                            @Html.DisplayNameFor(model => model.theAvailable.FirstOrDefault().available_hours)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model.theAvailable == null || Model.theAvailable.Count() <= 0)
+                        {
+                            <tr>
+                                <td colspan="4" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model.theAvailable)
+                            {
+                                <tr>
+                                    <td align="center">
+                                        @*@Html.DisplayFor(modelItem => item.day_name)*@
+                                        @Ajax.ActionLink(item.day_name, "ShowAvailableDetails", "Taiwan", new { pm_account_id = ViewData["pm_account_id"].ToString(), pm_day_year = item.day_year, pm_day_id = item.day_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.available_start)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.available_end)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.available_hours)
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+                    } 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

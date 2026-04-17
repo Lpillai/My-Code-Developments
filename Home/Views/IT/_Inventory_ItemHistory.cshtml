@@ -1,0 +1,122 @@
+﻿@model IEnumerable<RuntimeVariables.Inventory_History>
+
+
+
+
+<style>
+    .historyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: 80vh;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        text-align: center;
+        background-color: #eee;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&Chi;</span>
+    </button>
+    <h4 class="modal-title" id="detailsModalLabel">
+        @ViewData["item_id"].ToString()
+    </h4>
+</div>
+<div class="modal-body">
+    <div class="historyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 40px; max-width: 40px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="width: 115px; max-width: 115px;">
+                        @Html.DisplayNameFor(model => model.inv_account)
+                    </th>
+                    <th style="width: 140px; max-width: 140px;">
+                        @Html.DisplayNameFor(model => model.requisition_date)
+                    </th>
+                    @*<th style="width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.behavior)
+                    </th>*@
+                    <th style="width: 400px; max-width: 400px;">
+                        @Html.DisplayNameFor(model => model.history_text)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model != null)
+                    {
+                        int i = Model.Count();
+                        //string theText;
+
+                        foreach (var item in Model)
+                        {
+                            //theText = "";
+
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i.ToString())
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.inv_account)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.requisition_date)
+                                </td>
+                                @*<td align="center">
+                                    @Html.DisplayFor(modelItem => item.behavior)
+                                </td>
+                                @switch (item.behavior)
+                                {
+                                    case "Rename": 
+                                        theText = "Renamed to: " + item.item_id;
+                                        break;
+                                    case "Purchase": 
+                                        theText = "New purchased: " + item.item_id;
+                                        break;
+                                    case "Move": 
+                                        theText = "Moved to " + item.bin_hierarchy;
+                                        break;
+                                    case "Requisition": 
+                                        theText = "Requisitioned " + item.quantity + " by " + item.requisition_user;
+                                        break;
+                                    case "Scrap": 
+                                        theText = "Scrapped";
+                                        break;
+                                    case "Withdraw": 
+                                        theText = "Withdrew to " + item.bin_hierarchy;
+                                        break;
+                                    default: 
+                                        theText = "n/a";
+                                        break;
+                                }
+                                <td>
+                                    @Html.Raw(theText)
+                                </td>*@
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.history_text)
+                                </td>
+                            </tr>
+
+                            i--;
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

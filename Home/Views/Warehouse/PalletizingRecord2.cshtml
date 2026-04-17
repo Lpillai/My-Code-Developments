@@ -1,0 +1,165 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+    })
+</script>
+<script type="text/javascript">
+    function onEnterPressed(event) {
+        if (event.keyCode === 13) {
+            goSearch();
+        }
+    }
+
+    function goSearch() {
+        //alert('goSearch');
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        var pick_ticket_no = $("#pick_ticket_no").val();
+        $("#output").load('@Url.Action("ShowPalletizingRecord2", "Warehouse")?pm_pick_ticket_no=' + pick_ticket_no);
+    }
+    
+    function pageLoad() {
+        var pm_pick_ticket_no = '@ViewData["pick_ticket_no"]';
+        if (pm_pick_ticket_no != '')
+            goSearch();
+    }
+    window.onload = pageLoad;
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("GoUpdate_PackingPerson", "Warehouse", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">Packing Person</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group" style="padding-top: 8px;">
+                            @Html.Label("User Name", htmlAttributes: new { @class = "control-label col-xs-3", @style = "margin-top: 3px; text-align: right;" })
+                            <input type="text" name="pm_packing_person" class="col-xs-6" style="padding: 0 5px; font-size: medium;" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Update" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div style="font-size: medium; margin-bottom: 8px; ">
+    <a href="#myModal" data-toggle="modal">Packing Person</a>:
+    @Html.Raw(ViewData["packing_person"])
+</div>
+
+
+
+
+<div class="form-inline form-group">
+    <input type="number" id="pick_ticket_no" name="pm_pick_ticket_no" value="@ViewData["pick_ticket_no"]" autofocus autocomplete="off" onkeyup="onEnterPressed(event);" placeholder="Pick Ticket No" class="form-control col-xs-3" style="font-size: medium; width: 130px; max-width: 130px;" />
+    &nbsp;&nbsp;
+    <input type="button" id="btn_search" value="Search" onclick="goSearch();" @(string.IsNullOrWhiteSpace(ViewData["packing_person"].ToString()) ? "disabled" : "") class="btn btn-default" />
+</div>
+
+
+<div id="output">
+    @if (string.IsNullOrWhiteSpace(ViewData["packing_person"].ToString()))
+    {
+        <div style="font-size: larger; color: darkorange;">
+            @Html.Raw("※ Please set Packing Person first.")
+        </div>
+    }
+</div>
+

@@ -1,0 +1,48 @@
+﻿
+
+<style>
+</style>
+
+
+<script type="text/javascript">
+</script>
+
+
+@using (Html.BeginForm("Inventory_GoItemAction", "IT", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_bin_cd", ViewData["pm_bin_cd"].ToString(), null)
+    @Html.Hidden("pm_history.dpt", ViewData["pm_dpt"].ToString(), null)
+    @Html.Hidden("pm_history.behavior", "Update", null)
+    @Html.Hidden("pm_history.item_uid", ViewData["pm_item_uid"].ToString(), null)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @Html.Raw("Update")
+            @Html.Raw(ViewData["pm_item_id"].ToString())
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.Label("Name", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-9">
+                    @Html.TextBox("pm_history.item_id", ViewData["pm_item_id"].ToString(), new { @type = "text", required="required", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.Label("Description", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-9">
+                    @Html.TextArea("pm_history.history_text", ViewData["pm_item_desc"].ToString(), new { required="required", @autocomplete = "off", @rows = "5", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Update this item?');" />
+    </div>
+}
+

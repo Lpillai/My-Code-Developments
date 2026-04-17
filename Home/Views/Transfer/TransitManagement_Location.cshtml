@@ -1,0 +1,207 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<BuySheet_TransitTime_Location>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+*@
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 150px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="bulkModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content" id="myBulk">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+    <div class="row" style="padding: 0 10px 0 15px;">
+        @Ajax.ActionLink("Mirror Location Settings", "ShowTransit_LocationMirror", "Transfer", null, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal", @class = "btn btn-default action_btn" })
+        @Ajax.ActionLink("Create One Record", "ShowTransit_LocationDetails", "Transfer", new { pm_RRN = 0 }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal", @class = "btn btn-default action_btn" })
+    </div>
+
+
+    <div class="bodyScrollY">
+        <table class="table table-hover">
+            <colgroup>
+                <col id="col_01" style="width: 60px;">
+                <col id="col_03" style="width: 160px;">
+                <col id="col_04" style="width: 30px;">
+                <col id="col_05" style="width: 160px;">
+                <col id="col_06" style="width: 30px;">
+                <col id="col_07" style="width: 20px;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th style="text-align: center;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.Label("From Location")
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.to_loc_id)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.to_loc_name)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.transit_days)
+                    </th>
+                    <th style="text-align: center;">
+                        &nbsp;
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model != null)
+                    {
+                        var records = 0;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td align="center">
+                                    @Html.ValueFor(modelItem => item.i)
+                                </td>
+                                @if (records < item.i) 
+                                { 
+                                    <td rowspan="@item.group_count" style="padding-left: 15px;">
+                                        @Ajax.ActionLink(item.from_loc_id.ToString() + " - " + item.from_loc_name, "ShowTransit_LocationBulk", "Transfer", new { pm_from_loc_id = item.from_loc_id }, new AjaxOptions { UpdateTargetId = "myBulk", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#bulkModal" })
+                                    </td>
+                                    records += item.group_count;
+                                }
+                                <td align="center">
+                                    @Html.ValueFor(modelItem => item.to_loc_id)
+                                </td>
+                                <td>
+                                    @Html.ValueFor(modelItem => item.to_loc_name)
+                                </td>
+                                <td align="right" style="padding-right: 25px;">
+                                    @Html.ValueFor(modelItem => item.transit_days)
+                                </td>
+                                <td align="right">
+                                    @Html.ActionLink("Delete", "GoDeleteTransit_Location", "Transfer", new { pm_RRN = @item.i }, new { onclick = "return confirm('Are you sure you want to delete this record?');", @class = @attr_css })
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

@@ -1,0 +1,300 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<tw_LeaveApproval>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 160px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        text-align: center;
+        z-index: 1;
+        font-size: medium;
+        background-color: #eee;
+    }
+
+    tbody td {
+        font-size: large;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    label {
+        white-space: pre-wrap;
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="specialModal" tabindex="-1" role="dialog" aria-labelledby="specialModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="mySpecial">
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+    
+
+<div style="width: 98%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    @if (Model == null || Model.Count() <= 0)
+                    {
+                        <th style="width: 25px; max-width: 25px;">
+                            @Html.Raw("0")
+                        </th>
+                    }
+                    else
+                    {
+                        <th style="width: 25px; max-width: 25px;">
+                            @Model.Count().ToString()
+                        </th>
+                    }
+                    <th style="width: 200px; max-width: 200px;">
+                        @*@Html.DisplayNameFor(model => model.emp_name)*@
+                        @Html.Raw("姓名<br>Name")
+                    </th>
+                    <th style="width: 150px; max-width: 150px;">
+                        @*@Html.DisplayNameFor(model => model.day_name)*@
+                        @Html.Raw("假別<br>Type")
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @*@Html.DisplayNameFor(model => model.day_start)*@
+                        @Html.Raw("起始時間<br>Start Time")
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @*@Html.DisplayNameFor(model => model.day_end)*@
+                        @Html.Raw("截止時間<br>End Time")
+                    </th>
+                    <th style="width: 80px; max-width: 80px;">
+                        @*@Html.DisplayNameFor(model => model.day_hours)*@
+                        @Html.Raw("請休時數<br>Hours")
+                    </th>
+                    <th style="width: 680px; max-width: 680px;">
+                        @Html.Raw("簽核<br>Approval Or Rejection")
+                    </th>
+                    <th>
+                        @*@Html.DisplayNameFor(model => model.day_reason)*@
+                        @Html.Raw("事由<br>Reason")
+                    </th>
+                    <th style="width: 110px; max-width: 110px;">
+                        @*@Html.DisplayNameFor(model => model.attach_added)*@
+                        @Html.Raw("附件<br>Attachment")
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    {
+                        <tr>
+                            <td colspan="9" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.emp_name)
+                                </td>
+                                <td align="center" style="font-size: large;">
+                                    @Html.DisplayFor(modelItem => item.day_name)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.day_start)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.day_end)
+                                </td>
+                                <td align="right" style="padding-right: 10px;">
+                                    @Html.DisplayFor(modelItem => item.day_hours)
+                                </td>
+                                <td align="center" style="padding: 0 0 0 10px; text-align: center;">
+                                    <form id="ApprovalForm_@i" action="" method="post">
+                                        @Html.AntiForgeryToken()
+                                        @*@Html.HiddenFor(model => item.apply_uid)*@
+                                        <input type="hidden" name="apply_uid" value="@item.apply_uid" />
+                                        <div class="form-group" style="margin: 0px; padding: 0px;">
+                                            <div class="col-md-2" style="text-align: center;">
+                                                @if ((new [] { 6, 7, 9 }).Contains(item.day_id) && (bool)ViewData["isHR"] && item.av_hours <= 0)
+                                                {
+                                                    @Ajax.ActionLink("特殊給假", "ShowLeaveTakingApprovalSpecial", "Taiwan", new { pm_apply_uid = item.apply_uid }, new AjaxOptions { UpdateTargetId = "mySpecial", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#specialModal", @class="btn btn-default action_btn" })
+                                                }
+                                                else
+                                                {
+                                                    @*<input type="submit" name="LeaveApprovalAction:Approve" value="核可 Approve" @attr_html class="btn btn-primary" style="font-size: medium;" />*@
+                                                    <input type="submit" id="btnSubmit_a_@i" value="核可 Approve" @attr_html onclick="OnClickApprove(@i);" class="btn btn-primary" style="font-size: medium;" />
+                                                }
+                                            </div>
+                                            <div class="col-md-1">
+                                                &nbsp;
+                                            </div>
+                                            @Html.TextBox("pm_reason", "", new { @type = "text", placeholder = "退回原因 Rejected Reason", @maxlength = "20", @class = "form-control col-md-7", style="font-size: medium; margin-top: 1px;" })
+                                            @*<div class="col-md-7" style="padding-top: 2px; text-align: center;">
+                                                @Html.TextBox("pm_reason", "", new { @type = "text", placeholder = "退回原因", @maxlength = "20", @class = "form-control", style="font-size: medium; width: 200px; max-width: 200px;" })
+                                            </div>*@
+                                            <div class="col-md-2">
+                                                @*<input type="submit" name="LeaveApprovalAction:Reject" value="退回 Reject" @attr_html class="btn btn-default" style="font-size: medium;" onclick="return confirm('確認退回此筆申請？\r\nAre you sure you want to reject this application?');" />*@
+                                                <input type="submit" id="btnSubmit_r_@i" name="LeaveApprovalAction:Reject" value="退回 Reject" @attr_html class="btn btn-default" style="font-size: medium;" onclick="OnClickReject(@i);" />
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.day_reason)
+                                </td>
+                                <td align="center">
+                                    @if(item.attach_added)
+                                    {
+                                        @Html.ActionLink("Download", "Get_attachment", "Taiwan", new { pm_attach_uid = item.attach_uid }, new { target = "_blank" })
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+    function OnClickApprove(i) {
+        document.getElementById('btnSubmit_a_'+i).setAttribute('disabled', 'disabled');
+        document.getElementById('btnSubmit_r_'+i).setAttribute('disabled', 'disabled');
+        document.getElementById('btnSubmit_a_'+i).value = "Processing...";
+        document.getElementById('ApprovalForm_'+i).action = 'Go_ApproveApply';
+        document.getElementById('ApprovalForm_'+i).submit();
+    }
+
+
+    function OnClickReject(i) {
+        if (confirm('確認退回此筆申請？\r\nAre you sure you want to reject this application?') == false)
+            return false;
+
+        document.getElementById('btnSubmit_a_'+i).setAttribute('disabled', 'disabled');
+        document.getElementById('btnSubmit_r_'+i).setAttribute('disabled', 'disabled');
+        document.getElementById('btnSubmit_r_'+i).value = "Processing...";
+        document.getElementById('ApprovalForm_'+i).action = 'Go_RejectApply';
+        document.getElementById('ApprovalForm_'+i).submit();
+        return true;
+    }
+</script>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

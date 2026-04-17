@@ -1,0 +1,300 @@
+﻿@model IEnumerable<RuntimeVariables.BuyNote>
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Ajax.BeginForm("EditNote", "Procurement",
+                        new AjaxOptions()
+                        {
+                            UpdateTargetId = "toUpdate",
+                            HttpMethod = "Post",
+                            OnSuccess = ""
+                        })
+                )
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="noteModalLabel">Update note for #@ViewData["viewID"]</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="pm_Note_cluster" value="@ViewBag.cluster">
+                    @Html.Hidden("pm_Note_viewID", ViewData["viewID"])
+                    @Html.Hidden("pm_Note_entryID", ViewData["entryID"])
+                    @Html.Hidden("pm_Note_notesID", "", new { @id = "pm_Note_notesID" })
+                    @Html.Hidden("pm_Upd_user", "", new { @id = "pm_Upd_user" })
+                    <textarea id="pm_Upd_Notes" name="pm_Upd_Notes" rows="5" maxlength="255" class="form-control"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="btnUpdNote" class="btn btn-primary" data-bs-dismiss="modal" @attr_html>Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<style>
+    div.note {
+        border-radius: 5px;
+        border: thin solid darkseagreen;
+        padding: 7px 10px 0px 10px;
+        margin: 2px 0 3px 0;
+    }
+
+    div.read {
+        /*background-color: darkseagreen;*/
+        background-color: rgba(197, 222, 204, .3);
+    }
+
+    span.usr {
+        font-family: 'Verdana';
+        font-style: italic;
+        font-size: 13px;
+        margin-left: 10px;
+        color: dimgray;
+    }
+
+    span.dt {
+        font-family: 'Microsoft JhengHei UI Light';
+        font-style: italic;
+        font-size: 12px;
+        color: dimgrey;
+    }
+
+    div.updPanel {
+        float: right;
+        width: 50px;
+        text-align: right;
+        margin: 0 -3px 5px 0;
+        /*border: 1px solid black;*/
+    }
+
+    .notePanel {
+        font-size: 15px;
+    }
+
+    .noteReadOnly {
+        border: 0 none transparent;
+        background-color: transparent;
+    }
+
+    .noteEditMode {
+        border: 1px solid lightgrey;
+        background-color: white;
+        display: inline-block;
+        line-height: 20px;
+    }
+
+    .noteBlock {
+        width: 100%;
+    }
+
+    .noteBlockEdit {
+        width: 90%;
+    }
+
+    .btnSave {
+        margin: -3px 3px 0 -5px;
+        padding: 0 0 0 -7px;
+        display: none;
+        border: 0px none transparent; /*
+        border: 1px solid lightgrey;*/
+        background-color: transparent;
+        width: 20px;
+    }
+
+    .alert {
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+    }
+
+        .alert.Success {
+            background-color: #04AA6D;
+        }
+
+        .alert.Info {
+            background-color: #2196F3;
+        }
+
+        .alert.Warning {
+            background-color: #ff9800;
+        }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+
+
+
+
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<script type='text/javascript'>
+    function panelClicked(theNo) {
+        document.getElementById('div' + theNo).style.display = 'inline-block';
+        document.getElementById('link' + theNo).style.display = 'none';
+
+        setTimeout(
+            function () {
+                document.getElementById('div' + theNo).style.display = 'none';
+                document.getElementById('link' + theNo).style.display = 'inline-block';
+            },
+            2500
+        );
+    }
+
+
+    function enableEdit(theNo) {
+        var i;
+        var theElement = document.getElementById('divNotes').querySelectorAll('.noteEditMode');
+        for (i = 0; i < theElement.length; i++) {
+            theElement[i].setAttribute('readonly', '');
+            theElement[i].className = 'noteReadOnly';
+        }
+
+        theElement = document.getElementById('divNotes').querySelectorAll('.noteBlockEdit');
+        for (i = 0; i < theElement.length; i++) {
+            theElement[i].className = 'noteBlock';
+        }
+
+        document.getElementById('blk' + theNo).className = 'noteBlockEdit';
+        document.getElementById('area' + theNo).className = 'noteEditMode';
+        document.getElementById('area' + theNo).removeAttribute('readonly');
+        //document.getElementById('btn' + theNo).style.display = 'inline-block';
+    }
+
+
+    function whenSubmiting(theNo) {
+        document.getElementsByName('text' + theNo).value = (document.getElementById('area' + theNo).innerHTML).trim();
+        alert(document.getElementsByName('text' + theNo).value);
+        return true;
+    }
+
+
+    function edt(theNoteID) {
+        var moduleList = @Html.Raw(Json.Encode(@Model));
+
+        document.getElementById('pm_Note_notesID').value = theNoteID;
+        for (var i = 0; i < moduleList.length; i++) {
+            if (moduleList[i].notesID == theNoteID) {
+                document.getElementById('pm_Upd_Notes').value = moduleList[i].notes;
+                document.getElementById('pm_Upd_user').value = moduleList[i].user;
+            }
+        }
+    }
+
+
+    function validateEdit(form) {
+        if (document.getElementById('pm_Notes').value == "") {
+            alert('Please fill up the note column.');
+            return false;
+        }
+    }
+
+</script>
+<script>
+    $('#btnUpdNote').click(function () {
+        $('#noteModal').modal('hide');
+    });
+</script>
+
+
+
+
+@if (ViewBag.Source != "EditBuy")
+{
+    <div style="text-align: center;">
+        <h4>
+            @ViewData["viewID"]
+        </h4>
+        @if (ViewBag.Source == "BuySheet" && ViewBag.newCount > 0)
+        {
+            @Ajax.ActionLink("Mark as read", "AsReadNote", "Procurement", new { cluster = ViewBag.cluster, pm_entryID = ViewData["entryID"], pm_viewID = ViewData["viewID"] }, new AjaxOptions { UpdateTargetId = "toUpdate", HttpMethod = "Post" }, new { @class = "btn btn-default action_btn " + @attr_css })
+        }
+    </div>
+}
+
+
+<div id="divNotes">
+    @foreach (var item in Model)
+    {
+        <div class="note read">
+            <span class="usr">@Html.DisplayFor(modelItem => item.user),</span>
+            <span class="dt">@Html.DisplayFor(modelItem => item.createDate)</span>
+
+            @if (ViewBag.Source == "BuySheet")
+            {
+                <div id="@("link" + item.notesID)" class="updPanel" style="display: inline-block;">
+                    <a href="javascript:panelClicked(@item.notesID);" class="updLink notePanel @attr_css">&nbsp;@Html.Raw(((char)8942).ToString())&nbsp;</a>
+                </div>
+                <div id="@("div" + item.notesID)" class="updPanel" style="display: none;">
+                    @Ajax.ActionLink(((char)10008).ToString(), "DeleteNote", "Procurement", new { cluster = ViewBag.cluster, pm_entryID = item.entryID, pm_viewID = item.viewID, pm_notesID = item.notesID }, new AjaxOptions { UpdateTargetId = "toUpdate", HttpMethod = "Post" }, new { @class = "notePanel " + @attr_css })
+                    <a href="#noteModal" class="notePanel" data-toggle="modal" onclick="edt(@item.notesID);">&nbsp;@Html.Raw(((char)9998).ToString())&nbsp;</a>
+                </div>
+            }
+
+            <div id="@("blk"+item.notesID)" class="noteBlock" style="display: inline-block;">
+                <p style="margin: 2px 0 8px 0;">
+                    <span id="@("area"+item.notesID)" name="pm_area_notes" class="textarea noteReadOnly" role="textbox" style="white-space: pre-line">@Html.Raw(item.notes)</span>
+                </p>
+            </div>
+        </div>
+    }
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    var msgType = TempData["msgType"];
+
+    <div class="alert @msgType">
+        <span class="closebtn">&times;</span>
+        <strong>@msgType!</strong><br>
+        @TempData["message"]
+    </div>
+}
+

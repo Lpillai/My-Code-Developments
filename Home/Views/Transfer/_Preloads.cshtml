@@ -1,0 +1,159 @@
+﻿@model IEnumerable<RuntimeVariables.Transfer_Preload>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 160px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+</style>
+
+
+
+    
+<div style="width: 85%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                    </th>
+                    @*<th>
+                        @Html.DisplayNameFor(model => model.order_date)
+                    </th>*@
+                    <th>
+                        @Html.DisplayNameFor(model => model.order_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.po_no)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.lines)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.cut_off_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ship_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.expected_date)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.wgt)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.carrier)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.route_code)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.appr_so)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.appr_po)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    { 
+                        <tr>
+                            <td colspan="12" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                @*<td align="center">
+                                    @Html.DisplayFor(modelItem => item.order_date)
+                                </td>*@
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.order_no)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.po_no)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.lines)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.cut_off_date)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.ship_date)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.expected_date)
+                                </td>
+                                <td align="right">
+                                    @Html.DisplayFor(modelItem => item.wgt)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.carrier)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.route_code)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.appr_so)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.appr_po)
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

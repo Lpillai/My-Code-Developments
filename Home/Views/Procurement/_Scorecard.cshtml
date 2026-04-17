@@ -1,0 +1,870 @@
+﻿@using RuntimeVariables;
+@model SupplierScorecard_finished
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY1 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: 280px;
+    }
+    .bodyScrollY2 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: calc(100vh - 545px);
+    }
+
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: medium;
+        max-height: 20px;
+        overflow: hidden;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 15px -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+</style>
+
+
+<br><br>
+
+
+@if(Model.DataFlag.r == 1)
+{
+    @Html.Raw(ViewData["supplier_name"])
+
+    //Spend
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Spend</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY1">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.Raw("Category")
+                                    </th>
+                                    <th scope="col" style="width: 140px; max-width: 140px;">
+                                        @Html.Raw("Subtotal")
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.total_po_placed.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.Raw(String.Format("${0:#,##0.00}", Model.total_po_placed.subtotal))
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (decimal)Model.total_po_placed.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.total_po_placed, null);
+                                        <td align="right">
+                                            @Html.Raw(String.Format("${0:#,##0}", thisYM))
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.yoy_total_po_placed.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.Raw(String.Format("${0:#,##0.00}", Model.yoy_total_po_placed.subtotal))
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (decimal)Model.yoy_total_po_placed.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.yoy_total_po_placed, null);
+                                        <td align="right">
+                                            @Html.Raw(String.Format("${0:#,##0}", thisYM))
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.po_lines_issued.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.po_lines_issued.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.po_lines_issued.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.po_lines_issued, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.yoy_po_lines_issued.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.yoy_po_lines_issued.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.yoy_po_lines_issued.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.yoy_po_lines_issued, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    //Pricing top 5 parts
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Pricing top 5 parts</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY2">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.price[0].item)
+                                    </th>
+                                    <th style="width: 90px; max-width: 90px;">
+                                        @Html.DisplayNameFor(model => model.price[0].unit_price)
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th scope="col" style="width: 100px; max-width: 100px;">
+                                        @Html.DisplayNameFor(model => model.price[0].sub_total)
+                                    </th>
+                                    <th scope="col" style="width: 100px; max-width: 100px;">
+                                        @Html.DisplayNameFor(model => model.price[0].grand_total)
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.DisplayNameFor(model => model.price[0].target)
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.DisplayNameFor(model => model.price[0].actual)
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if (Model.price == null || Model.price.Count() <= 0)
+                                    { 
+                                        <tr>
+                                            <td colspan="18" style="text-align:center;">No data found.</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        foreach (var item in Model.price)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <table>
+                                                        <tr><td style="font-weight: 600;">@Html.DisplayFor(modelItem => item.item)</td></tr>
+                                                        <tr><td style="font-weight: 100;">@Html.DisplayFor(modelItem => item.supplier_part_no)</td></tr>
+                                                    </table>
+                                                </td>
+                                                <td align="right">
+                                                    @Html.DisplayFor(modelItem => item.unit_price)
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym01 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym01))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym02 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym02))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym03 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym03))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym04 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym04))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym05 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym05))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym06 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym06))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym07 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym07))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym08 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym08))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym09 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym09))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym10 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym10))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym11 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym11))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.ym12 == 0 ? "" : String.Format("{0:#,##0.00}", item.ym12))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.DisplayFor(modelItem => item.sub_total)
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.grand_total == 0 ? "" : String.Format("{0:#,##0.00}", item.grand_total))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.target == 0 ? "" : String.Format("{0:#,##0.0000}", item.target))
+                                                </td>
+                                                <td align="right">
+                                                    @Html.Raw(item.actual == 0 ? "" : String.Format("{0:#,##0.00}", item.actual))
+                                                </td>
+                                                <td>
+                                                    &nbsp;
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    //Lines Received
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Lines Received</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY1">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.Raw("Category")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw("Subtotal")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.total_lines.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.total_lines.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.total_lines.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.total_lines, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.lines_late.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.lines_late.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.lines_late.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.lines_late, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.lines_early.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.lines_early.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.lines_early.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.lines_early, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.lines_on_time.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.lines_on_time.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (decimal)Model.lines_on_time.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.lines_on_time, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    //Receipt Discrepancies
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Receipt Discrepancies</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY1">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.Raw("Category")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw("Subtotal")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Freight_Damages_found_at_Receipt.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.Freight_Damages_found_at_Receipt.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.Freight_Damages_found_at_Receipt.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.Freight_Damages_found_at_Receipt, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.shipments_Missing_Documents.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.shipments_Missing_Documents.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.shipments_Missing_Documents.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.shipments_Missing_Documents, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.shipments_with_quantity_discrepancies.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.shipments_with_quantity_discrepancies.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.shipments_with_quantity_discrepancies.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.shipments_with_quantity_discrepancies, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    //Quality
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Quality</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY1">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.Raw("Category")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw("Subtotal")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Parts_with_Quality_Defects.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.Parts_with_Quality_Defects.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.Parts_with_Quality_Defects.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.Parts_with_Quality_Defects, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.corrective_actions.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.corrective_actions.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.corrective_actions.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.corrective_actions, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    //Reponsiveness
+    <div class="row">
+        <div class="column" style="width: 99%;">
+            <div class="card">
+                <h4 style="text-align: center">Reponsiveness</h4>
+                <div style="display: block; margin-left: auto; margin-right: auto;">
+                    <div id="theSheet" class="bodyScrollY1">
+                        <table class="table table-hover" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.Raw("Category")
+                                    </th>
+                                    <th scope="col" style="width: 120px; max-width: 120px;">
+                                        @Html.Raw("Summary (Average)")
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[0])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[1])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[2])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[3])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[4])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[5])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[6])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[7])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[8])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[9])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[10])
+                                    </th>
+                                    <th scope="col" style="width: 90px; max-width: 90px;">
+                                        @Html.Raw(Model.ym[11])
+                                    </th>
+                                    <th style="width: 10px; max-width: 10px;">
+                                        &nbsp;
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.number_of_rfq_sent.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.number_of_rfq_sent.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.number_of_rfq_sent.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.number_of_rfq_sent, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.response_time.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.response_time.average)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.response_time.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.response_time, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.number_of_rfq_recommended_forward.category)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => Model.number_of_rfq_recommended_forward.subtotal)
+                                    </td>
+                                    @for (int j = 1; j <= 12; j++)
+                                    {
+                                        var thisYM = (int)Model.number_of_rfq_recommended_forward.GetType().GetProperties().First(w => w.Name == "ym" + j.ToString("00")).GetValue(Model.number_of_rfq_recommended_forward, null);
+                                        <td align="right">
+                                            @Html.DisplayFor(modelItem => thisYM)
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

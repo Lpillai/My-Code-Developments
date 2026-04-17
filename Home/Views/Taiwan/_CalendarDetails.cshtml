@@ -1,0 +1,83 @@
+﻿@model RuntimeVariables.tw_Calendar
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+</style>
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+
+@using (Html.BeginForm("goSaveCalendar", "Taiwan", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @*<input type="hidden" name="pmCRUD" value="@ViewBag.pmCRUD">*@
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            <span>新增</span>
+            @*@if ((bool)ViewData["isNew"])
+            {
+                <span>New</span>
+            }
+            else
+            {
+                <span>&nbsp;</span>
+            }*@
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.holiday, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input type="date" name="holiday" class="col-md-8 form-control" autocomplete="off" value="@DateTime.Today.ToString("yyyy-MM-dd")" style="font-size: medium;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.start_time, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input type="time" name="start_time" class="col-md-8 form-control" autocomplete="off" style="font-size: medium;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.end_time, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input type="time" name="end_time" class="col-md-8 form-control" autocomplete="off" style="font-size: medium;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input type="text" name="z_memo" class="col-md-8 form-control" autocomplete="off" value="@Model.z_memo" style="font-size: medium;" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="儲存" @attr_html class="btn btn-primary" onclick="return confirm('儲存日期？');" />
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+    var message = @Html.Raw(Json.Encode(TempData["message"]));
+    alert(message);
+    </script>
+}
+

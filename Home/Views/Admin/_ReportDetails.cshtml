@@ -1,0 +1,223 @@
+﻿@model RuntimeVariables.ReportItem
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+    textarea {
+        padding: 10px;
+        line-height: 1.5;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 1px 1px 1px #999;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#output").ready(function () { GetList_SSRS_id(); OnOutputChange(); });
+        $("#output").change(function () { OnOutputChange(); });
+        
+        function GetList_SSRS_id() {
+            var items = '';
+            var ssrs_id = @Html.Raw(Json.Encode(@Model.ssrs_id));
+
+            $.ajax({
+                cache: false,
+                url: '@Url.Action("GetSSRSList", "Admin")',
+                data: {},
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: JSON,
+                success: function (result) {
+                    $(result).each(function () {
+                        items += "<option value='" + this.Value + "'>" + this.Text + "</option>";
+                    });
+                    $("#ssrs_id").html(items);
+                    $('#ssrs_id').val(ssrs_id);
+                },
+                error: function (data) {
+                    alert("SSRS data not found.");
+                }
+            });
+        }
+
+        function OnOutputChange() {
+            if ($("#output").val() == "query" || $("#output").val() == "download") {
+                $("#run").prop("disabled", false);
+            }
+            else {
+                $("#run").prop("disabled", true);
+            }
+
+            if ($("#output").val() == "query") {
+                $("#ssrs_id").prop("disabled", true);
+            }
+            else {
+                $("#ssrs_id").prop("disabled", false);
+            }
+        }
+    });
+</script>
+
+
+
+
+<script type="text/javascript">
+    var cluster = @Html.Raw(Json.Encode(@Model.cluster));
+    var output = @Html.Raw(Json.Encode(@Model.output));
+
+    var selectElement = document.getElementById("cluster");
+    for (var i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].value === cluster) {
+            selectElement.selectedIndex = i;
+            break;
+        }
+    }
+
+    selectElement = document.getElementById("output");
+    for (var j = 0; j < selectElement.options.length; j++) {
+        if (selectElement.options[j].value === output) {
+            selectElement.selectedIndex = j;
+            break;
+        }
+    }
+</script>
+
+
+
+
+@using (Html.BeginForm("GoReportSave", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pmCRUD" value="@ViewBag.pmCRUD">
+    @Html.HiddenFor(model => model.report_id)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @if ((bool)ViewData["isNew"])
+            {
+                <span>New</span>
+            }
+            else
+            {
+                <span>&nbsp;</span>
+            }
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.cluster, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @*<input name="cluster" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.cluster" type="text" style="font-size: 14px;" />*@
+                @Html.DropDownList("cluster", (SelectList)ViewData["cluster"], new { @class = "form-control col-md-8", style = "font-size: 14px;" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.report_name, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input name="report_name" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.report_name" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.output, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @*@Html.HiddenFor(model => model.output)
+                <select id="opt_output" name="opt_output" class="col-md-8 form-control" style="font-size: 14px;" onchange="OnDropDownSelected();">*@
+                <select id="output" name="output" class="col-md-8 form-control" style="font-size: 14px;">
+                    <option value="download">Download File</option>
+                    <option value="embed">Embedded SSRS</option>
+                    <option value="query">Further querying</option>
+                    <option value="tab">PDF in new tab</option>
+                </select>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ssrs_id, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @*<input id="ssrs_id_txt" name="ssrs_id_txt" type="text" readonly value="@Model.ssrs_id" autocomplete="off" class="col-md-8 input-sm form-control" style="font-size: 14px;" />*@
+                <select id="ssrs_id" name="ssrs_id" disable class="col-md-8 form-control input-sm" style="font-size: 14px;"></select>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.run, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <input id="run" name="run" class="col-md-8 input-sm form-control" autocomplete="off" value="@Model.run" type="text" style="font-size: 14px;" />
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.param, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <textarea name="param" placeholder="Parameters here" rows="4" class="col-md-4 input-sm form-control" style="font-size: 14px;">@Html.Raw(Model.param)</textarea>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <textarea name="z_memo" placeholder="Note here" rows="4" class="col-md-4 input-sm form-control" style="font-size: 14px;">@Html.Raw(Model.z_memo)</textarea>
+            </div>
+            @if (!(bool)ViewData["isNew"])
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_date, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                    <span class="col-md-4" style="margin: 5px 0 0 0;">@Html.ValueFor(model => model.z_date)</span>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.z_usr, htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                    <span class="col-md-4" style="margin: 5px 0 0 0;">@Html.ValueFor(model => model.z_usr)</span>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" @attr_html class="btn btn-primary" onclick="return confirm('Save this report item?');" />
+    </div>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+    var message = @Html.Raw(Json.Encode(TempData["message"]));
+    alert(message);
+    </script>
+}
+

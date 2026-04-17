@@ -1,0 +1,50 @@
+﻿@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+@using (Html.BeginForm("GoMirrorTransitTime_Location", "Transfer", FormMethod.Post, new { id = "transitForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            <span>Mirror Location Settings</span>
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.Label("Source", htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewData["List_SourceLocation"] != null)
+                {
+                    @Html.DropDownList("source_loc_id", (SelectList)ViewData["List_SourceLocation"], new { id = "source_loc_id", @class = "form-control col-md-8", style = "font-size: 16px;" })
+                }
+            </div>
+            <div class="form-group">
+                @Html.Label("Target", htmlAttributes: new { @class = "col-md-4", @style = "text-align: right; margin: 5px 0 0 0;" })
+                @if (ViewData["List_TargetLocation"] != null)
+                {
+                    @Html.DropDownList("target_loc_id", (SelectList)ViewData["List_TargetLocation"], new { id = "target_loc_id", @class = "form-control col-md-8", style = "font-size: 16px;" })
+                }
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Save mirroring?');" @attr_html />
+    </div>
+}
+

@@ -1,0 +1,684 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<Buy>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+    ViewBag.Source = "BuyArchive";
+}
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+@if ((bool)ViewBag.takeSession)
+{
+    <h4>
+        @ViewBag.Path
+    </h4>
+}
+else
+{
+    <h4>
+        @ViewBag.PageName
+    </h4>
+}
+
+
+
+<div class="modal fade" id="splitsModal" tabindex="-1" role="dialog" aria-labelledby="splitsModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="mySplits" style="padding: 10px 50px 10px 50px;">
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="filtersModal" tabindex="-1" role="dialog" aria-labelledby="filtersModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="myFilters">
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<style>
+    table.detailed {
+        border-spacing: 20px 1px;
+        border-collapse: separate;
+    }
+
+    .action_btn {
+        font-size: 15px;
+    }
+
+    /* Set a fixed scrollable wrapper */
+    .tableScroll {
+        height: calc(100vh - 150px);
+        width: calc(100vw - 30px);
+        overflow: auto;
+        display: inline-block;
+    }
+
+    .noteScrollY {
+        display: none;
+        width: 265px;
+        vertical-align: top;
+        overflow-x: hidden;
+        padding: 0 0 0 5px;
+    }
+
+    .noteList {
+        width: 100%;
+        height: calc(100vh - 150px);
+        overflow-x: hidden;
+    }
+
+    textarea {
+        padding: 10px;
+        max-width: 100%;
+        line-height: 1.5;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-shadow: 1px 1px 1px #999;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background-color: #eee;
+        z-index: 1;
+    }
+
+        thead th:nth-child(3) {
+            left: 0;
+            z-index: 3;
+        }
+
+        thead th:nth-child(4) {
+            left: 60px;
+            z-index: 3;
+        }
+
+    tbody th:nth-child(3) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    tbody th:nth-child(4) {
+        position: sticky;
+        left: 60px;
+        z-index: 2;
+        background-color: white;
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    table {
+        border-collapse: collapse;
+    }
+/*
+    td, th {
+        padding: 6px 2px 0 2px; 
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+*/
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+    td.display {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+
+
+
+<script type='text/javascript'>
+    function yesnoCheck() {
+        if (document.getElementById('yesCheck').checked) {
+            document.getElementById('ifYes').style.display = 'table-cell';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 300px)';
+        }
+        else {
+            document.getElementById('ifYes').style.display = 'none';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 30px)';
+        }
+    }
+
+
+    function ScrollPosition() {
+        var divElement = document.getElementById('toUpdate');
+        divElement.scroll({
+            top: divElement.scrollHeight,//scroll to bottom of the element
+            //top: 0,//scroll to top of the element
+            behavior: 'smooth' //auto, smooth, initial, inherit
+        });
+    }
+
+
+    function getOne(theNo) {
+        if (!document.getElementById('yesCheck').checked) {
+            document.getElementById('yesCheck').checked = true;
+            document.getElementById('ifYes').style.display = 'table-cell';
+            document.getElementById('theSheet').style.width = 'calc(100vw - 300px)';
+        }
+    }
+</script>
+
+
+
+
+&nbsp;&nbsp;
+@if ((bool)ViewBag.takeSession)
+{
+    @Ajax.ActionLink("Filters", "FilterBuy", "Procurement", new { cluster = ViewBag.cluster, pm_Source = ViewBag.Source }, new AjaxOptions { UpdateTargetId = "myFilters", InsertionMode = InsertionMode.Replace }, new { id = "btnFilters", data_toggle = "modal", data_target = "#filtersModal", @class = "btn", style = "vertical-align: baseline;" })
+}
+&nbsp; &nbsp; &nbsp;
+<input type="radio" onclick="javascript:yesnoCheck();" name="yesno" id="yesCheck">Show Notes&nbsp;
+<input type="radio" onclick="javascript:yesnoCheck();" name="yesno" id="noCheck" checked="checked">Hide Notes
+<div style="display: table;">
+    <div id="theSheet" class="tableScroll">
+        <table class="table table-sm table-hover table-striped align-middle" style="table-layout: fixed;">
+            <thead>
+                <!-- #region header number -->
+                @*<tr>
+                    @for (int m = 1; m <= 65; m++)
+                    {
+                        <th>@m</th>
+                    }
+                </tr>*@
+                <!-- #endregion -->
+                <tr>
+                    <th style="text-align:right; width: 40px; max-width: 40px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="text-align:center; width: 80px; max-width: 80px;">
+                        Quotes / Notes / Splits
+                    </th>
+                    <th style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.viewID)
+                    </th>
+                    <th style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.ItemID)
+                    </th>
+                    <th style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.date_created)
+                    </th>
+                    @if (ViewBag.cluster == "FTB")
+                    {
+                        <th id="th_FTB_creator" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.creator)
+                        </th>
+                        <th id="th_FTB_sourced_by" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.theFTB.sourcing)
+                        </th>
+                        <th id="th_FTB_buyer" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.theFTB.procure)
+                        </th>
+                    }
+                    @if (ViewBag.cluster != "FTB")
+                    {
+                        <th id="th_planner" style="text-align:center; width: 90px; max-width: 90px;">
+                            @Html.DisplayNameFor(model => model.planner)
+                        </th>
+                    }
+                    <th style="padding-left: 20px; width: 240px; max-width: 240px;">
+                        @Html.DisplayNameFor(model => model.item_desc)
+                    </th>
+                    <th style="padding-left: 20px; width: 240px; max-width: 240px;">
+                        @Html.DisplayNameFor(model => model.extended_desc)
+                    </th>
+                    <th style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.vendor_approve)
+                    </th>
+                    <th id="th_PO_no" style="text-align: center; width: 115px; max-width: 115px;">
+                        @Html.DisplayNameFor(model => model.PO_no)
+                    </th>
+                    <th id="th_buy_to_loc" style="text-align:center; width: 65px; max-width: 65px;">
+                        @Html.DisplayNameFor(model => model.buy_to_loc)
+                    </th>
+                    @if (ViewBag.cluster != "Domestic")
+                    {
+                        <th id="th_package" style="width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.package)
+                        </th>
+                    }
+                    <th id="th_new_quantity" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.new_quantity)
+                    </th>
+                    @*<th id="th_required_date" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.required_date)
+                    </th>*@
+                    @if (ViewBag.cluster == "Domestic")
+                    {
+                        <th id="th_required_date" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.required_date)
+                        </th>
+                    }
+                    else
+                    {
+                        <th id="th_required_date" style="text-align:center; width: 110px; max-width: 110px;">
+                            @Html.Raw("Supplier Ship Date (Req'd Date)")
+                        </th>
+                    }
+                    @if (ViewBag.cluster != "Domestic")
+                    {
+                        <th id="th_preload_quantity" style="text-align:center; width: 90px; max-width: 90px;">
+                            @Html.DisplayNameFor(model => model.preload_quantity)
+                        </th>
+                        <th id="th_preload_loc" style="text-align:center; width: 65px; max-width: 65px;">
+                            @Html.DisplayNameFor(model => model.preload_loc)
+                        </th>
+                    }
+                    <th id="th_total_value" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.total_value)
+                    </th>
+                    <th id="th_total_weight" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.total_weight)
+                    </th>
+                    <th id="th_part_assignment" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.part_assignment)
+                    </th>
+                    <th id="th_purchase_class" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.purchase_class)
+                    </th>
+                    <th id="th_PPAP" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.PPAP)
+                    </th>
+                    <th id="th_program" style="text-align:center; width: 120px; max-width: 120px;">
+                        @Html.DisplayNameFor(model => model.program)
+                    </th>
+                    <th id="th_standard_cost" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.standard_cost)
+                    </th>
+                    <th id="th_unit_weight" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.unit_weight)
+                    </th>
+                    <th id="th_supplier_standard_cost" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.supplier_standard_cost)
+                    </th>
+                    <th id="th_loc_supplier_standard_cost" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.loc_supplier_standard_cost)
+                    </th>
+                    <th id="th_LeadTime" style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.LeadTime)
+                    </th>
+                    <th id="th_TruePrimarySupplier" style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.TruePrimarySupplier)
+                    </th>
+                    <th id="th_loc_primary_supplier_name" style="text-align:center; width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.loc_primary_supplier_name)
+                    </th>
+                    @if (ViewBag.cluster != "FTB")
+                    {
+                        <th id="th_last_vendor" style="text-align:center; width: 200px; max-width: 200px;">
+                            @Html.DisplayNameFor(model => model.last_vendor)
+                        </th>
+                        <th id="th_last_PO_date" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.last_PO_date)
+                        </th>
+                        <th id="th_last_price" style="text-align:center; width: 100px; max-width: 100px;">
+                            @if (ViewBag.cluster == "Domestic")
+                            {
+                                @Html.Raw("Last Price/EA")
+                            }
+                            else
+                            {
+                                @Html.DisplayNameFor(model => model.last_price)
+                            }
+                        </th>
+                        <th id="th_previous_quantity" style="text-align:center; width: 90px; max-width: 90px;">
+                            @Html.DisplayNameFor(model => model.previous_quantity)
+                        </th>
+                    }
+                    <th id="th_unit_price" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.unit_price)
+                    </th>
+                    <th id="th_currency_id" style="text-align:center; width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.currency_id)
+                    </th>
+                    <th id="th_currency_rate" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.currency_rate)
+                    </th>
+                    <th id="th_tariff" style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.tariff)
+                    </th>
+                    <th id="th_price_all_in" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.price_all_in)
+                    </th>
+                    <th id="th_moq" style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.moq)
+                    </th>
+                    <th id="th_lead" style="text-align:center; width: 60px; max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.lead)
+                    </th>
+                    @if (ViewBag.cluster != "FTB")
+                    {
+                        <th id="th_sourcing" style="text-align:center; width: 75px; max-width: 75px;">
+                            @Html.DisplayNameFor(model => model.sourcing)
+                        </th>
+                    }
+                    <th id="th_po_to_loc" style="text-align:center; width: 65px; max-width: 65px;">
+                        @Html.DisplayNameFor(model => model.po_to_loc)
+                    </th>
+                    <th id="th_PO_order_quantity_1" style="text-align:center; width: 90px; max-width: 90px;">
+                        @Html.DisplayNameFor(model => model.PO_order_quantity_1)
+                    </th>
+                    <th id="th_expected_date" style="text-align:center; width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.expected_date)
+                    </th>
+                    @if (ViewBag.cluster != "Domestic")
+                    {
+                        <th id="th_preload_PO_SO" style="text-align:center; width: 150px; max-width: 150px;">
+                            @Html.DisplayNameFor(model => model.preload_PO_SO)
+                        </th>
+                    }
+                    @if (ViewBag.cluster == "Domestic")
+                    {
+                        <th id="th_urgent" style="text-align:center; width: 60px; max-width: 60px;">
+                            @Html.DisplayNameFor(model => model.urgent)
+                        </th>
+                    }
+                    @if (ViewBag.cluster != "FTB")
+                    {
+                        <th id="th_creator" style="text-align:center; width: 100px; max-width: 100px;">
+                            @Html.DisplayNameFor(model => model.creator)
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.no)
+                        </td>
+                        <td align="center">
+                            @if (ViewBag.takeSession)
+                            {
+                                @Ajax.ActionLink(" " + @item.quotes_count.ToString() + " ", "ShowArchive_Quotes", "Procurement", new { pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                                @Html.Raw(" / ")
+                                @Ajax.ActionLink(" " + @item.noteCount.ToString() + " ", "ShowNotes", "Procurement", new { cluster = ViewBag.cluster, pm_Source = ViewBag.Source, pm_entryID = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "toUpdate", InsertionMode = InsertionMode.Replace }, new { onclick = "getOne('" + @item.no + "')" })
+                                @Html.Raw(" / ")
+                                @Ajax.ActionLink(" " + @item.Splits + " ", "ShowSplits", "Procurement", new { cluster = ViewBag.cluster, pm_Source = ViewBag.Source, pm_entryId = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                            }
+                            else
+                            {
+                                @Ajax.ActionLink(" " + @item.quotes_count.ToString() + " ", "ShowArchive_Quotes", "Procurement", new { pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                                @Html.Raw(" / ")
+                                @Ajax.ActionLink(" " + @item.noteCount.ToString() + " ", "ShowNotes", "Procurement", new { cluster = ViewBag.cluster, pm_Source = "", pm_entryID = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "toUpdate", InsertionMode = InsertionMode.Replace }, new { onclick = "getOne('" + @item.no + "')" })
+                                @Html.Raw(" / ")
+                                @Ajax.ActionLink(" " + @item.Splits + " ", "ShowSplits", "Procurement", new { cluster = ViewBag.cluster, pm_Source = "", pm_entryId = @item.entryID, pm_viewID = @item.viewID }, new AjaxOptions { UpdateTargetId = "mySplits", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#splitsModal" })
+                            }
+                        </td>
+                        <th style="text-align: center;">
+                            @Html.DisplayFor(modelItem => item.viewID)
+                        </th>
+                        <th style="word-wrap: break-word;">
+                            @Html.DisplayFor(modelItem => item.ItemID)
+                        </th>
+                        <td align="center">
+                            @Html.ValueFor(modelItem => item.date_created, "{0:MM/dd/yyyy}")
+                        </td>
+                        @if (ViewBag.cluster == "FTB")
+                        {
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.creator)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.filter_sourcing)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.filter_buyer)
+                            </td>
+                        }
+                        @if (ViewBag.cluster != "FTB")
+                        {
+                            <td class="display" align="center" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.planner)">
+                                @Html.DisplayFor(modelItem => item.planner)
+                            </td>
+                        }
+                        <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.item_desc)">
+                            @Html.DisplayFor(modelItem => item.item_desc)
+                        </td>
+                        <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.extended_desc)">
+                            @Html.DisplayFor(modelItem => item.extended_desc)
+                        </td>
+                        <td align="center" class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.vendor_approve)">
+                            @Html.DisplayFor(modelItem => item.vendor_approve)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PO_no)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.buy_to_loc)
+                        </td>
+                        @if (ViewBag.cluster != "Domestic")
+                        {
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.package)
+                            </td>
+                        }
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.new_quantity)
+                        </td>
+                        <td align="center">
+                            @Html.ValueFor(modelItem => item.required_date, "{0:MM/dd/yyyy}")
+                        </td>
+                        @if (ViewBag.cluster != "Domestic")
+                        {
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.preload_quantity)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.preload_loc)
+                            </td>
+                        }
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.total_value)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.total_weight)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.part_assignment)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.purchase_class)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.PPAP)
+                        </td>
+                        <td align="center" class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.program)">
+                            @Html.DisplayFor(modelItem => item.program)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.standard_cost)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.unit_weight)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.supplier_standard_cost)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.loc_supplier_standard_cost)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.LeadTime)
+                        </td>
+                        <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.TruePrimarySupplier)">
+                            @Html.DisplayFor(modelItem => item.TruePrimarySupplier)
+                        </td>
+                        <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.loc_primary_supplier_name)">
+                            @Html.DisplayFor(modelItem => item.loc_primary_supplier_name)
+                        </td>
+                        @if (ViewBag.cluster != "FTB")
+                        {
+                            <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.last_vendor)">
+                                @Html.DisplayFor(modelItem => item.last_vendor)
+                            </td>
+                            <td align="center">
+                                @Html.ValueFor(modelItem => item.last_PO_date, "{0:MM/dd/yyyy}")
+                            </td>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.last_price)
+                            </td>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.previous_quantity)
+                            </td>
+                        }
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.unit_price)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.currency_id)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.currency_rate)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.tariff)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.price_all_in)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.moq)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.lead)
+                        </td>
+                        @if (ViewBag.cluster != "FTB")
+                        {
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.sourcing)
+                            </td>
+                        }
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.po_to_loc)
+                        </td>
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.PO_order_quantity_1)
+                        </td>
+                        <td align="center">
+                            @Html.ValueFor(modelItem => item.expected_date, "{0:MM/dd/yyyy}")
+                        </td>
+                        @if (ViewBag.cluster != "Domestic")
+                        {
+                            <td class="display" data-toggle="tooltip" data-placement="right" title="@Html.DisplayFor(modelItem => item.preload_PO_SO)">
+                                @Html.DisplayFor(modelItem => item.preload_PO_SO)
+                            </td>
+                        }
+                        @if (ViewBag.cluster == "Domestic")
+                        {
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.urgent)
+                            </td>
+                        }
+                        @if (ViewBag.cluster != "FTB")
+                        {
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.creator)
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.Count() <= 0)
+        {
+            <div style="font-size: larger; text-align: center; color: darkorange;">No data from querying. Please use Filters to get what you need.</div>
+        }
+    </div>
+
+    <div id="ifYes" class="noteScrollY">
+        <div class="noteList">
+            <div id="toUpdate"></div>
+        </div>
+    </div>
+</div>
+
+
+@if (Model.Count() >= 200)
+{
+    <script type="text/javascript">
+        alert('This querying only returned the latest 200 records. Please specify more filter conditions if you could not find what you want in these records.');
+    </script>
+}
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

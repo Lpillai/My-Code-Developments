@@ -1,0 +1,325 @@
+﻿@model RuntimeVariables.Local_Information
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<style>
+    .bodyScrollY1 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: 280px;
+    }
+
+    .bodyScrollY2 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: calc(100vh - 545px);
+    }
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 0 -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+    .raw {
+        border: 0px none transparent;
+        background-color: transparent;
+        outline: none;
+        padding: 2px 2px;
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+@if ((bool)ViewData["pm_isNew"])
+{
+    <h4>New</h4>
+
+    <div class="form-group">
+        <div class="col-md-1">
+            <input type="number" id="address_id" autofocus autocomplete="off" onkeyup="onEnterPressed(event);" placeholder="P21 ID" class="form-control" style="font-size: medium;" />
+        </div>
+        <div id="address_name" class="col-md-5" style="font-size: medium; padding-top: 7px;" />
+    </div>
+}
+else
+{
+    @*@Html.HiddenFor(x => Model.address_id)
+    @Html.LabelFor(model => model.address_name, htmlAttributes: new { @class = "control-label" })*@
+    <h3>@Html.Raw(Model.address_name)</h3>
+}
+
+
+<div id="divInfo" class="form-horizontal" style="display: @((bool)ViewData["pm_isNew"] ? "none" : "initial");">
+    <div class="column" style="margin-top: 15px;">
+        <div class="card">
+            <h3 style="text-align: center;">Address</h3>
+
+            <div class="bodyScrollY1">
+                <table class="table table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>
+                                @if (Model.theAddress == null)
+                                {
+                                    Html.Raw("0");
+                                }
+                                else
+                                {
+                                    Html.Raw(Model.theAddress.Count().ToString());
+                                }
+                                @Ajax.ActionLink(((char)10010).ToString(), "showLocalInformation_Address", "Accounting", new { pm_address_id = ViewData["address_id"], pm_address_name = ViewData["address_name"] }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_type)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_language)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_context)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_zip)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].address_country)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theAddress[0].tax_id)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            for (var i = 0; i < Model.theAddress.Count(); i++)
+                            {
+                                <tr>
+                                    <td align="right" style="padding: 8px 15px 0 0;">
+                                        @Html.Raw((i + 1).ToString())
+                                        @Html.HiddenFor(x => Model.theAddress[i].p21_id)
+                                        @Html.HiddenFor(x => Model.theAddress[i].address_uid)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].type_val)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].lan_val)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Ajax.ActionLink(Model.theAddress[i].address_name, "showLocalInformation_Address", "Accounting", new { pm_address_id = ViewData["address_id"], pm_address_name = ViewData["address_name"], pm_address_uid = Model.theAddress[i].address_uid }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].address_context)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].address_zip)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].address_country)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theAddress[i].tax_id)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+          
+    <div class="column" style="margin-top: 15px;">
+        <div class="card">
+            <h3 style="text-align: center;">Contact</h3>
+
+            <div class="bodyScrollY2">
+                <table class="table table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>
+                                @if (Model.theContact == null)
+                                {
+                                    Html.Raw("0");
+                                }
+                                else
+                                {
+                                    Html.Raw(Model.theContact.Count().ToString());
+                                }
+                                @Ajax.ActionLink(((char)10010).ToString(), "showLocalInformation_Contact", "Accounting", new { pm_address_id = ViewData["address_id"], pm_address_name = ViewData["address_name"] }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_type)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_language)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_title)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_phone)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_fax)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.theContact[0].contact_mail)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            for (var j = 0; j < Model.theContact.Count(); j++)
+                            {
+                                <tr>
+                                    <td align="right" style="padding: 8px 15px 0 0;">
+                                        @Html.Raw((j + 1).ToString())
+                                        @Html.HiddenFor(x => Model.theContact[j].p21_id)
+                                        @Html.HiddenFor(x => Model.theContact[j].contact_uid)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].type_val)
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].lan_val)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Ajax.ActionLink(Model.theContact[j].contact_name, "showLocalInformation_Contact", "Accounting", new { pm_address_id = ViewData["address_id"], pm_address_name = ViewData["address_name"], pm_contact_uid = Model.theContact[j].contact_uid }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                                    </td>
+                                    <td align="center" style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].contact_title)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].contact_phone)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].contact_fax)
+                                    </td>
+                                    <td style="padding: 8px 0 0 0;">
+                                        @Html.ValueFor(x => Model.theContact[j].contact_mail)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+    function onEnterPressed(event) {
+        if (event.keyCode === 13) {
+            GetP21Address();
+        }
+    }
+
+
+    function GetP21Address() {
+        //alert('test');
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        let address_id = document.getElementById('address_id').value;
+        //alert('address_id: ' + address_id);
+
+        var address_name = "";
+        $('#divInfo').css('display', 'none');
+        $("#address_id").prop("disabled", true);
+        $("#address_name").innerHTML = "";
+        //alert("ajax_call");
+        $.when(ajax_call(address_id))
+            .done(function () {
+                //alert(hours);
+                if (address_name == null) {
+                    alert("Error returned address name.");
+                } else {
+                    document.getElementById('address_name').innerHTML = address_name;
+                    //document.getElementById('address_id').value = address_id;
+                    $('#divInfo').css('display', 'initial');
+                }
+            })
+            .fail(function() {
+                alert("Couldn't find the address.");
+            });
+        $("#address_id").prop("disabled", false);
+        $("#loading").fadeOut();
+
+        function ajax_call(address_id) {
+            return $.ajax({
+                    cache: false,
+                    url: '@Url.Action("GetP21AddressInformation", "Accounting")',
+                    data: { "address_id": address_id },
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: JSON,
+                    success: function (result) {
+                        address_name = result;
+                    }/*,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(textStatus + ": Calculattion error.\r\n" + formatErrorMessage(jqXHR, errorThrown));
+                    }*/
+            });
+        }
+    }
+</script>
+

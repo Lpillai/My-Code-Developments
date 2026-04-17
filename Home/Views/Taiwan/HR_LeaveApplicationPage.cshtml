@@ -1,0 +1,229 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<tw_day_HR_apply>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 140px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+        font-size: medium;
+    }
+
+    tbody td {
+        font-size: large;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+    
+
+<div style="width: 96%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    <div id="theSheet" class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    @if (Model == null || Model.Count() <= 0)
+                    {
+                        <th style="max-width: 25px;">
+                            @Html.Raw("0")
+                        </th>
+                    }
+                    else
+                    {
+                        <th style="max-width: 25px;">
+                            @Model.Count().ToString()
+                        </th>
+                    }
+                    <th style="max-width: 40px;">
+                        @Html.DisplayNameFor(model => model.apply_uid)
+                    </th>
+                    <th style="max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.full_name)
+                    </th>
+                    <th style="width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.day_year)
+                    </th>
+                    <th style="max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.day_name)
+                    </th>
+                    <th style="max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.day_start)
+                    </th>
+                    <th style="max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.day_end)
+                    </th>
+                    <th style="max-width: 40px;">
+                        @Html.DisplayNameFor(model => model.day_hours)
+                    </th>
+                    <th style="max-width: 240px;">
+                        @Html.DisplayNameFor(model => model.day_reason)
+                    </th>
+                    <th style="max-width: 60px;">
+                        @Html.DisplayNameFor(model => model.sts)
+                    </th>
+                    <th style="max-width: 40px;">
+                        @Html.DisplayNameFor(model => model.attach_added)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model == null || Model.Count() <= 0)
+                    {
+                        <tr>
+                            <td colspan="12" style="text-align:center;">No data found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td align="right">
+                                    @Html.Raw(i)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.apply_uid)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.full_name)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.day_year)
+                                </td>
+                                <td align="center" style="font-size: large;">
+                                    @Html.DisplayFor(modelItem => item.day_name)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.day_start)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.day_end)
+                                </td>
+                                <td align="right" style="padding-right: 15px;">
+                                    @Html.DisplayFor(modelItem => item.day_hours)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.day_reason)
+                                </td>
+                                <td align="center" style="font-size: large;">
+                                    @Html.DisplayFor(modelItem => item.sts)
+                                </td>
+                                <td align="center">
+                                    @if(item.attach_added)
+                                    {
+                                        @Html.ActionLink("Download", "Get_attachment", "Taiwan", new { pm_attach_uid = item.attach_uid }, new { target = "_blank" })
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

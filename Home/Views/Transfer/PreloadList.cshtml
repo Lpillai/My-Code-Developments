@@ -1,0 +1,136 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+<style type="text/css">
+</style>
+
+
+
+
+<script type="text/javascript">
+    function goSearch() {
+        //alert('goSearch');
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+
+        var pmP21URL = '@ViewData["pmP21URL"]';
+        var pmFrom = $("#pmFrom option:selected").val();
+        var pmTo = $("#pmTo option:selected").val();
+        $("#output").load('@Url.Action("show_Preloads", "Transfer")?pmP21URL=' + pmP21URL + '&pmFrom=' + pmFrom + '&pmTo=' + pmTo);
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {    
+        @*$("#btn_search").click(function () {
+            document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);
+            
+            var pmP21URL = '@ViewData["pmP21URL"]';
+            var pmFrom = $("#pmFrom option:selected").val();
+            var pmTo = $("#pmTo option:selected").val();
+            $("#output").load('@Url.Action("show_Preloads", "Transfer")?pmP21URL=' + pmP21URL + '&pmFrom=' + pmFrom + '&pmTo=' + pmTo);
+        });*@
+    })
+</script>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="form-inline">
+    <div class="form-group col-md-3">
+        @Html.Label("From", htmlAttributes: new { @class = "control-label", style = "margin-right: 5px;" })
+        @Html.DropDownList("pmFrom", (SelectList)ViewData["List_Location"], new { @class = "form-control" })
+    </div>
+    <div class="form-group col-md-3">
+        @Html.Label("To", htmlAttributes: new { @class = "control-label", style = "margin-right: 5px;" })
+        @Html.DropDownList("pmTo", (SelectList)ViewData["List_Location"], new { @class = "form-control" })
+    </div>
+    <div class="form-group col-md-1">
+        <input type="button" id="btn_search" value="Search" onclick="goSearch();" class="btn btn-default" />
+    </div>
+</div>
+
+
+<div id="output">
+</div>
+

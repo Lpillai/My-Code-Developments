@@ -1,0 +1,297 @@
+﻿@using RuntimeVariables;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+@*<script src="~/Scripts/jquery-3.4.1.js"></script>*@
+
+
+
+
+<script type="text/javascript">
+    @*
+    //$(document).ready(async function () {
+    $(document).ready(function () {
+        alert('0');
+        
+        $("#btn_search").click(function () {
+            goSearch();
+        });
+
+        //$("#pm_country_cd").change(async function () { await onCountryChange(); onLocationChange(); });
+        $("#pm_country_cd").change(function () { onCountryChange(); onLocationChange(); });
+        $("#pm_loc_cd").change(function () { onLocationChange(); });
+        //alert('1');
+
+        var tmp_country_cd = '@(TempData["pm_country_cd"])';
+        if (tmp_country_cd != null && tmp_country_cd != '') {
+            var mySelect_country = document.getElementById('pm_country_cd');
+            for(var i, j = 0; i = mySelect_country.options[j]; j++) {
+                if(i.value == tmp_country_cd) {
+                    mySelect_country.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+        //alert('2');
+        
+        //await onCountryChange();
+        onCountryChange();
+        //alert('3');
+
+        var tmp_location_cd = '@(TempData["pm_location_cd"])';
+        if (tmp_location_cd != null && tmp_location_cd != '') {
+            var mySelect_loc = document.getElementById('pm_loc_cd');
+            for(var i, j = 0; i = mySelect_loc.options[j]; j++) {
+                if(i.value == tmp_country_cd) {
+                    mySelect_loc.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+        //alert('4');
+
+        onLocationChange();
+        //alert('5');
+
+        if (tmp_country_cd != null && tmp_country_cd != '' && tmp_location_cd != null && tmp_location_cd != '') {
+            goSearch();
+            //alert('6');
+        }
+    });
+    *@
+</script>
+<script type="text/javascript">
+    function onCountryChange() {
+        //alert('onCountryChange');
+        $("#pm_loc_cd").prop("disabled", true);
+        var pm_country_cd = $("#pm_country_cd").val();
+        var items = '';
+        $.ajax({
+            cache: false,
+            url: '@Url.Action("GetLocationGrpList", "Transfer")',
+            data: { "pm_country_cd": pm_country_cd },
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            datatype: JSON,
+            success: function (result) {
+                $(result).each(function () {
+                    items += "<option value='" + this.group_id + "'>" + this.loc_cd + "</option>";
+                });
+                //alert(items);
+                $('#pm_loc_cd').html(items);
+                $("#pm_loc_cd").prop("disabled", false);
+            },
+            error: function (data) {
+                alert("Location data not found.\r\n" + data);
+            }
+        });
+
+        //alert("1");
+        return new Promise((res) => { setTimeout(() => { res(); }, 500); });
+    }
+
+        
+    function onLocationChange() {
+        //alert('onLocationChange');
+        document.getElementById('loc_id').innerHTML = "";
+        var pm_country_cd = $("#pm_country_cd").val();
+        var pm_group_id = $("#pm_loc_cd").val();
+        //alert(pm_country_cd + "\r\n" + pm_group_id);
+        if (pm_group_id != null) {
+            $.ajax({
+                cache: false,
+                url: '@Url.Action("GetLocationIDs", "Transfer")',
+                data: { "pm_country_cd": pm_country_cd, "pm_group_id": pm_group_id },
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                datatype: JSON,
+                success: function (result) {
+                    //alert(result);
+                    document.getElementById('loc_id').innerHTML = result;
+                },
+                error: function () {
+                }
+            });
+        }
+        //alert("2");
+    }
+
+        
+    function goSearch() {
+        //alert('goSearch');
+        document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        var pm_country_cd = $("#pm_country_cd").val();
+        var pm_location_cd = $("#pm_loc_cd").val();
+        $("#output").load('@Url.Action("ShippingCalendar_Details", "Transfer")?pm_country_cd=' + pm_country_cd + '&pm_location_cd=' + pm_location_cd);
+    }
+
+
+    function pageLoad() {
+        //alert('pageLoad');
+
+        //$("#pm_country_cd").change(async function () { await onCountryChange(); onLocationChange(); });
+        $("#pm_country_cd").change(function () { onCountryChange(); onLocationChange(); });
+        $("#pm_loc_cd").change(function () { onLocationChange(); });
+        //alert('1');
+        @*
+        var tmp_country_cd = '@(TempData["pm_country_cd"])';
+        if (tmp_country_cd != null && tmp_country_cd != '') {
+            var mySelect_country = document.getElementById('pm_country_cd');
+            for(var i, j = 0; i = mySelect_country.options[j]; j++) {
+                if(i.value == tmp_country_cd) {
+                    mySelect_country.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+        //alert('2');
+        
+        //await onCountryChange();
+        onCountryChange();
+        //alert('3');
+
+        var tmp_location_cd = '@(TempData["pm_location_cd"])';
+        var mySelect_loc = document.getElementById('pm_loc_cd');
+        if (tmp_location_cd != null && tmp_location_cd != '') {
+            for (var i, j = 0; i = mySelect_loc.options[j]; j++) {
+                if (i.value == tmp_country_cd) {
+                    mySelect_loc.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+        else {
+            mySelect_loc.selectedIndex = 0;
+        }
+        alert(mySelect_loc.length);
+        alert(mySelect_loc.selectedIndex);
+        //alert('four');
+
+        onLocationChange();
+        //alert('5');
+
+        if (tmp_country_cd != null && tmp_country_cd != '' && tmp_location_cd != null && tmp_location_cd != '') {
+            goSearch();
+            //alert('6');
+        }
+
+        //alert('ok');
+        *@
+    }
+    window.onload = pageLoad;
+</script>
+
+
+
+
+<style>
+</style>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+
+<div class="row" style="margin: 10px 20px 0 20px;">
+    <div class="form-group" style="display: inline-block;">
+        @Html.Label("From Country", htmlAttributes: new { @class = "control-label" })
+        <br>
+        @Html.DropDownList("pm_country_cd", (SelectList)ViewData["List_fromCountry"], htmlAttributes: new { @class = "form-control", style = "font-size: large; width: 320px; max-width: 320px;" })
+        <div style="margin: 5px 0 0 10px; font-size: medium;">
+            &nbsp;
+        </div>
+    </div>
+    <div class="form-group" style="display: inline-block;">
+        @Html.Label("To Location", htmlAttributes: new { @class = "control-label" })
+        <br>
+        @*@Html.DropDownList("pm_loc_cd", Enumerable.Empty<SelectListItem>(), htmlAttributes: new { @class = "form-control mycombo" })*@
+        @Html.DropDownList("pm_loc_cd", (SelectList)ViewData["List_toLocationGroup"], htmlAttributes: new { @class = "form-control", style = "font-size: large; width: 450px; max-width: 450px;" })
+        <div id="loc_id" style="margin: 5px 0 0 10px; font-size: medium;">
+            @ViewData["loc_IDs"].ToString()
+        </div>
+    </div>
+    <div class="form-group" style="display: inline-block;">
+        <br>
+        <input type="button" id="btn_search" value="Search" class="btn btn-default" onclick="goSearch();" />
+        <div style="margin: 5px 0 0 10px; font-size: medium;">
+            &nbsp;
+        </div>
+    </div>
+</div>
+
+
+<div id="output">
+</div>

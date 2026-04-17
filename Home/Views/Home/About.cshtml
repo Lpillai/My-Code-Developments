@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "About Intranet";
+    ViewBag.PageName = "About";
+    ViewBag.Path = "Home / About";
+}
+
+
+<h2>@ViewBag.Path</h2>
+
+<hr>
+
+<h3>@ViewBag.Message</h3>
+<p>isDebug=@ViewData["isDebug"]</p>
+<p>isDev=@ViewData["isDev"]</p>
+<p>Assembly Date=@ViewData["AssemblyDate"]</p>
+<hr>
+
+@*<h3>Path</h3>
+<p>@ViewData["folderPath1"]</p>
+<p>@ViewData["folderPath2"]</p>
+<p>@ViewData["folderPath3"]</p>
+<p>RootFolder=@ViewData["RootFolder"]</p>
+<hr>*@
+
+@if (ViewData["MySession"] != null)
+{
+    <h3>Development</h3>
+    @Html.Raw(ViewData["MySession"].ToString())
+}

@@ -1,0 +1,19 @@
+﻿@using ReportViewerForMvc;
+
+<style>
+    .rpt {
+        /*display: table;*/
+        height: 960px;
+        width: 1200px;
+    }
+</style>
+
+@*<div class="rpt">*@
+<div>
+    @if (ViewBag.ReportViewer != null)
+    {
+        @Html.ReportViewer(ViewData["ReportViewer"] as Microsoft.Reporting.WebForms.ReportViewer, new { @class = "rpt" })
+        @*@Html.ReportViewer(ViewData["ReportViewer"] as Microsoft.Reporting.WebForms.ReportViewer, null)*@
+    }
+</div>
+

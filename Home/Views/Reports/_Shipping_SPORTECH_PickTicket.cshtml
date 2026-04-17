@@ -1,0 +1,53 @@
+﻿<style type="text/css">
+    .SearchFields {
+        max-width: 120px;
+        width: 120px;
+        font-size: 14px;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#btn_search").click(function () {
+            document.getElementById('btn_search').setAttribute('disabled', 'disabled');
+            //document.getElementById('btn_search').value = "Searching...";
+
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);
+
+            let pm_pick_ticket_no = $('#pm_pick_ticket_no').val();
+            let pmLabelType = '@ViewData["pmLabelType"].ToString()';
+            $("#output").load('@Url.Action("Get_SPORTECH_PickTicket", "Reports")?pm_pick_ticket_no=' + pm_pick_ticket_no + '&pmLabelType=' + pmLabelType);
+        });
+    })
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+<form id="submit-button">
+    <div class="form-inline form-group">
+        @Html.Label("Pick Ticket", htmlAttributes: new { @class = "control-label", style = "margin-left: 15px;" })
+        &nbsp;
+        <input type="text" id="pm_pick_ticket_no" name="pm_pick_ticket_no" autofocus autocomplete="off" class="form-control SearchFields" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" id="btn_search" value="Search" class="btn btn-default" />
+    </div>
+</form>
+
+<div id="output">
+    <div style="font-size: larger; color: darkorange;">
+        @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+    </div>
+</div>

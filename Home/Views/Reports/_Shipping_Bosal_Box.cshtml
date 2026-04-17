@@ -1,0 +1,197 @@
+﻿@model IEnumerable<RuntimeVariables.Bosal_Invoice>
+
+
+
+
+<style type="text/css">
+    .bulkScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 300px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        document.getElementById('btn_search').removeAttribute("disabled");
+        //document.getElementById('btn_search').value = "Search";
+        $("#loading").fadeOut();
+    })
+</script>
+<script type="text/javascript">
+    function getFormData() {
+        document.getElementById('btnPrint').setAttribute('disabled', 'disabled');
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+        
+        let res = [];
+        let x = document.getElementsByName("invoice_no");
+        let y = document.getElementsByName("line_no");
+        let z = document.getElementsByName("box_qty_string");
+        for (let i = 0; i < x.length; i++) {
+            let obj = {
+                "invoice_no": x[i].value,
+                "line_no": y[i].value,
+                "box_qty_string": z[i].value
+            }
+            res.push(obj);
+        }
+        //alert(JSON.stringify(res));
+        
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            type: "POST",
+            url: '/Reports/Open_Shipping_Bosal_Box',
+            //url: '/SBS_Intranet_dev/Reports/Open_Shipping_Bosal_Box',
+            data: JSON.stringify(res),
+            success: function (response) { 
+                alert(response);
+            },
+            error: function (xhr, textStatus, error) {
+                //alert(xhr.statusText);
+                //alert(textStatus);
+                alert(error);
+            },
+            complete: function () {
+                document.getElementById('btnPrint').removeAttribute("disabled");
+                $("#loading").fadeOut();
+            }
+        });
+    }
+</script>
+
+
+
+
+<h4 style="margin: 0 0 20px 20px;">
+    @ViewBag.ReportName
+</h4>
+
+
+
+
+<div>
+    @*@using (Html.BeginForm("Open_Shipping_Bosal_Box", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))*@
+    @using (Html.BeginForm("Open_Shipping_Bosal_Box", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group" style="text-align: right;">
+            <input id="btnPrint" type="submit" value="Print" class="btn btn-primary" />
+            @*<button id="btnPrint" class="btn btn-primary" onclick="getFormData()">Print</button>*@
+        </div>
+        <div class="form-group" style="margin-top: -10px;">
+            <div style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+                <div class="bulkScrollY">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.item_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.customer_part_number)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.qty_shipped)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.box_qty)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model == null || Model.Count() <= 0)
+                                {
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">
+                                            @Html.Raw("No data found.")
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    var index = 0;
+                                    foreach (var item in Model)
+                                    {
+                                        @*<tr>
+                                            <td align="right">
+                                                <input type="hidden" name="invoice_no" value="@item.invoice_no">
+                                                <input type="hidden" name="line_no" value="@item.line_no">
+                                                @Html.DisplayFor(modelItem => item.line_no)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.item_id)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.customer_part_number)
+                                            </td>
+                                            <td align="center">
+                                                <input name="box_qty_string" value="@item.box_qty_string" class="form-control" style="font-size: 14px; max-width: 240px; width: 240px;">
+                                            </td>
+                                        </tr>*@
+                                        <tr>
+                                            <td align="right" style="padding-right: 10px;">
+                                                <input type="hidden" name="pmLineList[@index].invoice_no" value="@item.invoice_no">
+                                                <input type="hidden" name="pmLineList[@index].line_no" value="@item.line_no">
+                                                <input type="hidden" name="pmLineList[@index].qty_shipped" value="@item.qty_shipped">
+                                                @Html.DisplayFor(modelItem => item.line_no)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.item_id)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.customer_part_number)
+                                            </td>
+                                            <td align="right" style="padding-right: 10px;">
+                                                @Html.DisplayFor(modelItem => item.qty_shipped)
+                                            </td>
+                                            <td align="center">
+                                                <input type="number" name="pmLineList[@index].box_qty" value="@item.box_qty" class="form-control" style="font-size: medium; max-width: 160px; width: 160px; text-align: right;">
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size: larger; color: darkorange;">
+                    @Html.Raw("※ Please do NOT hit the ENTER key on this screen.")
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

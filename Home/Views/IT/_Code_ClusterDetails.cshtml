@@ -1,0 +1,145 @@
+﻿@model IEnumerable<RuntimeVariables.CodeStore>
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {    
+        $("#loading").fadeOut();
+    })
+</script>
+<script type="text/javascript">
+</script>
+
+
+
+
+<style>
+    .labelAdj {
+        text-align: right;
+        margin: 7px 0 0 0;
+    }
+    .boxAdj {
+        width: 500px;
+        max-width: 500px;
+    }
+
+    .bodyScrollY {
+        overflow: auto;
+        display: block;
+        height: calc(100vh - 165px);
+        /*width: 100%;*/
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<h4>@ViewData["pm_cluster"]</h4>
+
+
+
+    
+<div id="theSheet" class="bodyScrollY">
+    <table class="table table-hover" style="margin: 0 10px 0 10px; width: 97%;">
+        <colgroup>
+            <col id="col_01" style="width: 80px;">
+            <col id="col_02" style="width: 90px;">
+            <col id="col_03" style="width: 320px;">
+            <col id="col_04" style="width: 480px;">
+            <col id="col_05" style="width: 30px;">
+        </colgroup>
+        <thead>
+            <tr>
+                @if (Model == null || Model.Count() <= 0)
+                {
+                    <td>0</td>
+                }
+                else {
+                    <th>@Model.Count().ToString()</th>
+                }
+                <th>
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Value)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.z_memo)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.z_status)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model == null || Model.Count() <= 0)
+                {
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No data found.</td>
+                    </tr>
+                }
+                else
+                {
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+                        <tr>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.no)
+                                &nbsp;
+                                @Ajax.ActionLink("Edit", "Show_CodeDetails", "IT", new { pm_CRUD = "U", pm_cluster = item.Cluster, pm_code = item.Code }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                            </td>
+                            <td align="right" style="padding: 2px 10px 0 0; font-size: medium;">
+                                @Html.DisplayFor(modelItem => item.Code)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Value)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.z_memo)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.z_status)
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+

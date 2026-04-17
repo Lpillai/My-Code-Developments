@@ -1,0 +1,287 @@
+﻿@model RuntimeVariables.palletizing_data
+
+@{
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    /*.tbScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 180px);
+    }*/
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .table-hover tbody tr:hover td {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+@if (Model.hdr != null && (string.IsNullOrWhiteSpace(Model.hdr.checking_manager) || Model.hdr.checking_date == null))
+{
+    <div>    
+        @using (Html.BeginForm("GoSavePalletizingChecking", "Warehouse", new { pm_pick_ticket_no = Model.pick_ticket_no }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <div class="col-xs-10" style="font-size: larger; color: darkorange;">
+                    &nbsp;
+                </div>
+                <div class="col-xs-2" style="text-align: center;">
+                    <input type="submit" value="Check" @attr_html class="btn btn-primary" onclick="return confirm('Check this PT?');" />
+                </div>
+            </div>
+            }
+    </div>
+}
+
+
+<div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active">
+            <a href="#Header" aria-controls="Header" role="tab" data-toggle="tab">Header</a>
+        </li>
+
+        <li role="presentation">
+            <a href="#Detail" aria-controls="Detail" role="tab" data-toggle="tab">Detail</a>
+        </li>
+
+        <li role="presentation">
+            <a href="#Summary" aria-controls="Summary" role="tab" data-toggle="tab">Summary</a>
+        </li>
+    </ul>
+
+
+    <!-- Tab panes -->
+    <div class="tab-content" style="padding-top: 15px; font-size: medium;">                
+        <div role="tabpanel" class="tab-pane fade in active" id="Header">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.order_no, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.order_no)
+                    @*@Html.CheckBox($"pmAR[{i-1}].chk_archive", item.chk_archive)*@
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.po_no, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.po_no)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.customer_id, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.customer_id)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.checking_manager, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.checking_manager)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.checking_date, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.checking_date)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.hdr.delivery_instructions, htmlAttributes: new { @class = "control-label col-xs-4", style="text-align: right;" })
+                    @Html.DisplayFor(model => model.hdr.delivery_instructions)
+                </div>
+            </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane fade" id="Detail">
+            <div class="tbScrollY">
+                <table class="table table-hover">
+                    @*<thead>
+                        <tr>
+                            <th>
+                                @Model.line.Count().ToString()
+                            </th>
+                            <th style="text-align: left; padding-left: 25px;">
+                                @Html.DisplayNameFor(model => model.line[0].line_number)
+                                &nbsp;
+                                @Ajax.ActionLink("Create", "ShowGroupDetails", "Admin", new { pm_group_id = -1, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "theGroupPartial", InsertionMode = InsertionMode.Replace })
+                            </th>
+                        </tr>
+                    </thead>*@
+                    <tbody>
+                        @{ 
+                            if (Model.detail == null || Model.detail.Count() <= 0)
+                            {
+                                <tr>
+                                    <td style="text-align:center;">No data found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var line in Model.detail)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <div class="row">
+                                                    <div class="form-group" style="font-weight: 600;">
+                                                        <div class="col-xs-1">
+                                                            @Html.DisplayFor(l => line.line_number)
+                                                        </div>
+                                                        <div class="col-xs-2">
+                                                            @Html.DisplayFor(l => line.packing_person)
+                                                        </div>
+                                                        <div class="col-xs-6">
+                                                            @Html.DisplayFor(l => line.item_id)
+                                                        </div>
+                                                        <div class="col-xs-3" style="text-align: right;">
+                                                            @Html.DisplayFor(l => line.print_quantity)
+                                                        </div>
+                                                    </div>
+                                                    @{ 
+                                                        if (line.lots == null || line.lots.Count() <= 0)
+                                                        {
+                                                            <div class="form-group" style="color: green; text-align:center;">No data found.</div>
+                                                        }
+                                                        else
+                                                        {
+                                                            foreach (var lot in line.lots)
+                                                            {
+                                                                <div class="form-group" style="color: green;">
+                                                                    <div class="col-xs-2">
+                                                                        &nbsp;
+                                                                    </div>
+                                                                    <div class="col-xs-3">
+                                                                        @Html.DisplayFor(l => lot.lot_cd)
+                                                                    </div>
+                                                                    <div class="col-xs-3">
+                                                                        @Html.DisplayFor(l => lot.bin_cd)
+                                                                    </div>
+                                                                    <div class="col-xs-4" style="text-align: right;">
+                                                                        @Html.DisplayFor(l => lot.qty_allocated_delta)
+                                                                    </div>
+                                                                </div>
+
+                                                                if (lot.plts == null || lot.plts.Count() <= 0)
+                                                                {
+                                                                    <div class="form-group" style="color: lightslategrey; text-align:center;">No data found.</div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    foreach (var pallet in lot.plts)
+                                                                    {
+                                                                        <div class="form-group" style="color: lightslategrey;">
+                                                                            <div class="col-xs-3">
+                                                                                &nbsp;
+                                                                            </div>
+                                                                            <div class="col-xs-6" style="text-align: right;">
+                                                                                @Html.DisplayFor(l => pallet.qty_per_box)
+                                                                                @Html.Raw("x")
+                                                                                @Html.ValueFor(l => pallet.total_boxes)
+                                                                                @Html.Raw("=")
+                                                                                @Html.Raw((pallet.qty_per_box * pallet.total_boxes).ToString("N0"))
+                                                                            </div>
+                                                                            <div class="col-xs-2" style="text-align: center;">
+                                                                                @Html.ValueFor(l => pallet.pallet_no)
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+                
+        <div role="tabpanel" class="tab-pane fade" id="Summary">
+            <div class="tbScrollY">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.summary1[0].pallet_no)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.summary1[0].sub_qty)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.summary1[0].sub_boxes)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ 
+                            if (Model.summary1 == null || Model.summary1.Count() <= 0)
+                            {
+                                <tr>
+                                    <td colspan="3" style="text-align:center;">No data found.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var summary in Model.summary1)
+                                {
+                                    <tr>
+                                        <td style="text-align:center;">
+                                            @Html.DisplayFor(s => summary.pallet_no)
+                                        </td>
+                                        <td style="text-align: right; padding-right: 20px;">
+                                            @Html.DisplayFor(s => summary.sub_qty)
+                                        </td>
+                                        <td style="text-align: right; padding-right: 20px;">
+                                            @Html.DisplayFor(s => summary.sub_boxes)
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td style="text-align: center; font-weight: 700;">
+                                        @Html.Raw("Total")
+                                    </td>
+                                    <td style="text-align:right; padding-right: 20px;">
+                                        @Html.DisplayFor(s => Model.summary2.sum_qty)
+                                    </td>
+                                    <td style="text-align:right; padding-right: 20px;">
+                                        @Html.DisplayFor(s => Model.summary2.sum_boxes)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+

@@ -1,0 +1,59 @@
+﻿
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Coming Soon";
+    ViewBag.PageName = "Coming Soon";
+}
+
+
+<style>
+    /* Set height to 100% for body and html to enable the background image to cover the whole page: */
+    body, html {
+        height: 100%;
+    }
+
+    body {
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+
+    .bottomleft {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .Container {
+        text-align: center;
+    }
+
+        .Container:before {
+            content: '';
+            height: 100%;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+    .Content {
+        display: inline-block;
+        vertical-align: middle;
+    }
+</style>
+
+
+@*<body style="background-image: url('@Url.Action("GetImage", "Home")');">
+    <div class="bottomleft">
+        <a href="https://www.freepik.com/vectors/background">Background vector created by freepik - www.freepik.com</a>
+    </div>
+</body>*@
+
+<div class="Container">
+    <div class="Content"> 
+        <img src="~/Images/ComingSoon2.jpg" class="img" style="width:40%;">
+    </div>
+</div>
+
+<div class="bottomleft">
+    <a href="http://www.freepik.com">Designed by Freepik</a>
+</div>

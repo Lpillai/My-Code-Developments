@@ -1,0 +1,581 @@
+﻿@model RuntimeVariables.Transfer_ShipmentData
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    })
+</script>
+
+
+
+
+<style>
+    .bodyScrollY1 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: 280px;
+    }
+    .bodyScrollY2 {
+        overflow: auto;
+        display: inline-block;
+        width: 100%;
+        max-height: calc(100vh - 545px);
+    }
+
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+
+    tbody td {
+        font-size: small;
+        max-height: 20px;
+        overflow: hidden;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+
+    /* Float four columns side by side */
+    .column {
+        float: left;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding */
+    .row {
+        margin: 15px -5px;
+    }
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        text-align: left;
+        background-color: #f1f1f1;
+    }
+
+</style>
+
+
+
+    
+<div class="row">
+    <div class="column" style="width: 99%;">
+        <div class="card">
+            <div style="display: block; margin-left: auto; margin-right: auto;">
+                <div id="theSheet" class="bodyScrollY1">
+                    <table class="table table-hover" style="table-layout: fixed;">
+                        <colgroup>
+                            @*01*@<col style="width: 25px;">
+                            @*02*@<col style="width: 60px;">
+                            @*03*@<col style="width: 60px;">
+                            @*04*@<col style="width: 60px;">
+                            @*05*@<col style="width: 250px;">
+                            @*06*@<col style="width: 150px;">
+                            @*07*@<col style="width: 250px;">
+                            @*08*@<col style="width: 150px;">
+                            @*09*@<col style="width: 250px;">
+                            @*10*@<col style="width: 150px;">
+                            @*11*@<col style="width: 150px;">
+                            @*12*@<col style="width: 80px;">
+                            @*13*@<col style="width: 80px;">
+                            @*14*@<col style="width: 250px;">
+                            @*15*@<col style="width: 50px;">
+                            @*16*@<col style="width: 80px;">
+                        </colgroup>
+                        <thead>
+                            @*<tr>
+                                <th>01</th>
+                                <th>02</th>
+                                <th>03</th>
+                                <th>04</th>
+                                <th>05</th>
+                                <th>06</th>
+                                <th>07</th>
+                                <th>08</th>
+                                <th>09</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                            </tr>*@
+                            <tr>
+                                <th style="text-align: center;">
+                                    @Html.Raw(((Model == null || Model.hdr == null || Model.hdr.Count() == 0) ? 0 : Model.hdr.Count()).ToString())
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].pick_ticket_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].order_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].invoice_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].vendor_name)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].vendor_phone)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].ship2_name)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].ship_to_phone)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].invoice_name)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].invoice_phone)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].invoice_email)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].invoice_reference_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].tracking_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].transportation)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].currency)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.hdr[0].freight_desc)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.hdr == null || Model.hdr.Count() <= 0)
+                                { 
+                                    <tr>
+                                        <td colspan="16" style="text-align:center;">No data found.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    int i = 0;
+                                    foreach (var item in Model.hdr)
+                                    {
+                                        i++;
+                                        <tr>
+                                            <td align="right">
+                                                @Html.Raw(i)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.pick_ticket_no)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.order_no)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.invoice_no)
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.vendor_address)" style="word-wrap: break-word;">
+                                                @Html.DisplayFor(modelItem => item.vendor_name)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.vendor_phone)
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.ship2_address)" style="word-wrap: break-word;">
+                                                @Html.DisplayFor(modelItem => item.ship2_name)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ship_to_phone)
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.invoice_address)" style="word-wrap: break-word;">
+                                                @Html.DisplayFor(modelItem => item.invoice_name)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.invoice_phone)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.invoice_email)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.invoice_reference_no)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.tracking_no)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.transportation)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.currency)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.freight_desc)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="column" style="width: 99%;">
+        <div class="card">
+            <div style="display: block; margin-left: auto; margin-right: auto;">
+                <div id="theSheet" class="bodyScrollY2">
+                    <table class="table table-hover" style="table-layout: fixed;">
+                        <colgroup>
+                            @*01*@<col style="width: 40px;">
+                            @*02*@<col style="width: 70px;">
+                            @*05*@<col style="width: 250px;">
+                            @*03*@<col style="width: 90px;">
+                            @*04*@<col style="width: 200px;">
+                            @*05*@<col style="width: 250px;">
+                            @*06*@<col style="width: 150px;">
+                            @*07*@<col style="width: 80px;">
+                            @*08*@<col style="width: 110px;">
+                            @*09*@<col style="width: 110px;">
+                            @*10*@<col style="width: 110px;">
+                            @*11*@<col style="width: 110px;">
+                            @*12*@<col style="width: 110px;">
+                            @*13*@<col style="width: 110px;">
+                            @*14*@<col style="width: 120px;">
+                            @*15*@<col style="width: 40px;">
+                            @*16*@<col style="width: 80px;">
+                            @*17*@<col style="width: 80px;">
+                            @*18*@<col style="width: 80px;">
+                            @*19*@<col style="width: 80px;">
+                            @*20*@<col style="width: 80px;">
+                            @*21*@<col style="width: 80px;">
+                            @*22*@<col style="width: 90px;">
+                            @*23*@<col style="width: 50px;">
+                            @*24*@<col style="width: 75px;">
+                            @*25*@<col style="width: 80px;">
+                            @*26*@<col style="width: 90px;">
+                            @*27*@<col style="width: 90px;">
+                            @*28*@<col style="width: 60px;">
+                            @*29*@<col style="width: 60px;">
+                            @*30*@<col style="width: 60px;">
+                            @*31*@<col style="width: 60px;">
+                            @*32*@<col style="width: 60px;">
+                            @*33*@<col style="width: 80px;">
+                            @*34*@<col style="width: 80px;">
+                            @*35*@<col style="width: 60px;">
+                        </colgroup>
+                        <thead>
+                            @*<tr>
+                                <th>01</th>
+                                <th>02</th>
+                                <th>03</th>
+                                <th>04</th>
+                                <th>05</th>
+                                <th>06</th>
+                                <th>07</th>
+                                <th>08</th>
+                                <th>09</th>
+                                <th>10</th>
+                                <th>11</th>
+                                <th>12</th>
+                                <th>13</th>
+                                <th>14</th>
+                                <th>15</th>
+                                <th>16</th>
+                                <th>17</th>
+                                <th>18</th>
+                                <th>19</th>
+                                <th>20</th>
+                                <th>21</th>
+                                <th>22</th>
+                                <th>23</th>
+                                <th>24</th>
+                                <th>25</th>
+                                <th>26</th>
+                                <th>27</th>
+                                <th>28</th>
+                                <th>29</th>
+                                <th>30</th>
+                                <th>31</th>
+                                <th>32</th>
+                                <th>33</th>
+                                <th>34</th>
+                                <th>35</th>
+                                <th>36</th>
+                            </tr>*@
+                            <tr>
+                                <th style="text-align: center;">
+                                    @Html.Raw(((Model == null || Model.line == null || Model.line.Count() == 0) ? 0 : Model.line.Count()).ToString())
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].supplier_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].supplier_name)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].po_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].item_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ship2_name)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].customer_part_number)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].order_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code_usa)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code_can)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code_mex)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code_twn)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].hs_code_fin)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].material_type)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].coo)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].qty_uom_100)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].wgt_unit)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ext_wgt_100)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].price_uom_100)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].uom_100)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].sum_ext_sell)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].pick_ticket_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].line_number)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].oe_line_no)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].customer_id)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].duty_rate_can)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].anti_dump_can)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ver_can)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ver_usa)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ver_mex)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ver_twn)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].ver_fin)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].print_quantity)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].unit_price)
+                                </th>
+                                <th style="text-align: center;">
+                                    @Html.DisplayNameFor(model => model.line[0].unit_size)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.line == null || Model.line.Count() <= 0)
+                                { 
+                                    <tr>
+                                        <td colspan="36" style="text-align:center;">No data found.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    int i = 0;
+                                    foreach (var item in Model.line)
+                                    {
+                                        i++;
+                                        <tr>
+                                            <td align="right">
+                                                @Html.Raw(i)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.supplier_id)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.supplier_name)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.po_no)
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.item_desc)">
+                                                @Html.DisplayFor(modelItem => item.item_id)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.ship2_name)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(modelItem => item.customer_part_number)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.order_no)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code_usa)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code_can)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code_mex)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code_twn)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.hs_code_fin)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.material_type)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.coo)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.qty_uom_100)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.wgt_unit)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.ext_wgt_100)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.price_uom_100)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.uom_100)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.sum_ext_sell)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.pick_ticket_no)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.line_number)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.oe_line_no)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.customer_id)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.duty_rate_can)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.anti_dump_can)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.ver_can)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.ver_usa)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.ver_mex)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.ver_twn)
+                                            </td>
+                                            <td align="center">
+                                                @Html.DisplayFor(modelItem => item.ver_fin)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.print_quantity)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.unit_price)
+                                            </td>
+                                            <td align="right">
+                                                @Html.DisplayFor(modelItem => item.unit_size)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

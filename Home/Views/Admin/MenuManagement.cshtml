@@ -1,0 +1,289 @@
+﻿@using RuntimeVariables;
+@model MenuData
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+@helper SayHello(IEnumerable<MenuTreeItem> wkList)
+{
+    <ul>
+        @foreach(var item in wkList)
+        {
+            if (@item.z_status == "D")
+            {
+                continue;
+            }
+
+            if(@item.child_menu.Count() == 0)
+            {
+                <li><span> @item.menu_name </span></li>
+            }
+            else
+            {
+                <li>
+                    <span><i class="fa fa-minus-square"></i> @item.menu_name </span>
+                    @SayHello(item.child_menu)
+                </li>
+            }
+        }
+    </ul>
+}
+
+
+@Scripts.Render("~/bundles/jquery")
+@*
+@Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+*@
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 115px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .tree {
+        min-height: 20px;
+        padding: 10px;
+        /*margin-bottom: 5px;*/
+        background-color: #fbfbfb;
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        border-radius: 6px;
+        -webkit-box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.05);
+        -moz-box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.05)
+    }
+
+        .tree li {
+            list-style-type: none;
+            margin: 0;
+            padding: 10px 5px 0 5px;
+            position: relative
+        }
+
+            .tree li::before, .tree li::after {
+                content: '';
+                left: -20px;
+                position: absolute;
+                right: auto
+            }
+
+            .tree li::before {
+                border-left: 1px solid #999;
+                bottom: 50px;
+                height: 100%;
+                top: 0;
+                width: 1px
+            }
+
+            .tree li::after {
+                border-top: 1px solid #999;
+                height: 20px;
+                top: 30px;
+                width: 25px
+            }
+
+            .tree li span {
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border: 1px solid #999;
+                border-radius: 5px;
+                display: inline-block;
+                padding: 3px 8px;
+                text-decoration: none
+            }
+
+            .tree li.parent_li > span {
+                cursor: pointer
+            }
+
+        .tree > ul > li::before, .tree > ul > li::after {
+            border: 0
+        }
+
+        .tree li:last-child::before {
+            height: 30px
+        }
+
+        .tree li.parent_li > span:hover, .tree li.parent_li > span:hover + ul li span {
+            /*background: #eee;*/
+            background-color: rgb(255 205 143 / 0.2);
+            border: 1px solid #94a0b4;
+            color: #000
+        }
+</style>
+
+
+
+
+<script>
+    $(function () {
+        $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+        $('.tree li.parent_li > span').on('click', function (e) {
+            var children = $(this).parent('li.parent_li').find(' > ul > li');
+            if (children.is(":visible")) {
+                children.hide('fast');
+                $(this).attr('title', 'Expand this branch').find(' > i').addClass('fa-plus-square').removeClass('fa-minus-square');
+            } else {
+                children.show('fast');
+                $(this).attr('title', 'Collapse this branch').find(' > i').addClass('fa-minus-square').removeClass('fa-plus-square');
+            }
+            e.stopPropagation();
+        });
+    });
+</script>
+
+
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="myDetails">
+        </div>
+    </div>
+</div>
+
+
+
+
+<div>
+    <div style="width: 20%;" class="tree bodyScrollY">
+        <ul>
+            <li>
+                <span><i class="fa fa-folder-open"></i> Root </span>
+                @SayHello(Model.theItem)
+            </li>
+        </ul>
+    </div>
+
+    <div style="width: 79%; padding: 0 10px 0 15px;" class="bodyScrollY">
+        <table class="table table-hover">
+            @*<colgroup>
+                <col id="col_01" style="width: 10px;">
+                <col id="col_02" style="width: 20px;">
+                <col id="col_03" style="width: 130px;">
+                <col id="col_04" style="width: 20px;">
+                <col id="col_05" style="width: 70px;">
+                <col id="col_06" style="width: 80px;">
+                <col id="col_07" style="width: 160px;">
+                <col id="col_08" style="width: 30px;">
+                <col id="col_09" style="width: 20px;">
+                <col id="col_13" style="width: 120px;">
+            </colgroup>*@
+            <thead>
+                <tr>
+                    <th style="text-align: center;">
+                        @Model.theList.Count().ToString()
+                    </th>
+                    <th style="text-align: center;">
+                        @Ajax.ActionLink("Create", "ShowMenuDetails", "Admin", new { pm_id = 0, pm_isNew = true }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                        <br>
+                        @Html.DisplayNameFor(model => model.theList[0].menu_id)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].menu_name)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].parent_menu)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].folder)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].run)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].param)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].menu_sort)
+                    </th>
+                    <th style="text-align: center;">
+                        @Html.DisplayNameFor(model => model.theList[0].z_status)
+                    </th>
+                    <th style="text-align: center;">
+                        &nbsp;
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.theList)
+                {
+                    <tr style="color: @(item.z_status == "D" ? "gray" : "black");">
+                        <td align="right">
+                            @Html.DisplayFor(modelItem => item.no)
+                        </td>
+                        <td align="right" style="padding-right: 30px;">
+                            @Html.DisplayFor(modelItem => item.menu_id)
+                        </td>
+                        <td style="padding-left: 10px;">
+                            @Ajax.ActionLink(@item.menu_name, "ShowMenuDetails", "Admin", new { pm_id = @item.menu_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "myDetails", InsertionMode = InsertionMode.Replace }, new { data_toggle = "modal", data_target = "#detailsModal" })
+                        </td>
+                        <td align="right" style="padding-right: 30px;">
+                            @Html.DisplayFor(modelItem => item.parent_menu)
+                        </td>
+                        <td style="padding-left: 10px;">
+                            @Html.DisplayFor(modelItem => item.folder)
+                        </td>
+                        <td style="padding-left: 10px;">
+                            @Html.DisplayFor(modelItem => item.run)
+                        </td>
+                        <td style="padding-left: 10px;">
+                            @Html.DisplayFor(modelItem => item.param)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.menu_sort)
+                        </td>
+                        <td align="center">
+                            @Html.DisplayFor(modelItem => item.z_status)
+                        </td>
+                        <td>
+                            @if (item.isFolder || item.z_status == "D")
+                            {
+                                @Html.Raw("")
+                            }
+                            else
+                            { 
+                                @Html.ActionLink("Who has permission?", "WhoHasPermission", new { pm_MenuID = item.menu_id, pm_menu_name = item.menu_name }, new { target = "_blank" })
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

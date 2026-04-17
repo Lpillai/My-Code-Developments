@@ -1,0 +1,93 @@
+﻿@model IEnumerable<RuntimeVariables.ReportPermissionItem>
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Who Has Report Permission";
+    ViewBag.PageName = "Who has permission for report \"" + ViewData["Report"] + "\"? ";
+}
+
+
+
+
+<style>
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 125px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.PageName</h4>
+
+
+
+
+<div class="bodyScrollY">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th style="text-align: center;">
+                    @if (Model == null)
+                    {
+                        @Html.Raw(0);
+                    }
+                    else
+                    {
+                        @Html.Raw(Model.Count());
+                    }
+                </th>
+                <th style="text-align: center;">
+                    @Html.DisplayNameFor(model => model.kind)
+                </th>
+                <th style="text-align: center;">
+                    @Html.Raw("Permission Group")
+                </th>
+                <th style="text-align: center;">
+                    @Html.DisplayNameFor(model => model.account_id)
+                </th>
+                <th style="text-align: center;">
+                    @Html.DisplayNameFor(model => model.read_only)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ 
+                if (Model != null)
+                {
+                    var index = 1;
+                    foreach (var item in Model)
+                    {
+                        <tr style="color: @(item.z_status == "D" ? "gray" : "black");">
+                            <td align="right" style="padding-right: 10px;">
+                                @Html.Raw(index.ToString())
+                            </td>
+                            <td align="center">
+                                @Html.ValueFor(modelItem => item.kind)
+                            </td>
+                            <td align="left" style="padding-left: 5px;">
+                                @Html.ValueFor(modelItem => item.group_name)
+                            </td>
+                            <td style="padding-left: 15px;">
+                                @Html.ValueFor(modelItem => item.account_id)
+                            </td>
+                            <td align="center">
+                                @Html.ValueFor(modelItem => item.read_only)
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+

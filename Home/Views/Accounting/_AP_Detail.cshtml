@@ -1,0 +1,82 @@
+﻿@model IEnumerable<RuntimeVariables.AP_Detail>
+
+
+
+    
+<h4 style="margin-top: 20px; text-align: center;">
+    Receipt @ViewData["receipt_number"]
+</h4>
+
+
+<div style="margin-top: 10px; padding: 5px 10px 5px 10px;">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    @Html.Raw(((Model == null || Model.Count() == 0) ? 0 : Model.Count()).ToString())
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.item_id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.qty_received)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.unit_of_measure)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.unit_cost)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.extended_cost_display)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.po)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model == null || Model.Count() <= 0)
+                { 
+                    <tr>
+                        <td colspan="7" style="text-align:center;">No data found.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.line_number)
+                            </td>
+                            @*<td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.item_desc)">
+                                @Html.DisplayFor(modelItem => item.item_id)
+                            </td>*@
+                            <td>
+                                @Html.DisplayFor(modelItem => item.item_id)
+                            </td>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.qty_received)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.unit_of_measure)
+                            </td>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.unit_cost)
+                            </td>
+                            <td align="right">
+                                @Html.DisplayFor(modelItem => item.extended_cost_display)
+                            </td>
+                            <td align="center">
+                                @Html.DisplayFor(modelItem => item.po)
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+

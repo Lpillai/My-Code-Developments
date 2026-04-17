@@ -1,0 +1,251 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<FTB_OpenPO>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+
+
+
+
+<style type="text/css">
+    .bodyScrollY {
+        overflow: auto;
+        display: inline-block;
+        /*height: 35vh;*/
+        height: calc(100vh - 120px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        text-align: center;
+        background-color: #eee;
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+
+
+
+
+<script type="text/javascript">
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+
+
+<div align="center" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+    <div class="bodyScrollY">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 40px; max-width: 40px;">
+                        @Model.Count().ToString()
+                    </th>
+                    <th style="width: 70px; max-width: 70px;">
+                        @Html.DisplayNameFor(model => model.po_no)
+                    </th>
+                    <th style="width: 40px; max-width: 40px;">
+                        @Html.DisplayNameFor(model => model.location_id)
+                    </th>
+                    <th style="width: 250px; max-width: 250px;">
+                        @Html.DisplayNameFor(model => model.vendor_name)
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @Html.DisplayNameFor(model => model.buyer)
+                    </th>
+                    <th style="width: 70px; max-width: 70px;">
+                        @Html.DisplayNameFor(model => model.line_no)
+                    </th>
+                    <th style="width: 200px; max-width: 200px;">
+                        @Html.DisplayNameFor(model => model.item_id)
+                    </th>
+                    <th style="width: 300px; max-width: 300px;">
+                        @Html.DisplayNameFor(model => model.item_desc)
+                    </th>
+                    <th style="width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.qty_ordered)
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @Html.DisplayNameFor(model => model.required_date)
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @Html.DisplayNameFor(model => model.expected_date)
+                    </th>
+                    <th style="width: 135px; max-width: 135px;">
+                        @Html.DisplayNameFor(model => model.part_assignment)
+                    </th>
+                    <th style="width: 80px; max-width: 80px;">
+                        @Html.DisplayNameFor(model => model.hot_part)
+                    </th>
+                    <th style="width: 120px; max-width: 120px;">
+                        @Html.DisplayNameFor(model => model.ftb_followup_date)
+                    </th>
+                    <th style="width: 100px; max-width: 100px;">
+                        @Html.DisplayNameFor(model => model.ftb_risk_to_shipdate)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (Model != null)
+                    {
+                        int i = 0;
+                        int line_count = 0;
+
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            if (line_count == 0)
+                            {
+                                line_count = item.line_count;
+                            }
+
+                            <tr id="hdr_@item.po_no">
+                                <td rowspan="@item.note_count" align="right" style="color: @item.color;">
+                                    @Html.Raw(i.ToString())
+                                </td>
+                                @if (line_count == item.line_count)
+                                {
+                                    <td rowspan="@item.line_count" align="center">
+                                        @Html.DisplayFor(modelItem => item.po_no)
+                                    </td>
+                                    <td rowspan="@item.line_count" align="center">
+                                        @Html.DisplayFor(modelItem => item.location_id)
+                                    </td>
+                                    <td rowspan="@item.line_count">
+                                        @Html.DisplayFor(modelItem => item.vendor_id)
+                                        <br>
+                                        @Html.DisplayFor(modelItem => item.vendor_name)
+                                    </td>
+                                    <td rowspan="@item.line_count">
+                                        @Html.DisplayFor(modelItem => item.buyer)
+                                    </td>
+                                }
+                                <td rowspan="@item.note_count" align="right" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.line_no)
+                                </td>
+                                <td rowspan="@item.note_count" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.item_id)
+                                </td>
+                                <td style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.item_desc)
+                                </td>
+                                <td align="right" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.qty_ordered)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.required_date)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.expected_date)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.part_assignment)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.hot_part)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.ftb_followup_date)
+                                </td>
+                                <td align="center" style="color: @item.color;">
+                                    @Html.DisplayFor(modelItem => item.ftb_risk_to_shipdate)
+                                </td>
+                            </tr>
+                            if (!string.IsNullOrWhiteSpace(item.expedite_notes))
+                            {
+                                <tr>
+                                    <td colspan="8">
+                                        <span style="font-weight: 700;">@Html.DisplayNameFor(model => model.expedite_notes): </span><br>
+                                        @Html.Raw(item.expedite_notes)
+                                    </td>
+                                </tr>
+                                line_count--;
+                            }
+                            @*if (!string.IsNullOrWhiteSpace(item.ftb_followup_comment))
+                            {
+                                <tr>
+                                    <td colspan="8">
+                                        <span style="font-weight: 700;">@Html.DisplayNameFor(model => model.ftb_followup_comment): </span><br>
+                                        @Html.Raw(item.ftb_followup_comment)
+                                    </td>
+                                </tr>
+                                line_count--;
+                            }*@
+
+                            line_count--;
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+

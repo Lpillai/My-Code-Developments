@@ -1,0 +1,204 @@
+﻿@using RuntimeVariables;
+@model IEnumerable<tw_employee>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ((ViewBagPageInfo)ViewBag.PageInfo).Title;
+    ViewBag.PageName = ((ViewBagPageInfo)ViewBag.PageInfo).PageName;
+    ViewBag.Path = ((ViewBagPageInfo)ViewBag.PageInfo).Path;
+}
+@*
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+@Scripts.Render("~/bundles/unobtrusive")
+*@
+
+
+
+
+<style>
+    .tableScrollY {
+        overflow: auto;
+        display: inline-block;
+        padding: 0 10px 0 10px;
+        height: calc(100vh - 115px);
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+    }
+
+
+    /* ------------------------------------------------------------------------------------------------------------------------------------ */
+
+    input[type=checkbox] {
+        background-color: white;
+        border-radius: 2px;
+        outline: 1px solid skyblue;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        position: relative;
+    }
+
+        input[type=checkbox]:disabled {
+            outline: 1px solid lightgray;
+        }
+
+        input[type=checkbox]:focus {
+            outline: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        input[type=checkbox]:checked {
+            background-color: #409fd6;
+            background: #409fd6 url("data:image/gif;base64,R0lGODlhCwAKAIABAP////3cnSH5BAEKAAEALAAAAAALAAoAAAIUjH+AC73WHIsw0UCjglraO20PNhYAOw==") 3px 3px no-repeat;
+        }
+</style>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {   
+    });
+</script>
+<script type="text/javascript">
+    function goSearch(account_id) {
+        //alert('goSearch');
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+            
+        $("#thePartial").load('@Url.Action("ShowEmployeeDetails", "Taiwan")?pm_account_id=' + account_id);
+    }
+
+    function pageLoad() {
+        //alert('pageLoad');
+        var pm_account_id = '@ViewData["pm_account_id"]';
+        //alert(pm_account_id);
+        if (pm_account_id != '')
+            goSearch(pm_account_id);
+    }
+    window.onload = pageLoad;
+</script>
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+<h4>@ViewBag.Path</h4>
+
+
+<div>
+    <div id="theSheet" style="width: 22%;" class="tableScrollY">
+        <table class="table table-hover">
+            @*<colgroup>
+                <col style="width: 8px;">
+                <col style="width: 80px;">
+                <col style="width: 120px;">
+            </colgroup>*@
+            <thead>
+                <tr>
+                    <th>
+                        @Model.Count().ToString()
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.account_id)
+                        &nbsp;
+                        @Ajax.ActionLink("新增", "ShowEmployeeDetails", "Taiwan", new { pm_account_id = "", pm_isNew = true }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace })
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ 
+                    int i = 0;
+                    foreach (var item in Model)
+                    {
+                        i++;
+                        <tr>
+                            <td align="right">
+                                @Html.Raw(i)
+                            </td>
+                            <td style="font-size: medium;">
+                                @*@Ajax.ActionLink(@item.account_id, "ShowEmployeeDetails", "Taiwan", new { pm_account_id = @item.account_id, pm_isNew = false }, new AjaxOptions { UpdateTargetId = "thePartial", InsertionMode = InsertionMode.Replace })*@
+                                @Html.ActionLink(item.account_id, null, null, null, new { onclick = "goSearch('" + item.account_id + "')", @href = "#" })
+                            </td>
+                            <td style="font-size: large;">
+                                @*@Html.DisplayFor(modelItem => item.last_name)
+                                @Html.DisplayFor(modelItem => item.first_name)*@
+                                @Html.DisplayFor(modelItem => item.full_name)
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="margin: 0 0 0 20px; vertical-align: top; width: 75%; display: inline-block;">
+        <div id="thePartial"></div>
+    </div>
+</div>
+
+
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}

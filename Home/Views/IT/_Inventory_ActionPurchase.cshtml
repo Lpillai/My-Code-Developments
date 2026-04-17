@@ -1,0 +1,159 @@
+﻿@model RuntimeVariables.Inventory_Item
+
+
+<style>
+</style>
+
+
+<script type="text/javascript">
+    function onChangeCategoryIT() {
+        let category_code = parseInt($("#pm_item_category").val());
+        //alert(category_code);
+
+        document.getElementById("pm_item_thePC_operating_system").setAttribute("disabled", true);
+        //document.getElementById("pm_item_thePC_team_viewer").setAttribute("disabled", true);
+        document.getElementById("pm_item_thePC_office").setAttribute("disabled", true);
+        if (category_code > 0 && category_code < 10) {
+            document.getElementById("pm_item_thePC_operating_system").removeAttribute("disabled");
+            //document.getElementById("pm_item_thePC_team_viewer").removeAttribute("disabled");
+            if (category_code < 4) {
+                document.getElementById("pm_item_thePC_office").removeAttribute("disabled");
+            }
+        }
+    }
+
+
+    function onCheckConsumable() {
+        if (document.getElementById('pm_item_isConsumable').checked) {
+            document.getElementById("pm_item_model").setAttribute("disabled", true);
+            document.getElementById("pm_item_model").removeAttribute("required");
+            document.getElementById("pm_item_SN").setAttribute("disabled", true);
+            document.getElementById("pm_item_SN").removeAttribute("required");
+            document.getElementById("pm_item_qty").removeAttribute("disabled");
+            document.getElementById("pm_item_qty").setAttribute("required", "");
+        }
+        else {
+            document.getElementById("pm_item_model").removeAttribute("disabled");
+            document.getElementById("pm_item_model").setAttribute("required", "");
+            document.getElementById("pm_item_SN").removeAttribute("disabled");
+            document.getElementById("pm_item_SN").setAttribute("required", "");
+            document.getElementById("pm_item_qty").setAttribute("disabled", true);
+            document.getElementById("pm_item_qty").removeAttribute("required");
+        }
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        let dpt = '@ViewData["pm_dpt"].ToString()';
+        //alert(dpt);
+        if (dpt === "IT") {
+            document.getElementById("pm_item_category").addEventListener("change", onChangeCategoryIT);
+        }
+    });
+</script>
+
+
+@using (Html.BeginForm("Inventory_GoSaveItem", "IT", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("pm_item.dpt", ViewData["pm_dpt"].ToString(), null)
+    @Html.Hidden("pm_bin_cd", ViewData["pm_bin_cd"].ToString(), null)
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&Chi;</span>
+        </button>
+        <h4 class="modal-title" id="detailsModalLabel">
+            @Html.Raw("New Purchase")
+        </h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div class="form-group">
+                @Html.LabelFor(model => model.item_id, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.item_id", "", new { @type = "text", required="required", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.purchase_date, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.purchase_date", "", new { @type = "date", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            @*<div class="form-group">
+                @Html.LabelFor(model => model.p21_item_id, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.p21_item_id", "", new { @type = "text", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>*@
+            <div class="form-group">
+                @Html.LabelFor(model => model.category, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.DropDownList("pm_item.category", new SelectList((IEnumerable<SelectListItem>)ViewData["CategoryList"], "Value", "Text"), new { @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.isConsumable, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    <input type="checkbox" id="pm_item_isConsumable" name="pm_item.isConsumable" value="true" onclick="onCheckConsumable()" style="height: 20px;" />
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.model, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.model", "", new { @type = "text", required="required", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.SN, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.SN", "", new { @type = "text", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            @if (ViewData["pm_dpt"].ToString() == "IT")
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.thePC.operating_system, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-8">
+                        @Html.TextBox("pm_item.thePC.operating_system", "", new { @type = "text", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.thePC.office, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-8">
+                        @Html.TextBox("pm_item.thePC.office", "", new { @type = "text", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                    </div>
+                </div>
+                @*<div class="form-group">
+                    @Html.LabelFor(model => model.thePC.team_viewer, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <div class="col-md-8">
+                        @Html.TextBox("pm_item.thePC.team_viewer", "", new { @type = "number", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                    </div>
+                </div>*@
+            }
+            <div class="form-group">
+                @Html.Label("Quantity", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-8">
+                    @Html.TextBox("pm_item.qty", "1", new { id = "pm_item_qty", @type = "number", disabled = "true", @autocomplete = "off", @class = "form-control", style = "font-size: medium;" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.Label("Storage", htmlAttributes: new { @class = "col-md-3", @style = "text-align: right; margin: 5px 0 0 0;" })
+                <div class="col-md-8">
+                    @Html.DropDownList("pm_storage_code", (SelectList)ViewData["AvailableBins"], new { required = "required", @class = "form-control", style = "font-size: medium; width: 400px; max-width: 400px;" })
+                </div>
+            </div>
+            @*<div class="form-group">
+                @Html.LabelFor(model => model.z_memo, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-8">
+                    <textarea name="pm_item.z_memo" placeholder="Note here" rows="5" maxlength="500" class="form-control" style="font-size: medium;"></textarea>
+                </div>
+            </div>*@
+        </div>
+    </div>
+    <div class="modal-footer">
+        <input type="submit" value="Save" class="btn btn-primary" onclick="return confirm('Create this item?');" />
+    </div>
+}
+

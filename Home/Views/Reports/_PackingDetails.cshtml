@@ -1,0 +1,302 @@
+﻿@model RuntimeVariables.Transfer_PackingList
+@Scripts.Render("~/bundles/jquery")
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+        
+        $("#btn_default").click(function () {   
+            $("#loading").fadeIn();
+            var target = document.getElementById('loading');
+            var spinner = new Spinner(opts).spin(target);     
+                     
+            let pmPickTickets = "@ViewData["pmPickTickets"]";
+            $("#output").load('@Url.Action("GoUpdate_Packing_LoadDefault", "Reports")?pmPickTickets=' + pmPickTickets);
+        });
+    })
+</script>
+<script type="text/javascript">
+    var frm = $('#UpdateForm');
+    frm.submit(function (e) {
+        e.preventDefault(); // avoid to execute the actual submit of the form.
+        
+        $("#loading").fadeIn();
+        var target = document.getElementById('loading');
+        var spinner = new Spinner(opts).spin(target);
+
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                $('#output').html(data);
+            },
+            error: function (data) {
+                alert('An error occurred.');
+            },
+        });
+        
+        document.getElementById('btn_search').removeAttribute("disabled");   
+        $("#loading").fadeOut();
+    });
+</script>
+
+
+
+
+<style>
+    span {
+        display: block;
+    }
+
+    .listScrollY {
+        overflow: auto;
+        display: inline-block;
+        height: calc(100vh - 295px);
+        width: 100%;
+    }
+
+    thead tr th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        text-align: center;
+        z-index: 1;
+    }
+    /*
+    tbody td {
+        font-size: medium;
+    }
+    */
+    .table > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+</style>
+
+
+
+
+<div class="modal fade" id="ConfirmModal" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("GoPrint_PackingList", "Reports", null, FormMethod.Post, new { enctype = "multipart/form-data", target="_blank" }))
+            {
+                @Html.AntiForgeryToken()
+                
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&Chi;</span>
+                    </button>
+                    <h4 class="modal-title" id="saveModalLabel">Print Packing List</h4>
+                </div>
+                <div class="modal-body">
+                    @if (Model == null || Model.packing_list_hdr == null || Model.packing_list_hdr.Count <= 0)
+                    {
+                        <div style="text-align: center;">
+                            @Html.Raw("No data found.")
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-horizontal" style="font-size: medium;">
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().pick_ticket_no, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.Raw(ViewData["PickTickets_label"])
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().ship2_name, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => Model.packing_list_hdr.First().ship2_name)
+                                    <br>
+                                    @Html.DisplayFor(model => Model.packing_list_hdr.First().ship2_addr)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.packing_list_hdr.First().shipped_per, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="shipped_per" class="form-control" autocomplete="off" value="@Model.packing_list_hdr.First().shipped_per" type="text" style="font-size: medium;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().shipped_from, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="shipped_from" class="form-control" value="@Model.packing_list_hdr.First().shipped_from" type="text" style="font-size: medium;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().port, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="port" class="form-control" value="@Model.packing_list_hdr.First().port" type="text" style="font-size: medium;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().requested_date, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="requested_date" class="form-control" value="@Model.packing_list_hdr.First().requested_date.ToString("yyyy-MM-dd")" type="date" style="font-size: medium;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_hdr.First().final_des, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="final_des" class="form-control" value="@Model.packing_list_hdr.First().final_des" type="text" style="font-size: medium;" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(model => Model.packing_list_sum.plt, htmlAttributes: new { @class = "control-label col-md-4" })
+                                <div class="col-md-8">
+                                    <input name="plt" class="form-control" autocomplete="off" value="@Model.packing_list_sum.plt" type="number" style="font-size: medium;" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Save & Print" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+
+    
+<div style="width: 100%; display: block; margin-left: auto; margin-right: auto; margin-top: 15px;">
+    @using (Html.BeginForm("GoUpdate_Packing_UnitWeight", "Reports", new { pmPickTickets = @ViewData["pmPickTickets"] }, FormMethod.Post, new { id = "UpdateForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        if (Model != null && Model.packing_list_hdr.Count > 0 && Model.packing_list_line.Count > 0)
+        {
+            <div class="form-group">
+                <input type="button" id="btn_default" value="Load Default" class="btn btn-default" />
+                <input type="submit" value="Recalculate" class="btn btn-default" />
+                @Html.ActionLink("Download Raw Data", "GoDownload_PackingSpreadsheet", "Reports", null, new { @target = "_blank", @class = "btn btn-default action_btn" })
+                <a href="#ConfirmModal" class="btn btn-default action_btn" data-toggle="modal">Confirm Print</a>
+            </div>
+        }
+
+        <div id="theSheet" class="listScrollY" style="margin: 5px 0 0 0;">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().pick_ticket_no)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().pallet_no)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().box)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().lot_cd)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().item_id)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().unit)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().qty_per_box)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().qty)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().net)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.packing_list_line.First().gross)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: medium;">
+                    @{
+                        if (Model == null || Model.packing_list_line == null || Model.packing_list_line.Count() <= 0)
+                        {
+                            <tr>
+                                <td colspan="10" style="text-align:center;">No data found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int i = 0;
+                            foreach (var item in Model.packing_list_line)
+                            {
+                                i++;
+                                <tr>
+                                    <td align="center">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].pick_ticket_no" value="@item.pick_ticket_no">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].pallet_no" value="@item.pallet_no">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].po_no" value="@item.po_no">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].lot_cd" value="@item.lot_cd">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].item_id" value="@item.item_id">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].item_desc" value="@item.item_desc">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].qty_per_box" value="@item.qty_per_box">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].qty" value="@item.qty">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].net" value="@item.net">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].gross" value="@item.gross">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].same_box_no" value="@item.same_box_no">
+                                        <input type="hidden" name="pm_PackingList_line[@(i-1)].ship_to_id" value="@item.ship_to_id">
+                                        @Html.DisplayFor(modelItem => item.pick_ticket_no)
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.pallet_no)
+                                    </td>
+                                    <td align="right">
+                                        @Html.TextBox($"pm_PackingList_line[{i-1}].box", item.box, new { @type = "number", @step = "any", @autocomplete="off", @class = "form-control input-sm", style = "font-size: medium; text-align: right; width: 60px;" })
+                                    </td>
+                                    <td align="center">
+                                        @Html.DisplayFor(modelItem => item.lot_cd)
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="right" data-size="large" title="@Html.DisplayFor(modelItem => item.item_desc)">
+                                        @Html.DisplayFor(modelItem => item.item_id)
+                                    </td>
+                                    <td align="right">
+                                        @Html.TextBox($"pm_PackingList_line[{i-1}].unit", item.unit, new { @type = "number", @step = "any", @autocomplete="off", @class = "form-control input-sm", style = "font-size: medium; text-align: right; " })
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.qty_per_box)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.qty)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.net)
+                                    </td>
+                                    <td align="right">
+                                        @Html.DisplayFor(modelItem => item.gross)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>                    
+    }
+</div>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+
+

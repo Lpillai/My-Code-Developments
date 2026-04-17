@@ -1,0 +1,348 @@
+﻿@model IList<RuntimeVariables.BuySplit>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Update Splits";
+    ViewBag.PageName = "[" + ViewBag.cluster + "] " + "Update Splits";
+
+
+    object attr_helper = null;
+    object attr_html = "";
+    object attr_css = "";
+    if (!ViewBag.authorized)
+    {
+        attr_helper = new { disabled = "disabled" };
+        attr_html = "disabled";
+        attr_css = "isDisabled";
+    }
+}
+
+
+
+
+<!-- #region Developing -->
+@if (ViewBag.Dev != null)
+{
+    <div class="alert dev">
+        <span class="closebtn">&times;</span>
+        <strong>@ViewBag.Dev</strong>
+    </div>
+}
+<style>
+    .alert.dev {
+        padding: 20px;
+        color: white;
+        opacity: 1;
+        transition: opacity 0.6s;
+        margin-bottom: 15px;
+        background-color: hotpink;
+        font-size: larger;
+    }
+
+    .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .closebtn:hover {
+            color: black;
+        }
+</style>
+<script type='text/javascript'>
+    var close = document.getElementsByClassName("closebtn");
+    for (var i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.style.opacity = "0";
+            setTimeout(function () { div.style.display = "none"; }, 600);
+        }
+    }
+</script>
+<!-- #endregion -->
+
+
+
+
+<style>
+    .edt {
+        width: 40vh;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        z-index: 1;
+    }
+
+    tbody th {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background-color: white;
+        /* Browsers tend to drop borders on sticky elements, so we emulate the border-right using a box-shadow to ensure it stays: */
+        box-shadow: 1px 0 0 0 #ccc;
+    }
+
+    .tableScrollY {
+        height: calc(100vh - 150px);
+        width: 100%;
+        overflow: auto;
+        display: inline-block;
+    }
+
+    td, th {
+        padding: 3px;
+    }
+
+    .table-hover tbody tr:hover td,
+    .table-hover tbody tr:hover th {
+        background-color: rgb(255 205 143 / 0.2);
+    }
+
+
+    .planner {
+        background-color: rgb(240 230 140 / 0.1);
+    }
+
+    .buyer {
+        background-color: rgb(245 254 255 / 0.85);
+    }
+</style>
+
+
+
+
+<h4>@ViewBag.PageName</h4>
+
+
+
+
+@Html.ActionLink("Back to List", "BuySheet", "Procurement", new { cluster = ViewBag.cluster }, new { @class = "btn" })
+&nbsp;&nbsp;Buy ID<label style="font-size: large;">&nbsp;&nbsp;@ViewData["viewID"]</label>
+
+
+
+
+@using (Html.BeginForm("goUpdateSplits", "Procurement", new { cluster = ViewBag.cluster }, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div style="width: 85%; display: block; margin-left: auto; margin-right: auto;">
+        <div style="text-align: right; padding-right: 50px; margin-bottom: 15px;">
+            <input type="submit" value="Save" class="btn btn-primary btn-large" @attr_html />
+        </div>
+        <div id="theSheet" class="tableScrollY">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="text-align: center; width: 180px; max-width: 180px;">
+                            &nbsp;
+                        </th>
+                        <th class="planner" style="text-align: center; @(ViewBag.cluster == "FTB" ? "width: 470px; max-width: 470px;" : "width: 320px; max-width: 320px;")">
+                            For Planner
+                        </th>
+                        <th class="buyer" style="text-align:center">
+                            For Buyer
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+            <table id="tbSplits" class="table table-hover" style="font-size: medium; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th style="text-align: center; width: 100px; max-width: 100px;">
+                            &nbsp;
+                        </th>
+                        <th style="text-align: center; width: 80px; max-width: 80px;">
+                            No
+                        </th>
+                        @if (ViewBag.cluster == "FTB")
+                        { 
+                            <th class="planner" style="text-align: center; width: 150px; max-width: 150px;">
+                                @Html.DisplayNameFor(m => m.First().ship_method)
+                            </th>
+                        }
+                        <th class="planner" style="text-align: center; width: 180px; max-width: 180px;">
+                            @Html.DisplayNameFor(m => m.First().release_date)
+                        </th>
+                        <th class="planner" style="text-align: center; width: 140px; max-width: 140px;">
+                            @Html.DisplayNameFor(m => m.First().quantity)
+                        </th>
+                        <th class="buyer" style="text-align: center; width: 180px; max-width: 180px;">
+                            @Html.DisplayNameFor(m => m.First().expected_date)
+                        </th>
+                        <th class="buyer" style="text-align: center; width: 140px; max-width: 140px;">
+                            @Html.DisplayNameFor(m => m.First().po_quantity)
+                        </th>
+                        <th class="buyer" style="text-align:center">
+                            @Html.DisplayNameFor(m => m.First().preload_po_so)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Count; i++)
+                    {
+                        <tr id="@("tr" + i)" class="theRow">
+                            <td align="center" style="padding-top: 9px;">
+                                @Html.HiddenFor(m => Model[i].selected, new { @id = "selected" + i })
+                                @Html.HiddenFor(m => Model[i].viewID)
+                                @Html.HiddenFor(m => Model[i].splitID)
+                                @Html.HiddenFor(m => Model[i].entryID)
+                                @Html.HiddenFor(m => Model[i].sumQuant)
+                                @Html.HiddenFor(m => Model[i].po_sumQuant)
+                                <input type="button" id="@("disableBtn" + i)" value="@("\u2718")" onclick="disable_tr(@i)" class="btn btn-default">
+                            </td>
+                            <td style="text-align:center; padding-top: 12px;">
+                                @(i + 1)
+                            </td>
+                            @if (ViewBag.cluster == "FTB")
+                            {
+                                <td style="text-align:center;" class="planner">
+                                    @Html.DropDownListFor(m => Model[i].ship_method, new SelectList((IEnumerable<SelectListItem>)ViewData["ShipMethod"], "Value", "Text", Model[i].ship_method), new { @class = "form-control element", style = "font-size: medium;" })
+                                </td>
+                            }
+                            <td style="text-align:center;" class="planner">
+                                @Html.TextBoxFor(m => Model[i].release_date, new { @type = "date", @id = "release" + i, @class = "form-control input-sm datepicker element", @Value = Model[i].EDT_release_date, @Style = "font-size: medium;", @onfocusout = "dateCopy(" + i + ");" })
+                            </td>
+                            <td class="planner">
+                                @Html.TextBoxFor(m => Model[i].quantity, new { @type = "number", @id = "qty" + i, @min = "0", @class = "form-control input-sm element", @Style = "font-size: medium; text-align: right;", @onclick= "$(this).select();", @onfocusout = "priceCopy(" + i + ");" })
+                            </td>
+                            <td style="text-align:center;" class="buyer">
+                                @Html.TextBoxFor(m => Model[i].expected_date, new { @type = "date", @id = "expected" + i, @class = "form-control input-sm datepicker element", @Value = Model[i].EDT_expected_date, @Style = "font-size: medium;" })
+                            </td>
+                            <td class="buyer">
+                                @Html.TextBoxFor(m => Model[i].po_quantity, new { @type = "number", @id = "po_qty" + i, @min = "0", @class = "form-control input-sm element", @Style = "font-size: medium; text-align: right;", @onclick= "$(this).select();" })
+                            </td>
+                            <td class="buyer">                                
+                                @if (ViewData["PreloadList_"+i] == null)
+                                { 
+                                    @Html.TextBoxFor(m => Model[i].preload_po_so, new { @type = "text", @id = "preload_po_so" + i, @class = "form-control input-sm element" + ((bool)ViewData["Preload"] ? "" : " isDisabled"), @Style = "font-size: medium; width: 400px; max-width: 400px;" })
+                                }
+                                else
+                                {
+                                    @Html.DropDownList("[" + i + "].preload_so", (SelectList)ViewData["PreloadList_"+i], new { @class = "form-control input-sm" + ((bool)ViewData["Preload"] ? "" : " isDisabled"), style = "font-size: medium; display: initial; width: 400px; max-width: 400px;" });
+                                }
+                            </td>
+                        </tr>
+                    }
+
+                    <tr id="trBtn">
+                        <th colspan="2" style="text-align: center; font-size: medium;">
+                            Subtotal
+                        </th>
+                        <td @(ViewBag.cluster == "FTB" ? "colspan=3" : "colspan=2") style="text-align:right; padding: 7px 20px 0 0;">
+                            <input type="hidden" name="sumQuant" value="@Model.First().sumQuant">
+                            @Html.DisplayFor(modelItem => @Model.First().sumQuant)
+                        </td>
+                        <td colspan="2" style="text-align:right; padding: 7px 20px 0 0;">
+                            <input type="hidden" name="po_sumQuant" value="@Model.First().po_sumQuant">
+                            @Html.DisplayFor(modelItem => @Model.First().po_sumQuant)
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="color: brown; font-size: medium;">
+                @Html.Raw("※ Once a supplier/vendor got approved, 'Expected Date' will be calculated again automatically base on the supplier's country and 'PO to Loc'.")
+            </p>
+        </div>
+    </div>
+}
+
+
+
+
+<script type="text/javascript">
+    var cluster = '@ViewBag.cluster';
+
+
+    function setRowDefault() {
+        var j;
+        var moduleList = @Html.Raw(Json.Encode(@Model));
+        var trElement = document.getElementById('tbSplits').querySelectorAll('.theRow');
+
+        for (var i = 0; i < trElement.length; i++) {
+            var inputElement = trElement[i].querySelectorAll('.element');
+            if (moduleList[i].splitID === '' || !moduleList[i].selected) {
+                document.getElementById('tr' + i).disabled = true;
+                for (j = 0; j < inputElement.length; j++)
+                    inputElement[j].setAttribute('disabled', '');
+                document.getElementById('disableBtn' + i).value = '\u2795';
+                trElement[i].className = 'hideRow';
+            }
+            else {
+                document.getElementById('tr' + i).disabled = false;
+                for (j = 0; j < inputElement.length; j++)
+                    inputElement[j].removeAttribute('disabled');
+                document.getElementById('disableBtn' + i).value = '\u2718';
+                trElement[i].className = 'showRow';
+            }
+        }
+    }
+
+
+    function disable_tr(theNo) {
+        var i;
+        document.getElementById('tr' + theNo).disabled = !(document.getElementById('tr' + theNo).disabled);
+
+        var inputElement = document.getElementById('tr' + theNo).querySelectorAll(".element");
+        if (document.getElementById('tr' + theNo).disabled === true) {
+            for (i = 0; i < inputElement.length; i++)
+                inputElement[i].setAttribute("disabled", "");
+            document.getElementById('disableBtn' + theNo).value = '\u2795';
+        }
+        else {
+            for (i = 0; i < inputElement.length; i++)
+                inputElement[i].removeAttribute("disabled");
+            document.getElementById('disableBtn' + theNo).value = '\u2718';
+        }
+
+        if (document.getElementById('tr' + theNo).disabled === true) {
+            document.getElementById('tr' + theNo).className = 'disableRow';
+            document.getElementById('selected' + theNo).value = false;
+        }
+        else {
+            document.getElementById('tr' + theNo).className = 'showRow';
+            document.getElementById('selected' + theNo).value = true;
+        }
+    }
+
+
+    function priceCopy(theNo) {
+        let newQty = document.getElementById('qty' + theNo).value;
+        document.getElementById('po_qty' + theNo).value = newQty;
+    
+        if (cluster === "FTB") {
+            let priceUSD = parseFloat(@ViewData["price_usd"].ToString());
+            if (priceUSD * newQty / 100 > 5000) {
+                alert('Value of this release is greater than $5,000. Please consider set smaller quantity.');
+            }
+        }
+    }
+
+
+    function dateCopy(theNo) {
+        document.getElementById('expected' + theNo).value = document.getElementById('release' + theNo).value;
+    }
+
+
+    window.addEventListener("load", setRowDefault);
+</script>
+
+
+@if (TempData["message"] != null)
+{
+    <script type="text/javascript">
+        var message = @Html.Raw(Json.Encode(TempData["message"]));
+        alert(message);
+    </script>
+}
+
