@@ -188,6 +188,16 @@ namespace Reports
             return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
         }
 
+
+        public MemoryStream Get_LotAttribute(string rpt, string pm_lot_no, string pm_location_id)
+        {
+            ReportParameterCollection parms = new ReportParameterCollection();
+            parms.Add(new ReportParameter("lot", pm_lot_no));
+            parms.Add(new ReportParameter("locationID", pm_location_id));
+
+            return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
+        }
+
         #endregion
 
         #region Label Contract Bin
@@ -202,24 +212,27 @@ namespace Reports
 
         #endregion
 
+        #region FI Warehouse
+        /*
+        public MemoryStream Get_FinlandProduction(string rpt, string pm_job_no, string pm_item_id, string pm_lot, string pm_qty)
+        {
+            ReportParameterCollection parms = new ReportParameterCollection();
+            parms.Add(new ReportParameter("JobNo", pm_job_no));
+            parms.Add(new ReportParameter("ItemID", pm_item_id));
+            parms.Add(new ReportParameter("LotNo", pm_lot));
+            parms.Add(new ReportParameter("Qty", pm_qty));
+
+            return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
+        }
+        */
+        #endregion
+
         #region KR Warehouse
 
         public MemoryStream Get_ContractItem_Building(string rpt, string pm_building, string pm_contract_bin_id)
         {
             ReportParameterCollection parms = new ReportParameterCollection();
             parms.Add(new ReportParameter("building", pm_building));
-            parms.Add(new ReportParameter("contract_bin_id", pm_contract_bin_id));
-
-            return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
-        }
-
-        #endregion
-
-        #region TW Warehouse
-
-        public MemoryStream Get_ContractItem(string rpt, string pm_contract_bin_id)
-        {
-            ReportParameterCollection parms = new ReportParameterCollection();
             parms.Add(new ReportParameter("contract_bin_id", pm_contract_bin_id));
 
             return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
@@ -263,42 +276,26 @@ namespace Reports
         }
 
 
-        public MemoryStream Get_BRPProduction(string rpt, string pm_job_no, string pm_item_id, string pm_lot_no, string pm_qty)
+        public MemoryStream Get_BRPProduction(string rpt, string pm_job_no, string pm_lot_no, string pm_qty)
         {
             ReportParameterCollection parms = new ReportParameterCollection();
             parms.Add(new ReportParameter("JobNo", pm_job_no));
-            parms.Add(new ReportParameter("ItemID", pm_item_id));
             parms.Add(new ReportParameter("LotNo", pm_lot_no));
             parms.Add(new ReportParameter("Qty", pm_qty));
 
             return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
         }
 
-        public MemoryStream Get_FinlandProduction(string rpt, string pm_job_no, string pm_item_id, string pm_lot)
+        #endregion
+
+        #region TW Warehouse
+
+        public MemoryStream Get_ContractItem(string rpt, string pm_contract_bin_id)
         {
             ReportParameterCollection parms = new ReportParameterCollection();
+            parms.Add(new ReportParameter("contract_bin_id", pm_contract_bin_id));
 
-            parms.Add(new ReportParameter("JobNo", pm_job_no));
-            parms.Add(new ReportParameter("ItemID", pm_item_id));
-            parms.Add(new ReportParameter("LotNo", pm_lot));
-
-            return pgmReports.RenderReportToStream(
-                pgmReports.GenerateReport(rpt, parms),
-                0
-            );
-        }
-
-        public MemoryStream Get_LotAttribute(string rpt, string pm_lot_no, string pm_location_id)
-        {
-            ReportParameterCollection parms = new ReportParameterCollection();
-
-            parms.Add(new ReportParameter("LotNo", pm_lot_no));
-            parms.Add(new ReportParameter("LocationID", pm_location_id));
-
-            return pgmReports.RenderReportToStream(
-                pgmReports.GenerateReport(rpt, parms),
-                0
-            );
+            return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
         }
 
         #endregion
@@ -337,6 +334,16 @@ namespace Reports
 
             ReportParameterCollection parms = new ReportParameterCollection();
             parms.Add(new ReportParameter("pmJSON", pmJSON));
+
+            return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
+        }
+
+
+        public MemoryStream Get_Varian(string rpt, string pm_customer_id, string pm_item_id)
+        {
+            ReportParameterCollection parms = new ReportParameterCollection();
+            parms.Add(new ReportParameter("pm_customer_id", pm_customer_id));
+            parms.Add(new ReportParameter("pm_item_id", pm_item_id));
 
             return pgmReports.RenderReportToStream(pgmReports.GenerateReport(rpt, parms), 0);
         }

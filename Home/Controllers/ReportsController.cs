@@ -680,6 +680,31 @@ namespace Home.Controllers
         }
 
 
+        public PartialViewResult Show_BRPProduction(string rpt_name, string pm_parm)
+        {
+            ViewBag.ReportName = rpt_name;
+
+            JObject obj = JObject.Parse(pm_parm);
+            string pm_label = (string)obj["pm_label"];
+            string pm_job_no = (string)obj["pm_job_no"];
+            ViewData["label"] = pm_label;
+            ViewData["job_no"] = pm_job_no;
+
+            return PartialView("_BRPProduction");
+        }
+
+
+        public FileResult Open_BRPProduction(string pm_label, string pm_job_no, string pm_lot_no, string pm_qty)
+        {
+            MemoryStream example = pgmRPT_Warehouse.Get_BRPProduction(pm_label, pm_job_no, pm_lot_no, pm_qty);
+            example.Seek(0, 0);
+            //Response.Headers.Add("Content-Disposition", "attachment;filename=BRPProduction.pdf");
+            Response.Headers.Add("Content-Disposition", "attachment;filename=BRPProduction_" + pm_lot_no + ".pdf");
+            return File(example, "application/pdf");
+        }
+
+
+
         public PartialViewResult Show_BoxLabel(string rpt_name, string pm_parm)
         {
             ViewBag.ReportName = rpt_name;
@@ -720,6 +745,29 @@ namespace Home.Controllers
         }
 
 
+        public FileResult Open_LotAttribute(string pm_label, string pm_lot_no, string pm_location_id)
+        {
+            MemoryStream example = pgmRPT_Warehouse.Get_LotAttribute(pm_label, pm_lot_no, pm_location_id);
+            example.Seek(0, 0);
+            Response.Headers.Add("Content-Disposition", "attachment;filename=LotAttribute.pdf");
+            return File(example, "application/pdf");
+        }
+
+
+        public PartialViewResult Show_LotAttribute(string rpt_name, string pm_parm)
+        {
+            ViewBag.ReportName = rpt_name;
+
+            JObject obj = JObject.Parse(pm_parm);
+            string pm_label = (string)obj["pm_label"];
+            string pm_location_id = (string)obj["pm_location_id"];
+            ViewData["label"] = pm_label;
+            ViewData["location_id"] = pm_location_id;
+
+            return PartialView("_LotAttribute");
+        }
+
+        /*
         public PartialViewResult Show_MissingPhotoLabels(string rpt_name, string pm_parm)
         {
             ViewBag.ReportName = rpt_name;
@@ -741,7 +789,7 @@ namespace Home.Controllers
             Response.Headers.Add("Content-Disposition", "attachment;filename=" + pm_lot_cd + ".pdf");
             return File(example, "application/pdf");
         }
-
+        */
         #endregion
 
         #region Label Contract Bin
@@ -785,6 +833,8 @@ namespace Home.Controllers
 
             return PartialView("_FinlandDCLabel");
         }
+
+
         public FileResult Open_FinlandDCLabel(string pm_label, string pm_lot_cd, string pm_order_no, string pm_qty)
         {
             MemoryStream example = pgmRPT_Warehouse.Get_ShipByOrderNo(pm_label, pm_lot_cd, pm_order_no, pm_qty);
@@ -792,13 +842,15 @@ namespace Home.Controllers
             Response.Headers.Add("Content-Disposition", "attachment;filename=" + pm_order_no + "-" + pm_lot_cd + ".pdf");
             return File(example, "application/pdf");
         }
-        public FileResult Open_FinlandProduction(string pm_label, string pm_job_no, string pm_item_id, string pm_lot)
+
+        /*
+        public FileResult Open_FinlandProduction(string pm_label, string pm_job_no, string pm_item_id, string pm_lot, string pm_qty)
         {
-            MemoryStream example = pgmRPT_Warehouse.Get_FinlandProduction(pm_label, pm_job_no, pm_item_id, pm_lot);
+            //MemoryStream example = pgmRPT_Warehouse.Get_FinlandProduction(pm_label, pm_job_no, pm_item_id, pm_lot, pm_qty);
+            MemoryStream example = pgmRPT_Warehouse.Get_BRPProduction(pm_label, pm_job_no, pm_item_id, pm_lot, pm_qty);
             example.Seek(0, 0);
 
             Response.Headers.Add("Content-Disposition", "attachment;filename=FinlandProduction.pdf");
-
             return File(example, "application/pdf");
         }
 
@@ -808,35 +860,11 @@ namespace Home.Controllers
 
             JObject obj = JObject.Parse(pm_parm);
             string pm_label = (string)obj["pm_label"];
-
             ViewData["label"] = pm_label;
 
             return PartialView("_FinalProduction");
         }
-
-        #endregion
-        #region LOT Attrbutes
-        public FileResult Open_LotAttribute(string pm_label, string pm_lot_no, string pm_location_id)
-        {
-            MemoryStream example = pgmRPT_Warehouse.Get_LotAttribute(pm_label, pm_lot_no, pm_location_id);
-            example.Seek(0, 0);
-
-            Response.Headers.Add("Content-Disposition", "attachment;filename=LotAttribute.pdf");
-
-            return File(example, "application/pdf");
-        }
-        public PartialViewResult Show_LotAttribute(string rpt_name, string pm_parm)
-        {
-            ViewBag.ReportName = rpt_name;
-
-            JObject obj = JObject.Parse(pm_parm);
-            string pm_label = (string)obj["pm_label"];
-
-            ViewData["label"] = pm_label;
-
-            return PartialView("_LotAttribute");
-        }
-
+        */
         #endregion
 
         #region KR Warehouse
@@ -889,31 +917,6 @@ namespace Home.Controllers
 
             int invoice_no = Int32.Parse(pmLineList.FirstOrDefault().invoice_no);
             Response.Headers["Content-Disposition"] = $"attachment; filename=Bosal_{invoice_no}.pdf";
-
-            return File(example, "application/pdf");
-        }
-
-
-        public PartialViewResult Show_BRPProduction(string rpt_name, string pm_parm)
-        {
-            ViewBag.ReportName = rpt_name;
-
-            JObject obj = JObject.Parse(pm_parm);
-            string pm_label = (string)obj["pm_label"];
-            string pm_job_no = (string)obj["pm_job_no"];
-            ViewData["label"] = pm_label;
-            ViewData["job_no"] = pm_job_no;
-
-            return PartialView("_BRPProduction");
-        }
-
-
-        public FileResult Open_BRPProduction(string pm_label, string pm_job_no, string pm_item_id, string pm_lot_no, string pm_qty)
-        {
-            MemoryStream example = pgmRPT_Warehouse.Get_BRPProduction(pm_label, pm_job_no, pm_item_id, pm_lot_no, pm_qty);
-            example.Seek(0, 0);
-
-            Response.Headers.Add("Content-Disposition", "attachment;filename=BRPProduction.pdf");
 
             return File(example, "application/pdf");
         }
@@ -1040,6 +1043,29 @@ namespace Home.Controllers
                 pgmReports.DownloadFile(pm_path, pm_parm, 0).WriteTo(file);
 
             return RedirectToAction("Download_GetRenderedFile", new { pm_cluster = pm_cluster, pm_file_name = fileName });
+        }
+
+
+        public FileResult Open_Varian(string pm_label, string pm_customer_id, string pm_item_id)
+        {
+            MemoryStream example = pgmRPT_Warehouse.Get_Varian(pm_label, pm_customer_id, pm_item_id);
+            example.Seek(0, 0);
+            Response.Headers.Add("Content-Disposition", "attachment;filename=Varian.pdf");
+            return File(example, "application/pdf");
+        }
+
+
+        public PartialViewResult Show_Varian(string rpt_name, string pm_parm)
+        {
+            ViewBag.ReportName = rpt_name;
+
+            JObject obj = JObject.Parse(pm_parm);
+            string pm_label = (string)obj["pm_label"];
+            string pm_customer_id = (string)obj["pm_customer_id"];
+            ViewData["label"] = pm_label;
+            ViewData["customer_id"] = pm_customer_id;
+
+            return PartialView("_Varian");
         }
 
         #endregion
